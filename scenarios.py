@@ -32,23 +32,24 @@ def _unit(uid: str, x: float, y: float, source: str) -> Unit:
 
 
 def _juniper_assets() -> list[Asset]:
+    # Spread enough that map labels do not collide (housing/comms were stacking).
     return [
-        Asset("housing", 700.0, 350.0, "housing"),
-        Asset("generator", 730.0, 310.0, "generator"),
-        Asset("comms", 670.0, 300.0, "comms"),
-        Asset("fuel", 740.0, 380.0, "fuel"),
-        Asset("parking", 860.0, 520.0, "parking"),
+        Asset("housing", 720.0, 360.0, "housing"),
+        Asset("generator", 780.0, 280.0, "generator"),
+        Asset("comms", 640.0, 260.0, "comms"),
+        Asset("fuel", 800.0, 400.0, "fuel"),
+        Asset("parking", 880.0, 540.0, "parking"),
     ]
 
 
 def _juniper_units() -> list[Unit]:
-    # Rack near the asset cluster, west enough that unit-to-track < 600 for B.
-    # U1 is mock/live bridge later; U2-4 are sim.
+    # Rack west of assets; spaced so map markers read as four craft, not a clump.
+    # Keep unit-to-track proposal distances under 600 for Variant A at 50% battery.
     return [
-        _unit("U1", 600.0, 400.0, "mock"),
-        _unit("U2", 615.0, 400.0, "sim"),
-        _unit("U3", 630.0, 400.0, "sim"),
-        _unit("U4", 645.0, 400.0, "sim"),
+        _unit("U1", 560.0, 400.0, "mock"),
+        _unit("U2", 600.0, 400.0, "sim"),
+        _unit("U3", 640.0, 400.0, "sim"),
+        _unit("U4", 680.0, 400.0, "sim"),
     ]
 
 
@@ -115,12 +116,12 @@ def _friendly_waypoints() -> list[tuple[float, float]]:
 
 
 def juniper_night1() -> dict:
-    housing = (700.0, 350.0)
-    parking = (860.0, 520.0)
+    housing = (720.0, 360.0)
+    parking = (880.0, 540.0)
     # B: straight at housing from ~620 west.
-    b_start = (housing[0] - 620.0, housing[1])  # (80, 350)
+    b_start = (housing[0] - 620.0, housing[1])
     # C: straight at parking from the west.
-    c_start = (parking[0] - 600.0, parking[1])  # (260, 520)
+    c_start = (parking[0] - 600.0, parking[1])
 
     return {
         "name": "juniper_night1",
@@ -169,15 +170,15 @@ def juniper_night1() -> dict:
 
 
 def juniper_night2() -> dict:
-    comms = (670.0, 300.0)
+    comms = (640.0, 260.0)
     # Fast threat at comms. Spawn far enough for ETA >= 20 s (dist >= 800 at speed 40).
     # Rack sits farther west so unit-to-track at proposal stays under 600.
-    c_start = (comms[0] - 820.0, comms[1])  # (-150, 300); ETA = 20.5 s
+    c_start = (comms[0] - 820.0, comms[1])  # ETA ≈ 20.5 s
     units = [
-        _unit("U1", 480.0, 320.0, "mock"),
-        _unit("U2", 495.0, 320.0, "sim"),
-        _unit("U3", 510.0, 320.0, "sim"),
-        _unit("U4", 525.0, 320.0, "sim"),
+        _unit("U1", 420.0, 300.0, "mock"),
+        _unit("U2", 460.0, 300.0, "sim"),
+        _unit("U3", 500.0, 300.0, "sim"),
+        _unit("U4", 540.0, 300.0, "sim"),
     ]
     return {
         "name": "juniper_night2",
@@ -199,7 +200,7 @@ def juniper_night2() -> dict:
 
 
 def tower22() -> dict:
-    housing = (700.0, 350.0)
+    housing = (720.0, 360.0)
     return {
         "name": "tower22",
         "replay": True,
@@ -214,9 +215,9 @@ def tower22() -> dict:
                 "registered_friendly": True,
                 "target_asset": None,
                 "waypoints": [
-                    (700.0, 40.0),
-                    (700.0, 200.0),
-                    (650.0, 360.0),
+                    (720.0, 40.0),
+                    (720.0, 200.0),
+                    (660.0, 360.0),
                     (500.0, 360.0),
                     (-20.0, 360.0),
                 ],
@@ -229,7 +230,7 @@ def tower22() -> dict:
                 "registered_friendly": False,
                 "target_asset": "housing",
                 "waypoints": [
-                    (700.0, 680.0),
+                    (720.0, 680.0),
                     housing,
                 ],
             },

@@ -6,120 +6,156 @@
   <title>Triage</title>
   <style>
     :root {
-      --bg: #070a0e;
-      --bg-grid: #0c1118;
-      --panel: #0f151c;
-      --panel-2: #141c26;
-      --border: #3d4a5c;
-      --border-strong: #6b7c91;
-      --text: #eef3f8;
-      --muted: #b6c0cc;
-      --focus: #5eb1ff;
-      --threat: #ff6b6b;
-      --decoy: #9da7b3;
-      --unknown: #f0c14a;
-      --friendly: #3fb950;
-      --accent: #1a6fd4;
-      --danger: #f85149;
-      --ok: #3fb950;
-      --warn: #f0c14a;
-      --plan-pending: #f0c14a;
+      /* Brand */
+      --obsidian: #322D29;
+      --oxblood: #72383D;
+      --oxblood-hover: #5D2C31;
+      --oxblood-subtle: #F0E2E1;
+      --titanium: #AC9C8D;
+      --warm-stone: #D1C7BD;
+      --soft-silver: #D9D9D9;
+      --ivory: #EFE9E1;
+
+      /* Surfaces */
+      --bg: #F4F0EB;
+      --card: #FBF9F6;
+      --card-2: #EFE9E1;
+      --card-3: #E8E0D7;
+      --header: #322D29;
+
+      /* Text */
+      --text: #322D29;
+      --text-2: #655D56;
+      --muted: #756D66;
+
+      /* Borders */
+      --border: #DDD4CA;
+      --border-strong: #C5B8AC;
+
+      /* Operational (not brand) */
+      --threat: #B34F4B;
+      --unknown: #A8762C;
+      --friendly: #3F7891;
+      --decoy: #7B858B;
+      --ok: #527A5B;
+      --warn: #A8762C;
+      --danger: #B34F4B;
+      --accent: #72383D;
+      --plan-pending: #A8762C;
+      --focus: #72383D;
+
       --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
       --sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --shadow: 0 2px 8px rgba(50, 45, 41, 0.04);
+      --radius: 8px;
+      --ease: 150ms ease-out;
     }
-    /* Contrast kept WCAG AA on dark: text/muted/labels ≥4.5:1, borders ≥3:1 */
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background:
-        radial-gradient(1200px 600px at 10% -10%, #122033 0%, transparent 55%),
-        radial-gradient(900px 500px at 100% 0%, #1a1408 0%, transparent 40%),
-        var(--bg);
+      background: var(--bg);
       color: var(--text);
       font-family: var(--sans);
-      font-size: 15px;
-      line-height: 1.35;
+      font-size: 14px;
+      line-height: 1.4;
       overflow: hidden;
       font-variant-numeric: tabular-nums;
     }
     body {
-      display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr) auto auto auto minmax(4.2rem, 6.5rem);
+      display: flex;
+      flex-direction: column;
       height: 100vh;
       max-height: 100vh;
-      padding: 0.4rem 0.7rem 0.45rem;
-      gap: 0.35rem;
+      padding: 0;
+      gap: 0;
       overflow: hidden;
     }
     h1 {
       margin: 0;
-      font-family: var(--mono);
-      font-size: 1.55rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
+      font-size: 1.35rem;
+      font-weight: 650;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
+      color: var(--ivory);
     }
-    h1 span {
-      color: var(--warn);
-      letter-spacing: 0.08em;
+    h1 .mark {
+      display: inline-block;
+      width: 0.55rem;
+      height: 0.55rem;
+      margin-right: 0.45rem;
+      background: var(--oxblood);
+      vertical-align: 0.1em;
     }
     h2 {
-      margin: 0 0 0.2rem;
-      font-family: var(--mono);
-      font-size: 0.72rem;
+      margin: 0 0 0.35rem;
+      font-size: 0.7rem;
       color: var(--muted);
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
     }
     button {
       font: inherit;
-      font-family: var(--mono);
-      font-size: 0.82rem;
+      font-size: 0.78rem;
+      font-weight: 600;
       letter-spacing: 0.04em;
+      text-transform: uppercase;
       cursor: pointer;
-      background: var(--panel-2);
+      background: var(--card-3);
       color: var(--text);
       border: 1px solid var(--border-strong);
-      border-radius: 2px;
+      border-radius: 6px;
       padding: 0.4rem 0.75rem;
-      min-height: 40px;
+      min-height: 38px;
+      transition: background var(--ease), border-color var(--ease), color var(--ease);
     }
-    button:hover { background: #1a2533; border-color: var(--focus); }
+    button:hover { background: var(--warm-stone); }
     button:focus-visible {
-      outline: 3px solid var(--focus);
+      outline: 3px solid var(--oxblood);
       outline-offset: 2px;
     }
     button[aria-pressed="true"] {
-      background: #2a2410;
-      border-color: var(--warn);
-      box-shadow: inset 0 0 0 1px var(--warn);
+      background: var(--oxblood-subtle);
+      border-color: var(--oxblood);
+      color: var(--oxblood);
     }
-    button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
+    button:disabled { opacity: 0.42; cursor: not-allowed; }
+    button.btn-primary {
+      background: var(--oxblood);
+      border-color: var(--oxblood);
+      color: #fff;
     }
+    button.btn-primary:hover:not(:disabled) {
+      background: var(--oxblood-hover);
+      border-color: var(--oxblood-hover);
+    }
+    button.btn-danger {
+      border-color: #c9a2a0;
+      color: var(--danger);
+      background: #fff;
+    }
+
     .topbar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 0.65rem;
-      padding-bottom: 0.15rem;
-      border-bottom: 1px solid #1e2834;
+      gap: 0.75rem;
+      padding: 0.65rem 1rem;
+      background: var(--header);
+      color: var(--ivory);
     }
     .brand-block {
       display: flex;
       align-items: baseline;
-      gap: 0.65rem;
+      gap: 0.75rem;
     }
     .tagline {
-      font-family: var(--mono);
       font-size: 0.72rem;
-      color: var(--muted);
-      letter-spacing: 0.06em;
+      color: var(--titanium);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
     .status-row {
@@ -132,110 +168,139 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      font-family: var(--mono);
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       letter-spacing: 0.04em;
       padding: 0.28rem 0.55rem;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      background: var(--panel);
-      color: var(--muted);
-      min-height: 32px;
+      border: 1px solid rgba(239, 233, 225, 0.18);
+      border-radius: 999px;
+      background: rgba(239, 233, 225, 0.06);
+      color: var(--ivory);
+      min-height: 30px;
     }
-    .chip strong { color: var(--text); font-weight: 700; }
+    .chip strong { color: #fff; font-weight: 650; }
     #conn-status[data-state="connected"] {
-      color: var(--ok);
-      border-color: #2ea043;
-      background: #0f2318;
+      border-color: rgba(82, 122, 91, 0.55);
+      color: #b7d0bc;
     }
     #conn-status[data-state="disconnected"] {
-      color: var(--danger);
-      border-color: var(--danger);
-      background: #2a1214;
+      border-color: rgba(179, 79, 75, 0.65);
+      color: #e8b4b2;
       font-weight: 700;
     }
-    #motors-status[data-state="off"] {
-      color: var(--muted);
-      border-color: var(--border);
-      background: #121820;
-    }
+    #motors-status[data-state="off"] { color: #b7d0bc; }
     #motors-status[data-state="off"]::before {
       content: "";
-      width: 0.55rem;
-      height: 0.55rem;
-      border-radius: 50%;
+      width: 0.45rem; height: 0.45rem; border-radius: 50%;
       background: var(--ok);
-      box-shadow: 0 0 0 2px #1a3d2a;
     }
     #motors-status[data-state="on"] {
-      color: var(--danger);
-      border-color: var(--danger);
-      background: #2a1214;
-      font-weight: 800;
+      color: #e8b4b2; font-weight: 700;
+      border-color: rgba(179, 79, 75, 0.65);
     }
     #motors-status[data-state="on"]::before {
       content: "";
-      width: 0.55rem;
-      height: 0.55rem;
-      border-radius: 50%;
+      width: 0.45rem; height: 0.45rem; border-radius: 50%;
       background: var(--danger);
     }
-    #phase-status[data-phase="live"] {
-      color: var(--ok);
-      border-color: #2ea043;
-    }
-    #phase-status[data-phase="paused"] {
-      color: var(--warn);
-      border-color: var(--warn);
-    }
-    #phase-status[data-phase="ended"] {
-      color: var(--threat);
-      border-color: var(--threat);
+
+    .workspace {
+      display: contents;
     }
     .alerts {
-      min-height: 1.35rem;
+      min-height: 0;
+      padding: 0.35rem 1rem;
       color: var(--warn);
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 0.03em;
+      font-weight: 650;
+      font-size: 0.85rem;
+      background: var(--bg);
     }
     #replay-banner {
-      margin: 0;
-      padding: 0.35rem 0.65rem;
-      background: #121820;
-      border-left: 3px solid var(--border-strong);
-      color: var(--muted);
-      font-family: var(--mono);
+      margin: 0 1rem;
+      padding: 0.4rem 0.7rem;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-2);
       font-size: 0.82rem;
-      letter-spacing: 0.03em;
     }
     #replay-banner[hidden] { display: none !important; }
     body.replay-mode #plan-panel { display: none !important; }
     body.replay-mode #btn-after { display: none !important; }
+
+    #metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      align-items: stretch;
+      margin: 0 1rem 0.45rem;
+      padding: 0.55rem 0.2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .metric {
+      flex: 1 1 110px;
+      padding: 0.15rem 0.9rem;
+      border-right: 1px solid var(--border);
+      min-width: 0;
+    }
+    .metric:last-child { border-right: none; }
+    .metric .n {
+      display: block;
+      font-size: 1.55rem;
+      font-weight: 650;
+      line-height: 1.1;
+      color: var(--obsidian);
+    }
+    .metric .l {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .metric.threat .n { color: var(--threat); }
+    .metric.unknown .n { color: var(--unknown); }
+    .metric.ready .n { color: var(--ok); }
+    .metric.pending .n { color: var(--warn); }
+
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.75fr) minmax(280px, 0.9fr);
-      gap: 0.45rem;
+      grid-template-columns: minmax(0, 1.85fr) minmax(280px, 0.85fr);
+      gap: 0.55rem;
+      flex: 1 1 0;
       min-height: 0;
       overflow: hidden;
+      padding: 0 1rem;
+      margin-bottom: 0.45rem;
     }
     .panel {
-      background: linear-gradient(180deg, var(--panel-2) 0%, var(--panel) 100%);
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 2px;
-      padding: 0.35rem 0.5rem 0.45rem;
+      border-radius: var(--radius);
+      padding: 0.5rem 0.65rem 0.55rem;
       min-height: 0;
+      box-shadow: var(--shadow);
     }
-    #map-panel { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    #map-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      padding: 0.45rem;
+    }
+    #map-panel h2 { padding: 0 0.2rem; }
     #map-svg {
       width: 100%;
       height: 100%;
       min-height: 0;
       flex: 1;
-      background: var(--bg-grid);
-      border: 1px solid #1e2834;
-      border-radius: 2px;
+      background: #F1ECE5;
+      border: 1px solid var(--border);
+      border-radius: 6px;
     }
     #threat-panel {
       display: flex;
@@ -249,166 +314,162 @@
       min-height: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
+      gap: 0.35rem;
     }
     .track-card {
       border: 1px solid var(--border);
-      border-left-width: 3px;
-      border-radius: 2px;
-      padding: 0.4rem 0.5rem;
-      background: #0c1219;
+      border-left: 3px solid var(--border-strong);
+      border-radius: 6px;
+      padding: 0.45rem 0.55rem;
+      background: #fff;
     }
-    .track-card.threat { border-left-color: var(--threat); }
+    .track-card.threat { border-left-color: var(--threat); background: #FBF4F3; }
     .track-card.decoy { border-left-color: var(--decoy); }
-    .track-card.unknown { border-left-color: var(--unknown); }
-    .track-card.friendly { border-left-color: var(--friendly); }
-    .track-card.ended { opacity: 0.42; }
+    .track-card.unknown { border-left-color: var(--unknown); background: #FBF7F0; }
+    .track-card.friendly { border-left-color: var(--friendly); background: #F3F7F9; }
+    .track-card.ended { opacity: 0.5; }
     .track-card .label-row {
       display: flex;
       align-items: center;
       gap: 0.45rem;
-      font-weight: 700;
-      font-size: 1.02rem;
-      font-family: var(--mono);
-      letter-spacing: 0.02em;
+      font-weight: 650;
+      font-size: 0.95rem;
+      color: var(--text);
     }
     .swatch {
-      width: 0.8rem;
-      height: 0.8rem;
-      border-radius: 1px;
-      border: 1px solid var(--border);
+      width: 0.7rem; height: 0.7rem;
+      border-radius: 2px;
+      border: 1px solid var(--border-strong);
       flex-shrink: 0;
     }
     .swatch.threat { background: var(--threat); }
     .swatch.decoy { background: var(--decoy); }
     .swatch.unknown { background: var(--unknown); }
     .swatch.friendly { background: var(--friendly); }
-    .meta {
-      color: var(--muted);
-      font-size: 0.88rem;
-      margin-top: 0.2rem;
-      font-family: var(--mono);
-    }
+    .meta { color: var(--text-2); font-size: 0.82rem; margin-top: 0.2rem; }
     .factors {
       margin: 0.3rem 0 0;
       padding-left: 1.05rem;
       color: var(--muted);
-      font-size: 0.84rem;
+      font-size: 0.8rem;
     }
-    #rack-section { overflow: hidden; }
+
+    #rack-section, #plan-panel, #controls-section, #events-section {
+      margin-left: 1rem;
+      margin-right: 1rem;
+    }
+    #rack-section { margin-bottom: 0.4rem; overflow: hidden; }
     #rack-panel {
       display: flex;
       flex-wrap: nowrap;
-      gap: 0.35rem;
+      gap: 0.4rem;
       align-items: stretch;
-      max-height: 6.2rem;
+      max-height: 5.8rem;
       overflow: auto;
     }
     .unit-card {
       flex: 1 1 0;
       border: 1px solid var(--border);
-      border-radius: 2px;
-      padding: 0.35rem 0.45rem;
-      background: #0c1219;
+      border-radius: 6px;
+      padding: 0.4rem 0.5rem;
+      background: #fff;
       min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 0.15rem;
     }
     .unit-card .uid {
-      font-family: var(--mono);
       font-weight: 700;
-      font-size: 1.05rem;
-      letter-spacing: 0.06em;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      color: var(--obsidian);
     }
     .badge {
       display: inline-block;
-      font-family: var(--mono);
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       padding: 0.12rem 0.35rem;
-      border-radius: 2px;
+      border-radius: 4px;
       border: 1px solid var(--border);
-      margin-left: 0.3rem;
+      margin-left: 0.25rem;
       vertical-align: middle;
+      color: var(--text-2);
+      background: var(--card-2);
     }
-    .badge.live { background: #1a3d2a; color: var(--friendly); border-color: #2ea043; }
-    .badge.mock { background: #3d2e12; color: var(--warn); border-color: var(--warn); }
-    .badge.sim { background: #1a2533; color: #9ecbff; }
+    .badge.live { background: #E7F0EA; color: var(--ok); border-color: #B7CBBA; }
+    .badge.mock { background: var(--oxblood-subtle); color: var(--oxblood); border-color: #D4B4B2; }
+    .badge.sim { background: #EEF3F5; color: var(--friendly); border-color: #C2D2D9; }
     .tilt {
-      width: 80px;
-      height: 48px;
-      border: 2px solid var(--focus);
-      border-radius: 2px;
+      width: 78px; height: 44px;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
       position: relative;
       overflow: hidden;
-      background:
-        linear-gradient(#1a3048 0 48%, #0a1018 48% 52%, #2a1a10 52% 100%);
-      margin-top: 0.25rem;
+      background: linear-gradient(#D7E3EA 0 48%, #C5B8AC 48% 52%, #D8CFC4 52% 100%);
+      margin-top: 0.2rem;
       flex-shrink: 0;
     }
     .tilt-horizon {
       position: absolute;
-      left: -35%;
-      right: -35%;
-      top: 50%;
-      height: 3px;
-      background: var(--warn);
+      left: -35%; right: -35%; top: 50%;
+      height: 2px;
+      background: var(--oxblood);
       transform-origin: center center;
     }
-    #btn-zero-tilt, #btn-swap-a { background: #1a2533; }
     @media (min-width: 1440px) {
-      .tilt { width: 96px; height: 56px; }
-      body { font-size: 16px; }
+      .tilt { width: 92px; height: 52px; }
+      body { font-size: 15px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .tilt-horizon { transition: none !important; }
-      * { scroll-behavior: auto !important; }
+      * { transition: none !important; scroll-behavior: auto !important; }
     }
+
     #plan-panel[hidden] { display: none !important; }
     #plan-panel {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 0.55rem;
-      border-width: 2px;
-      background: #10161e;
+      margin-bottom: 0.4rem;
+      border: 1px solid var(--border);
     }
     #plan-panel.has-pending {
-      border-color: var(--plan-pending);
-      box-shadow: inset 0 0 0 1px rgba(240, 193, 74, 0.35);
-      background: #1c170a;
+      border-color: var(--warn);
+      background: #FBF7F0;
+      box-shadow: inset 0 0 0 1px rgba(168, 118, 44, 0.15);
     }
     #plan-lines {
       flex: 1 1 280px;
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
-      font-family: var(--mono);
     }
     .plan-line {
       border: 1px solid var(--border);
-      border-radius: 2px;
+      border-radius: 6px;
       padding: 0.4rem 0.55rem;
-      background: #0c1219;
-      font-size: 0.95rem;
+      background: #fff;
+      font-size: 0.9rem;
+      color: var(--text);
     }
     #approve-btn {
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      min-width: 168px;
-      min-height: 54px;
-      padding: 0.55rem 1.2rem;
-      background: #238636;
-      border-color: #3fb950;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      min-width: 160px;
+      min-height: 48px;
+      background: var(--oxblood);
+      border-color: var(--oxblood);
       color: #fff;
     }
     #plan-panel.has-pending #approve-btn {
-      background: #2ea043;
-      border-color: var(--plan-pending);
-      box-shadow: 0 0 0 2px rgba(240, 193, 74, 0.55);
+      background: var(--oxblood);
+      border-color: var(--oxblood);
+      box-shadow: 0 2px 8px rgba(114, 56, 61, 0.25);
+    }
+    #approve-btn:hover:not(:disabled) {
+      background: var(--oxblood-hover);
     }
     #controls {
       display: flex;
@@ -416,16 +477,18 @@
       gap: 0.3rem;
       align-items: center;
     }
-    #controls button[data-scenario] {
-      background: #162032;
-      border-color: #4a6fa5;
+    #controls-section { margin-bottom: 0.35rem; overflow: hidden; }
+    #events-section {
+      margin-bottom: 0.55rem;
+      overflow: hidden;
+      min-height: 0;
+      flex: 0 0 auto;
+      max-height: 5.5rem;
     }
-    #btn-start { background: #1a3d2a; border-color: #2ea043; }
-    #btn-pause { background: #3d2e12; border-color: var(--warn); }
-    #btn-reset { background: #2a1214; border-color: #8b3a3a; }
-    #controls-section, #events-section { overflow: hidden; }
+    #rack-section, #plan-panel, #controls-section {
+      flex: 0 0 auto;
+    }
     #events-panel {
-      max-height: none;
       height: 100%;
       overflow: auto;
       min-height: 0;
@@ -433,23 +496,22 @@
     #event-log {
       margin: 0;
       padding-left: 1.15rem;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 0.82rem;
+      color: var(--text-2);
+      font-size: 0.8rem;
     }
     .map-label {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      font-family: var(--mono);
+      font-family: var(--sans);
       paint-order: stroke;
-      stroke: #070a0e;
+      stroke: #F1ECE5;
       stroke-width: 3px;
     }
     #after-overlay[hidden] { display: none !important; }
     #after-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(4, 8, 12, 0.82);
+      background: rgba(50, 45, 41, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -457,50 +519,55 @@
       padding: 1rem;
     }
     #after-dialog {
-      background: var(--panel-2);
-      border: 2px solid var(--border-strong);
-      border-radius: 2px;
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
       max-width: 740px;
       width: 100%;
       max-height: 90vh;
       overflow: auto;
-      padding: 1rem 1.15rem;
+      padding: 1.1rem 1.2rem;
       color: var(--text);
+      box-shadow: 0 12px 40px rgba(50, 45, 41, 0.18);
     }
     #after-dialog h2, #after-dialog h3 {
       color: var(--text);
       text-transform: none;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
     }
     #after-brief {
       white-space: pre-wrap;
-      background: #0a1018;
+      background: var(--card-2);
       border: 1px solid var(--border);
-      padding: 0.6rem;
+      border-radius: 6px;
+      padding: 0.65rem;
       font-family: var(--mono);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       max-height: 12rem;
       overflow: auto;
+      color: var(--text);
     }
     .placeholder-tag {
       display: inline-block;
       margin-left: 0.4rem;
       padding: 0.1rem 0.4rem;
-      border: 1px solid var(--warn);
-      color: var(--warn);
-      font-family: var(--mono);
+      border: 1px solid var(--oxblood);
+      background: var(--oxblood-subtle);
+      color: var(--oxblood);
       font-weight: 800;
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       letter-spacing: 0.06em;
+      border-radius: 4px;
     }
     .after-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+    #btn-swap { background: var(--oxblood); border-color: var(--oxblood); color: #fff; }
   </style>
 </head>
 <body>
   <header class="topbar">
     <div class="brand-block">
-      <h1>Triage <span>//</span></h1>
-      <span class="tagline">watch officer · interceptor rack</span>
+      <h1><span class="mark" aria-hidden="true"></span>Triage</h1>
+      <span class="tagline">Outpost defense · watch officer</span>
     </div>
     <div class="status-row" aria-live="polite">
       <span id="conn-status" class="chip" data-state="disconnected" role="status">Disconnected</span>
@@ -516,20 +583,59 @@
     Replay: simplified schematic based on public reporting
   </p>
 
+  <div id="metrics" aria-label="Operational summary">
+    <div class="metric"><span class="n" id="m-tracks">00</span><span class="l">Active tracks</span></div>
+    <div class="metric threat"><span class="n" id="m-threat">00</span><span class="l">Threat</span></div>
+    <div class="metric unknown"><span class="n" id="m-unknown">00</span><span class="l">Unknown</span></div>
+    <div class="metric ready"><span class="n" id="m-ready">00</span><span class="l">Interceptors waiting</span></div>
+    <div class="metric pending"><span class="n" id="m-pending">00</span><span class="l">Awaiting approval</span></div>
+  </div>
+
   <div class="main-grid">
     <section id="map-panel" class="panel" aria-labelledby="map-heading">
-      <h2 id="map-heading">Map</h2>
-      <svg id="map-svg" viewBox="0 0 1000 700" role="img" aria-labelledby="map-title">
-        <title id="map-title">Outpost map. Track details are in the threat list.</title>
-        <rect x="0" y="0" width="1000" height="700" fill="#080c11"/>
-        <g id="map-grid" opacity="0.25" stroke="#4a5568" stroke-width="1">
-          <line x1="0" y1="175" x2="1000" y2="175"/>
-          <line x1="0" y1="350" x2="1000" y2="350"/>
-          <line x1="0" y1="525" x2="1000" y2="525"/>
-          <line x1="250" y1="0" x2="250" y2="700"/>
-          <line x1="500" y1="0" x2="500" y2="700"/>
-          <line x1="750" y1="0" x2="750" y2="700"/>
+      <h2 id="map-heading">Outpost map</h2>
+      <svg id="map-svg" viewBox="0 0 1000 700" role="img" aria-label="Outpost map. Track details are in the threat list.">
+        <defs>
+          <pattern id="map-grid-pat" width="50" height="50" patternUnits="userSpaceOnUse">
+            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#E0D8CE" stroke-width="1"/>
+          </pattern>
+          <linearGradient id="terrain" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#EDE6DC"/>
+            <stop offset="55%" stop-color="#F1ECE5"/>
+            <stop offset="100%" stop-color="#E5DDD2"/>
+          </linearGradient>
+          <filter id="pad-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#322D29" flood-opacity="0.12"/>
+          </filter>
+        </defs>
+        <rect x="0" y="0" width="1000" height="700" fill="url(#terrain)"/>
+        <rect x="0" y="0" width="1000" height="700" fill="url(#map-grid-pat)" opacity="0.9"/>
+        <!-- Terrain / compound depth -->
+        <g id="map-terrain" opacity="0.95">
+          <ellipse cx="720" cy="360" rx="210" ry="175" fill="#E8E0D7" stroke="#9E9489" stroke-width="2" stroke-dasharray="8 6"/>
+          <path d="M480 400 L620 400 L700 340 L780 340 L820 400 L880 540 L760 560 L520 480 Z"
+                fill="#DDD4CA" opacity="0.55" stroke="#C5B8AC" stroke-width="1.5"/>
+          <path d="M560 400 L880 540" fill="none" stroke="#C5B8AC" stroke-width="10" opacity="0.35"/>
+          <path d="M560 400 L880 540" fill="none" stroke="#AC9C8D" stroke-width="2" stroke-dasharray="6 8"/>
+          <rect x="540" y="372" width="160" height="56" rx="4" fill="#EFE9E1" stroke="#C5B8AC" stroke-width="1.5" filter="url(#pad-shadow)"/>
+          <text x="620" y="405" text-anchor="middle" fill="#655D56" font-size="11" font-weight="600" letter-spacing="0.08em">INTERCEPTOR RACK</text>
+          <text x="720" y="210" text-anchor="middle" fill="#322D29" font-size="13" font-weight="700" letter-spacing="0.12em">FOB SENTINEL</text>
+          <!-- North indicator -->
+          <g transform="translate(40,40)">
+            <circle cx="0" cy="0" r="18" fill="#FBF9F6" stroke="#C5B8AC" stroke-width="1.5"/>
+            <polygon points="0,-12 4,2 -4,2" fill="#72383D"/>
+            <text y="28" text-anchor="middle" fill="#655D56" font-size="10" font-weight="700">N</text>
+          </g>
+          <!-- Legend -->
+          <g transform="translate(40,620)" font-size="10" fill="#655D56">
+            <rect x="-8" y="-18" width="168" height="62" rx="4" fill="#FBF9F6" stroke="#DDD4CA"/>
+            <circle cx="6" cy="-2" r="5" fill="#B34F4B"/><text x="16" y="2">Threat</text>
+            <circle cx="78" cy="-2" r="5" fill="#A8762C"/><text x="88" y="2">Unknown</text>
+            <circle cx="6" cy="20" r="5" fill="#3F7891"/><text x="16" y="24">Friendly</text>
+            <circle cx="78" cy="20" r="5" fill="#7B858B"/><text x="88" y="24">Decoy</text>
+          </g>
         </g>
+        <g id="map-trails"></g>
         <g id="map-assets"></g>
         <g id="map-links"></g>
         <g id="map-units"></g>
@@ -551,7 +657,7 @@
   <section id="plan-panel" class="panel" aria-labelledby="plan-heading" aria-live="polite">
     <h2 id="plan-heading">Plan</h2>
     <div id="plan-lines"></div>
-    <button type="button" id="approve-btn">APPROVE</button>
+    <button type="button" id="approve-btn" class="btn-primary">APPROVE</button>
   </section>
 
   <section id="controls-section" class="panel" aria-labelledby="controls-heading">
@@ -560,9 +666,9 @@
       <button type="button" data-scenario="juniper_night1">Night 1</button>
       <button type="button" data-scenario="juniper_night2">Night 2</button>
       <button type="button" data-scenario="tower22">Tower 22</button>
-      <button type="button" id="btn-start">Start</button>
+      <button type="button" id="btn-start" class="btn-primary">Start</button>
       <button type="button" id="btn-pause">Pause</button>
-      <button type="button" id="btn-reset">Reset</button>
+      <button type="button" id="btn-reset" class="btn-danger">Reset</button>
       <button type="button" id="btn-mock" aria-pressed="true">Mock</button>
       <button type="button" id="btn-zero-tilt">Zero tilt</button>
       <button type="button" id="btn-swap-a">Swap U1 to A</button>
@@ -574,11 +680,12 @@
     <div id="after-dialog" role="dialog" aria-modal="true" aria-labelledby="after-title">
       <h2 id="after-title">After-action</h2>
       <p id="after-gaps"></p>
+      <div id="after-summary" class="meta" style="margin:0.5rem 0 0.75rem"></div>
       <div id="after-card"></div>
       <div id="after-brief-block">
         <h3>Velocity brief</h3>
         <pre id="after-brief"></pre>
-        <button type="button" id="btn-copy-brief">Copy</button>
+        <button type="button" id="btn-copy-brief" class="btn-primary">Copy</button>
       </div>
       <h3>Events</h3>
       <ol id="after-events"></ol>
@@ -610,17 +717,17 @@
   var tiltZeroRoll = 0;
   var tiltZeroPitch = 0;
   var LABEL_COLOR = {
-    threat: "#ff6b6b",
-    decoy: "#9da7b3",
-    unknown: "#f0c14a",
-    friendly: "#3fb950"
+    threat: "#B34F4B",
+    decoy: "#7B858B",
+    unknown: "#A8762C",
+    friendly: "#3F7891"
   };
   var ASSET_LABEL_OFFSET = {
-    housing: { x: -28, y: -24 },
-    generator: { x: 28, y: -24 },
-    comms: { x: -36, y: 28 },
-    fuel: { x: 36, y: 28 },
-    parking: { x: 0, y: 34 }
+    housing: { x: 0, y: -36 },
+    generator: { x: 0, y: -34 },
+    comms: { x: 0, y: -40 },
+    fuel: { x: 0, y: 42 },
+    parking: { x: 0, y: 38 }
   };
 
   var state = null;
@@ -656,11 +763,14 @@
     mapTracks: document.getElementById("map-tracks"),
     mapUnits: document.getElementById("map-units"),
     mapLinks: document.getElementById("map-links"),
+    mapTrails: document.getElementById("map-trails"),
     mockBtn: document.getElementById("btn-mock"),
     replayBanner: document.getElementById("replay-banner"),
     afterBtn: document.getElementById("btn-after"),
     motors: document.getElementById("motors-status")
   };
+  var trailNodes = {};
+  var unitPrev = {};
 
   function setConn(connected) {
     if (connected) {
@@ -719,6 +829,31 @@
     };
   }
 
+  function pad2(n) {
+    n = Math.max(0, n | 0);
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function updateMetrics(s) {
+    var tracks = s.tracks || [];
+    var units = s.units || [];
+    var plan = s.plan || [];
+    var active = tracks.filter(function (t) { return t.status === "active"; });
+    var threat = active.filter(function (t) { return t.label === "threat"; }).length;
+    var unknown = active.filter(function (t) { return t.label === "unknown"; }).length;
+    var waiting = units.filter(function (u) {
+      return u.state === "rack" && u.ready !== false;
+    }).length;
+    var pending = plan.filter(function (p) { return !p.approved; }).length;
+    var elT = document.getElementById("m-tracks");
+    if (!elT) return;
+    elT.textContent = pad2(active.length);
+    document.getElementById("m-threat").textContent = pad2(threat);
+    document.getElementById("m-unknown").textContent = pad2(unknown);
+    document.getElementById("m-ready").textContent = pad2(waiting);
+    document.getElementById("m-pending").textContent = pad2(pending);
+  }
+
   function onState(s) {
     var scen = s.scenario || "—";
     el.scenario.innerHTML = "Scenario <strong>" + String(scen).replace(/_/g, " ") + "</strong>";
@@ -726,6 +861,7 @@
     el.phase.innerHTML = "Phase <strong>" + phase + "</strong>";
     el.phase.setAttribute("data-phase", String(s.phase || "idle").toLowerCase());
     el.time.innerHTML = "t=<strong>" + (Number(s.t) || 0).toFixed(1) + "</strong>s";
+    updateMetrics(s);
 
     if (el.motors) {
       if (s.motors_enabled) {
@@ -770,6 +906,80 @@
     return document.createElementNS(SVG_NS, name);
   }
 
+  function assetIcon(kind) {
+    var g = svgEl("g");
+    g.setAttribute("class", "asset-marker");
+    if (kind === "housing") {
+      var base = svgEl("rect");
+      base.setAttribute("x", "-16"); base.setAttribute("y", "-6");
+      base.setAttribute("width", "32"); base.setAttribute("height", "20");
+      base.setAttribute("fill", "#EFE9E1"); base.setAttribute("stroke", "#655D56");
+      base.setAttribute("stroke-width", "1.5");
+      var roof = svgEl("polygon");
+      roof.setAttribute("points", "-18,-6 0,-20 18,-6");
+      roof.setAttribute("fill", "#E8E0D7"); roof.setAttribute("stroke", "#655D56");
+      roof.setAttribute("stroke-width", "1.5");
+      var door = svgEl("rect");
+      door.setAttribute("x", "-4"); door.setAttribute("y", "2");
+      door.setAttribute("width", "8"); door.setAttribute("height", "12");
+      door.setAttribute("fill", "#322D29"); door.setAttribute("stroke", "#AC9C8D");
+      g.appendChild(base); g.appendChild(roof); g.appendChild(door);
+    } else if (kind === "generator") {
+      var box = svgEl("rect");
+      box.setAttribute("x", "-14"); box.setAttribute("y", "-10");
+      box.setAttribute("width", "28"); box.setAttribute("height", "20");
+      box.setAttribute("rx", "2");
+      box.setAttribute("fill", "#EFE9E1"); box.setAttribute("stroke", "#655D56");
+      box.setAttribute("stroke-width", "1.5");
+      var bolt = svgEl("polyline");
+      bolt.setAttribute("points", "2,-6 -4,1 2,1 -2,8");
+      bolt.setAttribute("fill", "none"); bolt.setAttribute("stroke", "#72383D");
+      bolt.setAttribute("stroke-width", "2");
+      g.appendChild(box); g.appendChild(bolt);
+    } else if (kind === "comms") {
+      var mast = svgEl("line");
+      mast.setAttribute("x1", "0"); mast.setAttribute("y1", "14");
+      mast.setAttribute("x2", "0"); mast.setAttribute("y2", "-8");
+      mast.setAttribute("stroke", "#655D56"); mast.setAttribute("stroke-width", "2");
+      var dish = svgEl("path");
+      dish.setAttribute("d", "M-10,-2 Q0,-18 10,-2");
+      dish.setAttribute("fill", "none"); dish.setAttribute("stroke", "#655D56");
+      dish.setAttribute("stroke-width", "1.8");
+      var pad = svgEl("rect");
+      pad.setAttribute("x", "-8"); pad.setAttribute("y", "12");
+      pad.setAttribute("width", "16"); pad.setAttribute("height", "4");
+      pad.setAttribute("fill", "#EFE9E1"); pad.setAttribute("stroke", "#AC9C8D");
+      g.appendChild(pad); g.appendChild(mast); g.appendChild(dish);
+    } else if (kind === "fuel") {
+      var tank = svgEl("ellipse");
+      tank.setAttribute("cx", "0"); tank.setAttribute("cy", "0");
+      tank.setAttribute("rx", "12"); tank.setAttribute("ry", "16");
+      tank.setAttribute("fill", "#EFE9E1"); tank.setAttribute("stroke", "#655D56");
+      tank.setAttribute("stroke-width", "1.5");
+      var band = svgEl("line");
+      band.setAttribute("x1", "-11"); band.setAttribute("y1", "0");
+      band.setAttribute("x2", "11"); band.setAttribute("y2", "0");
+      band.setAttribute("stroke", "#72383D"); band.setAttribute("stroke-width", "2");
+      g.appendChild(tank); g.appendChild(band);
+    } else {
+      var lot = svgEl("rect");
+      lot.setAttribute("x", "-16"); lot.setAttribute("y", "-12");
+      lot.setAttribute("width", "32"); lot.setAttribute("height", "24");
+      lot.setAttribute("rx", "3");
+      lot.setAttribute("fill", "#E8E0D7"); lot.setAttribute("stroke", "#655D56");
+      lot.setAttribute("stroke-width", "1.5");
+      lot.setAttribute("stroke-dasharray", "4 3");
+      var p = svgEl("text");
+      p.setAttribute("text-anchor", "middle"); p.setAttribute("dy", "5");
+      p.setAttribute("fill", "#655D56"); p.setAttribute("font-size", "14");
+      p.setAttribute("font-family", "ui-monospace, monospace");
+      p.setAttribute("font-weight", "700");
+      p.textContent = "P";
+      g.appendChild(lot); g.appendChild(p);
+    }
+    return g;
+  }
+
   function ensureAssets(assets) {
     var key = JSON.stringify(assets || []);
     if (key === assetsBuiltFor) return;
@@ -779,27 +989,25 @@
     (assets || []).forEach(function (a) {
       var g = svgEl("g");
       g.setAttribute("data-asset", a.name);
-      var r = svgEl("rect");
-      r.setAttribute("x", a.x - 14);
-      r.setAttribute("y", a.y - 14);
-      r.setAttribute("width", 28);
-      r.setAttribute("height", 28);
-      r.setAttribute("fill", "#243044");
-      r.setAttribute("stroke", "#c9d1d9");
-      r.setAttribute("stroke-width", "2");
-      r.setAttribute("class", "asset-marker");
-      var off = ASSET_LABEL_OFFSET[a.name] || { x: 0, y: -22 };
+      g.setAttribute("transform", "translate(" + a.x + "," + a.y + ")");
+      var icon = assetIcon(a.kind || a.name);
+      var hit = svgEl("circle");
+      hit.setAttribute("r", "18");
+      hit.setAttribute("fill", "transparent");
+      hit.setAttribute("class", "asset-hit");
+      var off = ASSET_LABEL_OFFSET[a.name] || { x: 0, y: -28 };
       var t = svgEl("text");
-      t.setAttribute("x", a.x + off.x);
-      t.setAttribute("y", a.y + off.y);
+      t.setAttribute("x", off.x);
+      t.setAttribute("y", off.y);
       t.setAttribute("text-anchor", "middle");
-      t.setAttribute("fill", "#c9d1d9");
+      t.setAttribute("fill", "#322D29");
       t.setAttribute("class", "map-label");
       t.textContent = a.name;
-      g.appendChild(r);
+      g.appendChild(hit);
+      g.appendChild(icon);
       g.appendChild(t);
       el.mapAssets.appendChild(g);
-      assetNodes[a.name] = { g: g, r: r, t: t };
+      assetNodes[a.name] = { g: g, icon: icon, t: t, hit: hit };
     });
   }
 
@@ -807,18 +1015,26 @@
     if (trackNodes[id]) return trackNodes[id];
     var g = svgEl("g");
     g.setAttribute("data-track", id);
-    var c = svgEl("circle");
-    c.setAttribute("r", "10");
-    c.setAttribute("stroke", "#f0f3f6");
-    c.setAttribute("stroke-width", "2");
+    var body = svgEl("g");
+    body.setAttribute("class", "track-body");
+    var diamond = svgEl("polygon");
+    diamond.setAttribute("points", "0,-11 9,0 0,11 -9,0");
+    diamond.setAttribute("stroke", "#322D29");
+    diamond.setAttribute("stroke-width", "1.5");
+    diamond.setAttribute("filter", "url(#soft-glow)");
+    var nose = svgEl("polygon");
+    nose.setAttribute("points", "0,-14 4,-4 -4,-4");
+    nose.setAttribute("fill", "#322D29");
+    body.appendChild(diamond);
+    body.appendChild(nose);
     var t = svgEl("text");
-    t.setAttribute("dx", "14");
-    t.setAttribute("dy", "5");
+    t.setAttribute("x", "14");
+    t.setAttribute("y", "4");
     t.setAttribute("class", "map-label");
-    g.appendChild(c);
+    g.appendChild(body);
     g.appendChild(t);
     el.mapTracks.appendChild(g);
-    trackNodes[id] = { g: g, c: c, t: t };
+    trackNodes[id] = { g: g, body: body, diamond: diamond, nose: nose, t: t };
     return trackNodes[id];
   }
 
@@ -826,28 +1042,72 @@
     if (unitNodes[id]) return unitNodes[id];
     var g = svgEl("g");
     g.setAttribute("data-unit", id);
-    var p = svgEl("polygon");
-    p.setAttribute("points", "0,-10 8,10 -8,10");
-    p.setAttribute("fill", "#58a6ff");
-    p.setAttribute("stroke", "#f0f3f6");
-    p.setAttribute("stroke-width", "1.5");
+    var craft = svgEl("g");
+    craft.setAttribute("class", "unit-craft");
+    // X-frame quadcopter
+    var arm1 = svgEl("line");
+    arm1.setAttribute("x1", "-11"); arm1.setAttribute("y1", "-11");
+    arm1.setAttribute("x2", "11"); arm1.setAttribute("y2", "11");
+    arm1.setAttribute("stroke", "#3F7891"); arm1.setAttribute("stroke-width", "2.2");
+    arm1.setAttribute("stroke-linecap", "round");
+    var arm2 = svgEl("line");
+    arm2.setAttribute("x1", "11"); arm2.setAttribute("y1", "-11");
+    arm2.setAttribute("x2", "-11"); arm2.setAttribute("y2", "11");
+    arm2.setAttribute("stroke", "#3F7891"); arm2.setAttribute("stroke-width", "2.2");
+    arm2.setAttribute("stroke-linecap", "round");
+    [[-11, -11], [11, -11], [11, 11], [-11, 11]].forEach(function (xy) {
+      var rotor = svgEl("circle");
+      rotor.setAttribute("cx", String(xy[0]));
+      rotor.setAttribute("cy", String(xy[1]));
+      rotor.setAttribute("r", "4.5");
+      rotor.setAttribute("fill", "#FBF9F6");
+      rotor.setAttribute("stroke", "#72383D");
+      rotor.setAttribute("stroke-width", "1.4");
+      craft.appendChild(rotor);
+    });
+    craft.appendChild(arm1);
+    craft.appendChild(arm2);
+    var hub = svgEl("rect");
+    hub.setAttribute("x", "-5"); hub.setAttribute("y", "-4");
+    hub.setAttribute("width", "10"); hub.setAttribute("height", "8");
+    hub.setAttribute("rx", "1.5");
+    hub.setAttribute("fill", "#72383D");
+    hub.setAttribute("stroke", "#EFE9E1");
+    hub.setAttribute("stroke-width", "1");
+    craft.appendChild(hub);
+    var nose = svgEl("polygon");
+    nose.setAttribute("points", "0,-9 3,-2 -3,-2");
+    nose.setAttribute("fill", "#322D29");
+    craft.appendChild(nose);
     var t = svgEl("text");
-    t.setAttribute("y", "-14");
+    t.setAttribute("y", "-20");
     t.setAttribute("text-anchor", "middle");
-    t.setAttribute("fill", "#9ecbff");
+    t.setAttribute("fill", "#3F7891");
     t.setAttribute("class", "map-label");
     t.textContent = id;
-    g.appendChild(p);
+    g.appendChild(craft);
     g.appendChild(t);
     el.mapUnits.appendChild(g);
-    unitNodes[id] = { g: g, p: p, t: t };
+    unitNodes[id] = { g: g, craft: craft, hub: hub, t: t };
     return unitNodes[id];
+  }
+
+  function ensureTrail(id) {
+    if (trailNodes[id]) return trailNodes[id];
+    var poly = svgEl("polyline");
+    poly.setAttribute("fill", "none");
+    poly.setAttribute("stroke-width", "2");
+    poly.setAttribute("stroke-linecap", "round");
+    poly.setAttribute("opacity", "0.55");
+    el.mapTrails.appendChild(poly);
+    trailNodes[id] = poly;
+    return poly;
   }
 
   function ensureLink(uid) {
     if (linkNodes[uid]) return linkNodes[uid];
     var line = svgEl("line");
-    line.setAttribute("stroke", "#58a6ff");
+    line.setAttribute("stroke", "#72383D");
     line.setAttribute("stroke-width", "2");
     line.setAttribute("stroke-dasharray", "6 4");
     line.setAttribute("opacity", "0.85");
@@ -858,7 +1118,6 @@
 
   function updateMap(s) {
     ensureAssets(s.assets || []);
-    // Highlight sheltered assets from alerts like "Shelter: parking"
     var shelter = {};
     (s.alerts || []).forEach(function (a) {
       var m = String(a).match(/Shelter:\s*(\w+)/i);
@@ -866,54 +1125,78 @@
     });
     Object.keys(assetNodes).forEach(function (name) {
       var node = assetNodes[name];
-      if (!node || !node.r) return;
+      if (!node || !node.hit) return;
       if (shelter[name]) {
-        node.r.setAttribute("stroke", "#f0c14a");
-        node.r.setAttribute("stroke-width", "4");
-        node.r.setAttribute("fill", "#3d2e12");
+        node.hit.setAttribute("fill", "rgba(114,56,61,0.14)");
+        node.hit.setAttribute("stroke", "#72383D");
+        node.hit.setAttribute("stroke-width", "2");
+        node.t.setAttribute("fill", "#72383D");
       } else {
-        node.r.setAttribute("stroke", "#c9d1d9");
-        node.r.setAttribute("stroke-width", "2");
-        node.r.setAttribute("fill", "#243044");
+        node.hit.setAttribute("fill", "transparent");
+        node.hit.setAttribute("stroke", "none");
+        node.t.setAttribute("fill", "#322D29");
       }
     });
 
     var seenTracks = {};
+    var seenTrails = {};
     (s.tracks || []).forEach(function (tr) {
       if (tr.status !== "active") return;
       seenTracks[tr.id] = true;
       var node = ensureTrackNode(tr.id);
       var color = LABEL_COLOR[tr.label] || LABEL_COLOR.unknown;
-      node.c.setAttribute("cx", tr.x);
-      node.c.setAttribute("cy", tr.y);
-      node.c.setAttribute("fill", color);
-      node.t.setAttribute("x", tr.x);
-      node.t.setAttribute("y", tr.y);
+      var deg = ((Number(tr.heading) || 0) * 180 / Math.PI) + 90;
+      node.g.setAttribute("transform", "translate(" + tr.x + "," + tr.y + ")");
+      node.body.setAttribute("transform", "rotate(" + deg + ")");
+      node.diamond.setAttribute("fill", color);
+      node.nose.setAttribute("fill", color);
       node.t.setAttribute("fill", color);
       node.t.textContent = tr.id + " " + (LABEL_TEXT[tr.label] || tr.label);
       node.g.style.display = "";
       node.g.setAttribute("opacity", "1");
+
+      if (tr.history && tr.history.length > 1) {
+        seenTrails[tr.id] = true;
+        var trail = ensureTrail(tr.id);
+        var pts = tr.history.map(function (p) { return p[0] + "," + p[1]; }).join(" ");
+        trail.setAttribute("points", pts);
+        trail.setAttribute("stroke", color);
+        trail.style.display = "";
+      }
     });
     Object.keys(trackNodes).forEach(function (id) {
       if (!seenTracks[id]) trackNodes[id].g.style.display = "none";
+    });
+    Object.keys(trailNodes).forEach(function (id) {
+      if (!seenTrails[id]) trailNodes[id].style.display = "none";
     });
 
     var tracksById = {};
     (s.tracks || []).forEach(function (tr) { tracksById[tr.id] = tr; });
     var seenUnits = {};
-    var unitLabelOffsets = { U1: -18, U2: -6, U3: 6, U4: 18 };
+    var unitLabelOffsets = { U1: -16, U2: -4, U3: 8, U4: 20 };
     (s.units || []).forEach(function (u, idx) {
       seenUnits[u.id] = true;
       var node = ensureUnitNode(u.id);
-      node.g.setAttribute("transform", "translate(" + u.x + "," + u.y + ")");
       var expended = u.state === "expended";
       var away = u.state && u.state !== "rack" && !expended;
-      node.p.setAttribute("fill", expended ? "#4a5568" : (away ? "#58a6ff" : "#4a5568"));
+      var yaw = Number(u.yaw) || 0;
+      var prev = unitPrev[u.id];
+      if (prev && (Math.abs(u.x - prev.x) > 0.5 || Math.abs(u.y - prev.y) > 0.5)) {
+        yaw = Math.atan2(u.y - prev.y, u.x - prev.x) * 180 / Math.PI + 90;
+      } else if (away && u.assigned_track && tracksById[u.assigned_track]) {
+        var tgt = tracksById[u.assigned_track];
+        yaw = Math.atan2(tgt.y - u.y, tgt.x - u.x) * 180 / Math.PI + 90;
+      }
+      unitPrev[u.id] = { x: u.x, y: u.y };
+      node.g.setAttribute("transform", "translate(" + u.x + "," + u.y + ")");
+      node.craft.setAttribute("transform", "rotate(" + yaw + ")");
+      node.hub.setAttribute("fill", expended ? "#7B858B" : (away ? "#72383D" : "#AC9C8D"));
       node.g.setAttribute("opacity", expended ? "0.35" : "1");
       var lx = unitLabelOffsets[u.id];
       if (lx == null) lx = (idx - 1.5) * 12;
       node.t.setAttribute("x", String(lx));
-      node.t.setAttribute("y", expended ? "22" : "-14");
+      node.t.setAttribute("y", expended ? "24" : "-20");
       node.g.style.display = "";
 
       var link = ensureLink(u.id);
@@ -996,17 +1279,41 @@
     });
   }
 
+  function updateU1Tilt(u) {
+    var horizon = document.getElementById("u1-tilt-horizon");
+    var txt = document.getElementById("u1-tilt-text");
+    if (!horizon || !txt || !u) return;
+    var roll = (Number(u.roll) || 0) - tiltZeroRoll;
+    var pitch = (Number(u.pitch) || 0) - tiltZeroPitch;
+    horizon.style.transform = "translateY(" + (-pitch * 0.45) + "px) rotate(" + roll + "deg)";
+    txt.textContent = "Attitude  R " + roll.toFixed(0) + "°  P " + pitch.toFixed(0) + "°";
+  }
+
   function updateRack(s) {
     var units = s.units || [];
+    // Exclude continuous attitude from rebuild key — update tilt in place instead.
     var key = JSON.stringify(units.map(function (u) {
-      return [u.id, u.source, u.battery_v, u.battery_pct, u.ready, u.variant, u.state, u.roll, u.pitch];
+      return [
+        u.id, u.source,
+        Math.round((u.battery_v || 0) * 10) / 10,
+        Math.round((u.battery_pct || 0) * 100),
+        u.ready, u.variant, u.state
+      ];
     })) + "|tz=" + tiltZeroRoll + "," + tiltZeroPitch;
-    if (key === lastRackKey) return;
+    if (key === lastRackKey) {
+      var u1live = null;
+      for (var i = 0; i < units.length; i++) {
+        if (units[i].id === "U1") { u1live = units[i]; break; }
+      }
+      updateU1Tilt(u1live);
+      return;
+    }
     lastRackKey = key;
     el.rack.innerHTML = "";
     units.forEach(function (u) {
       var card = document.createElement("div");
       card.className = "unit-card";
+      card.setAttribute("data-unit", u.id);
       var head = document.createElement("div");
       var uid = document.createElement("span");
       uid.className = "uid";
@@ -1026,36 +1333,42 @@
         badge.textContent = "SIM";
       }
       head.appendChild(badge);
+      var varBadge = document.createElement("span");
+      varBadge.className = "badge";
+      varBadge.textContent = "VAR " + (u.variant || "?");
+      head.appendChild(varBadge);
       card.appendChild(head);
 
       var body = document.createElement("div");
       body.className = "meta";
       if (u.state === "expended") {
-        body.textContent = "EXPENDED · Variant " + (u.variant || "?");
-      } else {
+        body.textContent = "EXPENDED";
+      } else if (u.id === "U1") {
         var pct = Math.round((u.battery_pct || 0) * 100);
-        var ready = u.ready ? "READY" : "NOT READY";
-        body.textContent = (Number(u.battery_v) || 0).toFixed(1) + "V · " + pct + "% · Variant " +
-          (u.variant || "?") + " · " + ready + " · " + String(u.state || "").toUpperCase();
+        body.textContent = (Number(u.battery_v) || 0).toFixed(1) + "V · " + pct + "% · " +
+          (u.ready ? "READY" : "NOT READY") + " · " + String(u.state || "").toUpperCase();
+      } else {
+        body.textContent = String(u.state || "rack").toUpperCase() +
+          (u.assigned_track ? (" → " + u.assigned_track) : "");
       }
       card.appendChild(body);
 
       if (u.id === "U1" && u.state !== "expended") {
         var tilt = document.createElement("div");
         tilt.className = "tilt";
+        tilt.id = "u1-tilt";
         tilt.setAttribute("aria-hidden", "true");
-        tilt.title = "Tilt indicator";
+        tilt.title = "U1 attitude";
         var horizon = document.createElement("div");
         horizon.className = "tilt-horizon";
-        var roll = (Number(u.roll) || 0) - tiltZeroRoll;
-        var pitch = (Number(u.pitch) || 0) - tiltZeroPitch;
-        horizon.style.transform = "translateY(" + (-pitch * 0.45) + "px) rotate(" + roll + "deg)";
+        horizon.id = "u1-tilt-horizon";
         tilt.appendChild(horizon);
         card.appendChild(tilt);
         var tiltTxt = document.createElement("div");
         tiltTxt.className = "meta";
-        tiltTxt.textContent = "Tilt roll " + roll.toFixed(1) + "° · pitch " + pitch.toFixed(1) + "°";
+        tiltTxt.id = "u1-tilt-text";
         card.appendChild(tiltTxt);
+        updateU1Tilt(u);
       }
       el.rack.appendChild(card);
     });
@@ -1127,6 +1440,8 @@
     if (!u1) return;
     tiltZeroRoll = Number(u1.roll) || 0;
     tiltZeroPitch = Number(u1.pitch) || 0;
+    updateU1Tilt(u1);
+    lastRackKey = null;
     if (state) onState(state);
   });
   function swapU1ToA() {
@@ -1190,9 +1505,53 @@
     if (afterOpener && afterOpener.focus) afterOpener.focus();
   }
 
+  function buildRunSummary() {
+    var events = (state && state.events) || [];
+    var tracks = (state && state.tracks) || [];
+    var units = (state && state.units) || [];
+    var lines = [];
+    lines.push("Scenario: " + ((state && state.scenario) || "—") +
+      " · phase " + ((state && state.phase) || "idle") +
+      " · t=" + ((state && Number(state.t)) || 0).toFixed(1) + "s");
+    var counts = { contact: 0, neutralized: 0, impact: 0, miss: 0, gap: 0, returned: 0 };
+    events.forEach(function (e) {
+      if (counts[e.kind] != null) counts[e.kind] += 1;
+    });
+    lines.push(
+      "Contacts " + counts.contact +
+      " · neutralized " + counts.neutralized +
+      " · impacts " + counts.impact +
+      " · misses " + counts.miss +
+      " · gaps " + counts.gap
+    );
+    tracks.forEach(function (tr) {
+      lines.push(
+        "Track " + tr.id + ": " + (LABEL_TEXT[tr.label] || tr.label) +
+        " → " + String(tr.status || "").toUpperCase() +
+        (tr.target_asset ? (" @ " + tr.target_asset) : "")
+      );
+    });
+    units.forEach(function (u) {
+      lines.push(
+        u.id + " var " + (u.variant || "?") + " · " + String(u.state || "").toUpperCase() +
+        " · " + String(u.source || "sim").toUpperCase()
+      );
+    });
+    if (!tracks.length && !events.length) {
+      lines.push("No engagements yet — run a scenario, then reopen after-action.");
+    }
+    return lines.join("\n");
+  }
+
   function populateAfter() {
     var gaps = (state && state.gaps) || [];
-    document.getElementById("after-gaps").textContent = "Gaps logged: " + gaps.length;
+    document.getElementById("after-gaps").textContent =
+      "Gaps logged: " + gaps.length +
+      (gaps.length ? (" (" + gaps.map(function (g) {
+        return (g.gap_type || "?") + " on " + (g.track_id || "?");
+      }).join(", ") + ")") : "");
+    document.getElementById("after-summary").textContent = buildRunSummary();
+
     var evRoot = document.getElementById("after-events");
     evRoot.innerHTML = "";
     ((state && state.events) || []).slice().reverse().forEach(function (e) {
@@ -1200,6 +1559,12 @@
       li.textContent = "t=" + Number(e.t).toFixed(1) + " [" + e.kind + "] " + e.msg;
       evRoot.appendChild(li);
     });
+    if (!((state && state.events) || []).length) {
+      var empty = document.createElement("li");
+      empty.textContent = "No events in this run yet.";
+      evRoot.appendChild(empty);
+    }
+
     var swapBtn = document.getElementById("btn-swap");
     var swapABtn = document.getElementById("btn-swap-a-after");
     var phase = state ? state.phase : "idle";
@@ -1208,11 +1573,20 @@
     if (swapABtn) swapABtn.disabled = !canSwap;
     var swapACtrl = document.getElementById("btn-swap-a");
     if (swapACtrl) swapACtrl.disabled = !canSwap;
+    swapBtn.dataset.toVariant = "B";
+    swapBtn.dataset.unitId = "U1";
 
     var briefP = fetch("/gap_brief").then(function (r) { return r.text(); }).then(function (txt) {
-      document.getElementById("after-brief").textContent = txt || "(no gap brief yet)";
+      var elBrief = document.getElementById("after-brief");
+      if (txt && txt.trim()) {
+        elBrief.textContent = txt;
+      } else {
+        elBrief.textContent =
+          "RUN BRIEF (live)\n" + buildRunSummary() +
+          "\n\nNo capability gap this run — Velocity reconfigure card appears only after a fast-threat gap.";
+      }
     }).catch(function () {
-      document.getElementById("after-brief").textContent = "(brief unavailable)";
+      document.getElementById("after-brief").textContent = buildRunSummary();
     });
 
     var cardP = (cardsCache
@@ -1224,20 +1598,27 @@
     ).then(function (cards) {
       var cardRoot = document.getElementById("after-card");
       cardRoot.innerHTML = "";
+      if (!gaps.length) {
+        var none = document.createElement("p");
+        none.className = "meta";
+        none.textContent = "No Velocity reconfigure recommendation — rack matched this attack.";
+        cardRoot.appendChild(none);
+        return;
+      }
       var card = null;
-      var gapType = gaps.length ? (gaps[0].gap_type || "fast_threat") : "fast_threat";
+      var gapType = gaps[0].gap_type || "fast_threat";
       for (var i = 0; i < (cards || []).length; i++) {
         if (cards[i].gap_type === gapType) { card = cards[i]; break; }
       }
       if (!card && cards && cards[0]) card = cards[0];
       if (!card) {
-        cardRoot.textContent = "No card.";
+        cardRoot.textContent = "No matching Velocity card for " + gapType + ".";
         return;
       }
       var title = document.createElement("div");
-      title.innerHTML = "";
       var strong = document.createElement("strong");
-      strong.textContent = "Reconfigure " + (card.unit_id || "U1") + " → Variant " + (card.to_variant || "?");
+      strong.textContent = "Velocity · Reconfigure " + (card.unit_id || "U1") +
+        " → Variant " + (card.to_variant || "?");
       title.appendChild(strong);
       if (card.placeholder) {
         var tag = document.createElement("span");
@@ -1253,7 +1634,12 @@
         " · Δ$" + (card.cost_delta != null ? card.cost_delta : "—") +
         " · " + (card.swap_minutes != null ? card.swap_minutes + " min" : "") +
         " · " + (card.source || "");
+      var why = document.createElement("div");
+      why.className = "meta";
+      why.textContent = "Triggered by gap on track " + (gaps[0].track_id || "?") +
+        " (" + gapType + ") this run.";
       cardRoot.appendChild(title);
+      cardRoot.appendChild(why);
       cardRoot.appendChild(meta);
       swapBtn.dataset.toVariant = card.to_variant || "B";
       swapBtn.dataset.unitId = card.unit_id || "U1";
