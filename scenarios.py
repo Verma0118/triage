@@ -36,10 +36,10 @@ def _juniper_assets() -> list[Asset]:
     return [
         Asset("housing", 500.0, 350.0, "housing"),      # hub HV
         Asset("generator", 585.0, 270.0, "generator"),  # NE HV
-        Asset("clinic", 180.0, 280.0, "clinic"),        # W HV — off decoy south loiter
+        Asset("clinic", 620.0, 380.0, "clinic"),        # E of hub HV — on-screen with slice
         Asset("comms", 400.0, 255.0, "comms"),          # NW
         Asset("fuel", 605.0, 425.0, "fuel"),            # SE
-        Asset("radar", 820.0, 300.0, "radar"),          # far E
+        Asset("radar", 640.0, 250.0, "radar"),          # NE — on-screen with slice
         Asset("parking", 655.0, 520.0, "parking"),      # further SE apron
     ]
 
