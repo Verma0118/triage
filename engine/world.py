@@ -28,6 +28,8 @@ class World:
         self._spawns: list[dict] = []
         self._spawned_ids: set[str] = set()
         self._kept_variants: dict[str, str] = {}
+        # Variants the operator swapped by hand: these survive a scenario load.
+        self._swapped_variants: dict[str, str] = {}
         self._score_state: dict[str, ScoreState] = {}
         self._ever_proposed: set[str] = set()
         self._decoy_hold: dict[str, float] = {}
@@ -36,11 +38,13 @@ class World:
 
     def load_scenario(self, name: str) -> None:
         data = get_scenario(name)
-        # Preserve variants across load (7.5).
-        kept = dict(self._kept_variants)
-        for u in self.units:
-            kept[u.id] = u.variant
-        self._kept_variants = kept
+        # Preserve variants across load (7.5) — but only for units the operator
+        # actually swapped. A unit that merely started as a Variant B is part of
+        # that scenario's rack, not a standing capability: when the next night's
+        # rack is restocked it comes back as the scenario defines it. Otherwise
+        # night 2 would still show a spare Variant B and the swap would be
+        # pointless.
+        self._kept_variants = dict(self._swapped_variants)
 
         self.t = 0.0
         self.scenario = data["name"]
@@ -154,6 +158,7 @@ class World:
         unit.cost = spec["cost"]
         unit.range = unit.max_range * unit.battery_pct
         self._kept_variants[unit_id] = variant
+        self._swapped_variants[unit_id] = variant
         self.events.append(
             Event(
                 t=self.t,

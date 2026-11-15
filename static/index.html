@@ -825,7 +825,8 @@
       <button type="button" class="scn" data-scenario="juniper_night2" aria-describedby="scenario-label">Night 2</button>
       <button type="button" class="scn" data-scenario="tower22" aria-describedby="scenario-label">Tower 22</button>
       <span class="divider" aria-hidden="true"></span>
-      <button type="button" id="btn-start" class="primary">Start</button>
+      <button type="button" id="btn-demo" class="primary">Run full demo</button>
+      <button type="button" id="btn-start">Start</button>
       <button type="button" id="btn-pause">Pause</button>
       <button type="button" id="btn-reset">Reset</button>
       <span class="spacer"></span>
@@ -2246,6 +2247,7 @@
         }
       }
       render(state);
+      demoTick(state);
     };
   }
 
@@ -2286,6 +2288,7 @@
     var btns = document.querySelectorAll("button.scn");
     for (var i = 0; i < btns.length; i++) {
       btns[i].addEventListener("click", function (ev) {
+        if (demo) demoStop();  // a manual pick takes over from the demo runner
         selectedScenario = ev.currentTarget.getAttribute("data-scenario");
         markSelected();
         send({ type: "load_scenario", name: selectedScenario });
@@ -2293,6 +2296,99 @@
     }
     markSelected();
   })();
+
+  /* ---- Full demo runner -------------------------------------------------
+     One button plays the whole story hands-free for filming: night 1, the
+     capability gap, the after-action report, the module swap, then night 2.
+     It approves each plan line on a short delay so the APPROVED flash reads
+     on camera. Live on stage you still drive it by hand with Start/Approve. */
+  var demo = null;
+  var demoTimer = null;
+
+  function demoClearTimer() {
+    if (demoTimer) { window.clearTimeout(demoTimer); demoTimer = null; }
+  }
+
+  function demoLater(ms, fn) {
+    demoClearTimer();
+    demoTimer = window.setTimeout(function () { demoTimer = null; fn(); }, ms);
+  }
+
+  function updateDemoBtn() {
+    var b = document.getElementById("btn-demo");
+    b.textContent = demo ? "Stop demo" : "Run full demo";
+    b.setAttribute("aria-pressed", demo ? "true" : "false");
+  }
+
+  function demoStop() {
+    demoClearTimer();
+    demo = null;
+    updateDemoBtn();
+  }
+
+  function demoBegin() {
+    demo = { stage: "night1", approveAt: 0 };
+    updateDemoBtn();
+    if (afterOpen) closeAfter();
+    selectedScenario = "juniper_night1";
+    markSelected();
+    send({ type: "load_scenario", name: selectedScenario });
+    demoLater(700, function () { send({ type: "start" }); });
+  }
+
+  /* Called on every state frame while the demo is running. */
+  function demoTick(s) {
+    if (!demo || !s) return;
+    var now = Date.now();
+
+    // Approve whatever the operator would approve, on a beat.
+    if (demo.stage === "night1" || demo.stage === "night2") {
+      var pending = (s.plan || []).filter(function (ln) { return !ln.approved; });
+      if (pending.length) {
+        if (!demo.approveAt) demo.approveAt = now + 1500;
+        else if (now >= demo.approveAt) { approveVisible(); demo.approveAt = 0; }
+      } else {
+        demo.approveAt = 0;
+      }
+    }
+
+    if (demoTimer) return;  // a staged transition is already scheduled
+
+    if (demo.stage === "night1" && s.phase === "ended") {
+      demo.stage = "after";
+      demoLater(1800, function () {
+        openAfter();
+        // Let the stats, Velocity card and reuse bar sit on screen, then swap.
+        demoLater(9000, function () {
+          var b = document.getElementById("btn-swap");
+          send({
+            type: "swap_variant",
+            unit_id: (b && b.dataset.unitId) || "U1",
+            variant: (b && b.dataset.toVariant) || "B"
+          });
+          closeAfter();
+          demo.stage = "reconfig";
+          // RECONFIG shows for ~3.5 s, then night 2.
+          demoLater(4500, function () {
+            selectedScenario = "juniper_night2";
+            markSelected();
+            send({ type: "load_scenario", name: selectedScenario });
+            demo.stage = "night2";
+            demoLater(900, function () { send({ type: "start" }); });
+          });
+        });
+      });
+      return;
+    }
+
+    if (demo.stage === "night2" && s.phase === "ended") {
+      demoLater(2500, function () { demoStop(); });
+    }
+  }
+
+  document.getElementById("btn-demo").addEventListener("click", function () {
+    if (demo) demoStop(); else demoBegin();
+  });
 
   function pickScenario() {
     return selectedScenario;

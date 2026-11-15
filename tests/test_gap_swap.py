@@ -283,3 +283,26 @@ def test_night2_rack_has_no_variant_b_before_swap():
 
     night2 = scenarios.get_scenario("juniper_night2")
     assert all(u.variant == "A" for u in night2["units"])
+
+
+def test_night2_only_the_swapped_unit_is_variant_b():
+    """After the swap, U1 is the sole Variant B on night 2.
+
+    U3 started night 1 as a Variant B and was spent there; the rack is restocked
+    with Variant A, so converting U1 is the only way to field a B. If U3 came
+    back as a B the swap would be pointless and the demo's argument collapses.
+    """
+    from engine.world import World
+
+    world = World()
+    world.load_scenario("juniper_night1")
+    assert next(u for u in world.units if u.id == "U3").variant == "B"
+
+    world.handle_command({"type": "swap_variant", "unit_id": "U1", "variant": "B"})
+    world.load_scenario("juniper_night2")
+
+    by_id = {u.id: u for u in world.units}
+    assert by_id["U1"].variant == "B", "the hand-swapped unit must keep Variant B"
+    assert by_id["U3"].variant == "A", "an unswapped unit resets to the scenario rack"
+    bs = [u.id for u in world.units if u.variant == "B"]
+    assert bs == ["U1"], f"expected only U1 as Variant B, got {bs}"
