@@ -262,10 +262,19 @@
     .right-col {
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
+      gap: 0.55rem;
       min-height: 0;
-      overflow: auto;
-      padding: 0.1rem 0;
+      height: 100%;
+      overflow: hidden;
+      padding: 0;
+    }
+    .left-col > .side-card,
+    .right-col > .side-card {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
     .panel {
       background: var(--panel);
@@ -283,18 +292,53 @@
     #map-panel {
       min-width: 0;
       min-height: 0;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      padding: 0.45rem;
-      /* Map is the center column — do not let side rails shove it off-axis */
+      padding: 0.35rem 0.4rem 0.4rem;
       justify-self: stretch;
+      overflow: hidden;
     }
+    #map-panel > h2 { flex: 0 0 auto; margin-bottom: 0.3rem; }
     #map-svg {
-      flex: 1; width: 100%; min-height: 0;
+      flex: 1 1 0;
+      width: 100%;
+      min-height: 0;
       background: #0A0D10;
       border: 1px solid var(--border);
       border-radius: 2px;
+      display: block;
     }
+    .map-legend-banner {
+      flex: 0 0 auto;
+      margin-top: 0.4rem;
+      background: #F4F6F8;
+      color: #1A222C;
+      border: 1px solid #D0D7DE;
+      border-radius: 2px;
+      padding: 0.45rem 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1.15rem 1.6rem;
+      font-size: 0.78rem;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+    .map-legend-banner .leg {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .map-legend-banner .dot {
+      width: 0.55rem; height: 0.55rem; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .map-legend-banner .dot.threat { background: #E06B66; }
+    .map-legend-banner .dot.unknown { background: #D4A017; }
+    .map-legend-banner .dot.friendly { background: #5BA3C9; }
+    .map-legend-banner .dot.decoy { background: #8B949E; }
     .map-label {
       font-size: 11px; font-weight: 700; font-family: var(--sans);
       paint-order: stroke; stroke: #101618; stroke-width: 2.5px;
@@ -331,13 +375,10 @@
     }
 
     #plan-panel {
-      flex: 1 1 auto;
+      flex: 1 1 0;
       display: flex; flex-direction: column; gap: 0.55rem;
       overflow: hidden;
-      min-height: 220px;
-      position: sticky;
-      top: 0;
-      z-index: 2;
+      min-height: 0;
     }
     #plan-panel.has-pending {
       border-color: #3d4a28;
@@ -437,7 +478,7 @@
     #hold-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     #threat-panel {
-      flex: 1 1 auto;
+      flex: 1 1 0;
       display: flex; flex-direction: column; overflow: hidden;
       min-height: 0;
     }
@@ -470,14 +511,18 @@
     .factors { margin: 0.35rem 0 0; padding-left: 1.1rem; color: var(--muted); font-size: 0.8rem; line-height: 1.45; }
 
     #rack-section {
-      flex: 0 1 auto;
+      flex: 1 1 0;
       display: flex; flex-direction: column; gap: 0.5rem;
-      overflow: auto;
-      max-height: 42%;
+      overflow: hidden;
+      max-height: none;
     }
     #rack-summary { margin: 0; color: var(--muted); font-size: 0.75rem; }
     #rack-panel {
-      display: flex; flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
       border-top: 1px solid var(--border);
     }
     .unit-row {
@@ -561,20 +606,26 @@
     }
 
     #events-section {
-      flex: 0 1 28%;
-      min-height: 5.5rem;
+      flex: 1 1 0;
+      min-height: 0;
       max-height: none;
-      overflow: auto;
+      overflow: hidden;
       padding: 0.75rem 0.85rem;
     }
     #events-section h2 {
       margin: 0 0 0.25rem;
       font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
       color: var(--muted); font-weight: 650;
+      flex: 0 0 auto;
+    }
+    #events-panel {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
     }
     #event-log {
       margin: 0; padding-left: 1.15rem; color: var(--text-2); font-size: 0.82rem;
-      line-height: 1.45; max-height: 8rem; overflow: auto;
+      line-height: 1.45; max-height: none; overflow: visible;
     }
 
     #after-overlay[hidden] { display: none !important; }
@@ -657,7 +708,7 @@
             <p class="vel-kicker" id="vel-heading">Kearney Velocity AI</p>
             <p class="vel-title">Module guidance · core stays the same</p>
             <div class="vel-chips" aria-hidden="true">
-              <span>Motors</span><span>Props</span><span>Battery</span><span>Camera</span>
+              <span>Propulsion</span><span>Power</span><span>Airframe</span>
             </div>
           </div>
         </section>
@@ -665,7 +716,7 @@
 
       <section id="map-panel" class="panel" aria-labelledby="map-heading">
         <h2 id="map-heading">Outpost map</h2>
-        <svg id="map-svg" viewBox="0 0 1000 700" role="img" aria-label="Outpost map. Track details are in the threat list.">
+        <svg id="map-svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Outpost map. Track details are in the threat list. Classification legend is below the map.">
           <defs>
             <pattern id="map-grid-pat" width="56" height="56" patternUnits="userSpaceOnUse">
               <path d="M 56 0 L 0 0 0 56" fill="none" stroke="#243038" stroke-width="0.7" opacity="0.35"/>
@@ -685,30 +736,23 @@
               <circle cx="500" cy="350" r="310"/>
               <circle cx="500" cy="350" r="400"/>
             </g>
-            <!-- imperfect roads (bent cross) — white centerline on E–W only -->
+            <!-- bent roads: E–W offset from N–S crossing; white centerline on E–W only -->
             <g fill="none" stroke="#3A6B55" stroke-opacity="0.5" stroke-width="14" stroke-linecap="square" stroke-linejoin="miter">
-              <polyline points="0,372 140,348 310,362 500,346 690,358 860,334 1000,352"/>
-              <polyline points="488,0 512,120 492,240 508,350 486,470 518,590 498,700"/>
+              <polyline points="0,318 95,355 210,300 340,375 490,332 640,378 790,310 910,360 1000,338"/>
+              <polyline points="430,0 470,95 445,190 520,280 455,370 535,470 470,560 545,650 505,700"/>
             </g>
-            <polyline points="0,372 140,348 310,362 500,346 690,358 860,334 1000,352"
+            <polyline points="0,318 95,355 210,300 340,375 490,332 640,378 790,310 910,360 1000,338"
                       fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="1.3"/>
             <polygon points="500,265 575,308 575,392 500,435 425,392 425,308"
                      fill="none" stroke="#D7E2E8" stroke-opacity="0.5" stroke-width="1.3" stroke-dasharray="6 5"/>
             <text x="500" y="458" text-anchor="middle" fill="#E8F0F2" font-size="12"
                   font-weight="650" letter-spacing="0.16em">FOB SENTINEL</text>
-            <!-- legend lower, still centered -->
-            <g transform="translate(500,625)" font-size="10" fill="#A8B4BC">
-              <circle cx="-135" cy="0" r="4" fill="#E06B66"/><text x="-118" y="3">Threat</text>
-              <circle cx="-55" cy="0" r="4" fill="#D4A017"/><text x="-38" y="3">Unknown</text>
-              <circle cx="40" cy="0" r="4" fill="#5BA3C9"/><text x="57" y="3">Friendly</text>
-              <circle cx="135" cy="0" r="4" fill="#8B949E"/><text x="152" y="3">Decoy</text>
-            </g>
-            <!-- compact rack building; slot centers 261/297/333/369 @ y=421 -->
+            <!-- compact interceptor rack building; slot centers 261/297/333/369 @ y=421 -->
             <g id="rack-bay">
-              <rect x="246" y="400" width="136" height="34" fill="#121C18" stroke="#5FAE7A" stroke-width="1.2"/>
-              <line x1="252" y1="403" x2="252" y2="414" stroke="#C5D0D6" stroke-width="1"/>
-              <path d="M252,403 L262,406 L252,409 Z" fill="#7DCF8A"/>
-              <text x="314" y="412" text-anchor="middle" fill="#8FD4A0" font-size="6.5" font-weight="700" letter-spacing="0.1em">RACK</text>
+              <rect x="246" y="398" width="136" height="36" fill="#121C18" stroke="#5FAE7A" stroke-width="1.2"/>
+              <line x1="314" y1="401" x2="314" y2="412" stroke="#C5D0D6" stroke-width="1"/>
+              <path d="M314,401 L324,404 L314,407 Z" fill="#7DCF8A"/>
+              <text x="314" y="412" text-anchor="middle" fill="#8FD4A0" font-size="5.5" font-weight="700" letter-spacing="0.06em">INTERCEPTOR RACK</text>
               <rect x="254" y="414" width="14" height="14" fill="#15241E" stroke="#3D4A5C"/>
               <rect x="290" y="414" width="14" height="14" fill="#15241E" stroke="#3D4A5C"/>
               <rect x="326" y="414" width="14" height="14" fill="#15241E" stroke="#3D4A5C"/>
@@ -725,6 +769,12 @@
           <g id="map-units"></g>
           <g id="map-tracks"></g>
         </svg>
+        <div class="map-legend-banner" role="group" aria-label="Track classification legend">
+          <span class="leg"><span class="dot threat" aria-hidden="true"></span>Threat</span>
+          <span class="leg"><span class="dot unknown" aria-hidden="true"></span>Unknown</span>
+          <span class="leg"><span class="dot friendly" aria-hidden="true"></span>Friendly</span>
+          <span class="leg"><span class="dot decoy" aria-hidden="true"></span>Decoy</span>
+        </div>
       </section>
 
       <div class="right-col">
@@ -946,14 +996,17 @@
     return document.createElementNS(SVG_NS, name);
   }
 
+  var HIGH_VALUE_KINDS = { housing: true, generator: true, clinic: true };
+
   function assetMarker(name, kind) {
-    // Pad with flag drawn inside the square; name under the pad.
+    // Pad with flag centered inside; name under the pad. HV sites get gold stroke.
     var g = svgEl("g");
     g.setAttribute("class", "asset-marker");
+    var hv = !!HIGH_VALUE_KINDS[kind] || !!HIGH_VALUE_KINDS[name];
     var w = 26, h = 20;
     if (kind === "housing") { w = 30; h = 22; }
-    else if (kind === "generator") { w = 24; h = 20; }
-    else if (kind === "comms") { w = 24; h = 22; }
+    else if (kind === "generator" || kind === "clinic") { w = 26; h = 20; }
+    else if (kind === "comms" || kind === "radar") { w = 24; h = 22; }
     else if (kind === "fuel") { w = 24; h = 22; }
     else if (kind === "parking") { w = 26; h = 18; }
     var pad = svgEl("rect");
@@ -961,23 +1014,24 @@
     pad.setAttribute("y", String(-h / 2));
     pad.setAttribute("width", String(w));
     pad.setAttribute("height", String(h));
-    pad.setAttribute("fill", "#1B3A2C");
-    pad.setAttribute("stroke", "#2F4A3A");
-    pad.setAttribute("stroke-width", "1");
+    pad.setAttribute("fill", hv ? "#243820" : "#1B3A2C");
+    pad.setAttribute("stroke", hv ? "#D4A017" : "#2F4A3A");
+    pad.setAttribute("stroke-width", hv ? "1.6" : "1");
     g.appendChild(pad);
-    var poleX = -w / 2 + 5;
+    // Flag centered in the pad
+    var poleX = -3;
     var poleTop = -h / 2 + 3;
     var pole = svgEl("line");
     pole.setAttribute("x1", String(poleX));
     pole.setAttribute("y1", String(poleTop));
     pole.setAttribute("x2", String(poleX));
-    pole.setAttribute("y2", String(poleTop + 11));
-    pole.setAttribute("stroke", "#C5D0D6");
+    pole.setAttribute("y2", String(poleTop + 10));
+    pole.setAttribute("stroke", "#E8F0F2");
     pole.setAttribute("stroke-width", "1.1");
     var flag = svgEl("path");
-    flag.setAttribute("d", "M" + poleX + "," + poleTop + " L" + (poleX + 10) + "," + (poleTop + 3) +
-      " L" + poleX + "," + (poleTop + 6) + " Z");
-    flag.setAttribute("fill", "#7DCF8A");
+    flag.setAttribute("d", "M" + poleX + "," + poleTop + " L" + (poleX + 9) + "," + (poleTop + 2.5) +
+      " L" + poleX + "," + (poleTop + 5) + " Z");
+    flag.setAttribute("fill", hv ? "#E6C35C" : "#7DCF8A");
     flag.setAttribute("opacity", "0.95");
     g.appendChild(pole);
     g.appendChild(flag);
@@ -985,13 +1039,26 @@
     label.setAttribute("x", "0");
     label.setAttribute("y", String(h / 2 + 11));
     label.setAttribute("text-anchor", "middle");
-    label.setAttribute("fill", "#A8B4BC");
+    label.setAttribute("fill", hv ? "#E6C35C" : "#A8B4BC");
     label.setAttribute("font-size", "8");
     label.setAttribute("font-weight", "650");
     label.setAttribute("letter-spacing", "0.03em");
     label.setAttribute("class", "map-label");
     label.textContent = name;
     g.appendChild(label);
+    if (hv) {
+      var tag = svgEl("text");
+      tag.setAttribute("x", "0");
+      tag.setAttribute("y", String(h / 2 + 20));
+      tag.setAttribute("text-anchor", "middle");
+      tag.setAttribute("fill", "#D4A017");
+      tag.setAttribute("font-size", "6.5");
+      tag.setAttribute("font-weight", "750");
+      tag.setAttribute("letter-spacing", "0.08em");
+      tag.setAttribute("class", "map-label");
+      tag.textContent = "HIGH VALUE";
+      g.appendChild(tag);
+    }
     return { g: g, t: label };
   }
 
@@ -1271,9 +1338,12 @@
       row.appendChild(title);
       var meta = document.createElement("div");
       meta.className = "meta";
+      var tgt = tr.target_asset || "—";
+      var hvTarget = !!(tr.target_asset && HIGH_VALUE_KINDS[String(tr.target_asset)]);
+      // Confidence mirrors threat score; high-value targets raise priority weight in the engine.
       var parts = [
-        "Score " + (tr.threat_score | 0),
-        "Target " + (tr.target_asset || "—"),
+        "Confidence " + (tr.threat_score | 0),
+        "Target " + tgt + (hvTarget ? " (high value)" : ""),
         "Priority " + (tr.priority | 0)
       ];
       if (active) {
@@ -1282,6 +1352,13 @@
       meta.textContent = parts.join(" · ");
       card.appendChild(row);
       card.appendChild(meta);
+      if (hvTarget && active) {
+        var hvNote = document.createElement("div");
+        hvNote.className = "meta";
+        hvNote.style.color = "#D4A017";
+        hvNote.textContent = "High-value site — protect first";
+        card.appendChild(hvNote);
+      }
       if (active && tr.factors && tr.factors.length) {
         var ul = document.createElement("ul");
         ul.className = "factors";
@@ -1843,6 +1920,12 @@
       cardRoot.appendChild(title);
       cardRoot.appendChild(why);
       cardRoot.appendChild(meta);
+      if (card.summary) {
+        var sum = document.createElement("div");
+        sum.className = "meta";
+        sum.textContent = card.summary;
+        cardRoot.appendChild(sum);
+      }
       swapBtn.dataset.toVariant = card.to_variant || "B";
       swapBtn.dataset.unitId = card.unit_id || "U1";
     }).catch(function () {

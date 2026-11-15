@@ -3,14 +3,15 @@
     "gap_type": "fast_threat",
     "unit_id": "U1",
     "to_variant": "B",
-    "swap": ["motors", "props", "battery"],
+    "swap": ["propulsion", "power", "airframe"],
     "keep": ["flight controller", "ESCs", "radio", "software"],
     "reuse_pct": 80,
     "cost_delta": 3000,
     "swap_minutes": 15,
     "source": "Kearney Velocity AI",
     "velocity_stage": "Build",
-    "generated_at": "2026-11-14",
-    "placeholder": true
+    "generated_at": "2026-11-15",
+    "placeholder": false,
+    "summary": "Rack units at speed 30 vs required 48 (40×1.2). Shortfall 18 — ~60% speed increase over Variant A. Swap propulsion, power, and airframe modules; keep the shared core."
   }
 ]

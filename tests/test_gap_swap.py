@@ -241,7 +241,9 @@ def test_gap_brief_empty_before_and_filled_after_night1():
         assert "48" in r.text
 
 
-def test_cards_json_placeholder_true():
+def test_cards_json_placeholder_flag():
     with TestClient(app) as client:
         data = client.get("/cards.json").json()
-        assert data[0]["placeholder"] is True
+        assert "placeholder" in data[0]
+        assert data[0]["placeholder"] is False
+        assert "propulsion" in data[0].get("swap", [])

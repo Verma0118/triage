@@ -218,7 +218,7 @@ def test_night1_scenario_speeds_and_geometry():
     leg_len = math.hypot(a_wps[1][0] - a_wps[0][0], a_wps[1][1] - a_wps[0][1])
     assert 9 * 11.5 <= leg_len <= 9 * 12.5
     heading = math.atan2(a_wps[1][1] - a_wps[0][1], a_wps[1][0] - a_wps[0][0])
-    hva = ("housing", "generator", "comms", "fuel")
+    hva = ("housing", "generator", "clinic", "comms", "fuel", "radar")
     for name in hva:
         asset = assets[name]
         to_asset = math.atan2(asset.y - a_wps[0][1], asset.x - a_wps[0][0])

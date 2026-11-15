@@ -32,13 +32,14 @@ def _unit(uid: str, x: float, y: float, source: str) -> Unit:
 
 
 def _juniper_assets() -> list[Asset]:
-    # Around the cross: housing at hub, others on separate bearings so pads
-    # read as a compound without stacking. Positions are scenario-locked.
+    # Compound around the hub. High-value kinds: housing, generator, clinic.
     return [
-        Asset("housing", 500.0, 350.0, "housing"),      # hub
-        Asset("generator", 585.0, 270.0, "generator"),  # NE
+        Asset("housing", 500.0, 350.0, "housing"),      # hub HV
+        Asset("generator", 585.0, 270.0, "generator"),  # NE HV
+        Asset("clinic", 180.0, 280.0, "clinic"),        # W HV — off decoy south loiter
         Asset("comms", 400.0, 255.0, "comms"),          # NW
         Asset("fuel", 605.0, 425.0, "fuel"),            # SE
+        Asset("radar", 820.0, 300.0, "radar"),          # far E
         Asset("parking", 655.0, 520.0, "parking"),      # further SE apron
     ]
 
@@ -58,7 +59,7 @@ def _juniper_units() -> list[Unit]:
 def _decoy_waypoints() -> list[tuple[float, float]]:
     """Straight first leg ~12 s at speed 9, then 2–3 s loiter legs with ≥90° turns.
 
-    First leg is not aimed inside 20° of housing/generator/comms/fuel.
+    First leg is not aimed inside 20° of high-value or primary sites.
     Keeps loitering until at least t=58 (spawn t=5 + 12 s straight + loiter),
     then ends gone on a short final leg (≤3 s). No long straight exit.
     """
@@ -73,7 +74,7 @@ def _decoy_waypoints() -> list[tuple[float, float]]:
     # Verify cone constraint at definition time (guards against accidental edits).
     heading = 0.0  # east
     assets = {a.name: a for a in _juniper_assets()}
-    for name in ("housing", "generator", "comms", "fuel"):
+    for name in ("housing", "generator", "clinic", "comms", "fuel", "radar"):
         a = assets[name]
         to_a = math.atan2(a.y - start[1], a.x - start[0])
         diff = abs((to_a - heading + math.pi) % (2 * math.pi) - math.pi)

@@ -13,7 +13,17 @@ VARIANTS = {  # speeds are map units per second, tuned for demo pacing
     "A": {"speed": 30, "max_range": 1500, "cost": 2000},
     "B": {"speed": 60, "max_range": 1400, "cost": 5000},
 }
-ASSET_VALUE = {"housing": 1.0, "generator": 0.8, "comms": 0.7, "fuel": 0.7, "parking": 0.4}
+ASSET_VALUE = {
+    "housing": 1.0,
+    "generator": 0.8,
+    "clinic": 0.95,
+    "comms": 0.7,
+    "fuel": 0.7,
+    "radar": 0.5,
+    "parking": 0.4,
+}
+# High-value sites: more heading weight + UI "protect first" treatment.
+HIGH_VALUE_KINDS = frozenset({"housing", "generator", "clinic"})
 
 BATTERY_V_MIN, BATTERY_V_MAX = 13.2, 16.8  # 4S. CONFIRM the pack at gate H1.
 MOTOR_TEST_VALUE = 1080

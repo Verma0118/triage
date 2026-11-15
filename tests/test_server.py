@@ -29,7 +29,8 @@ def test_cards_json_served_with_placeholder():
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list) and data
-        assert data[0].get("placeholder") is True
+        assert "placeholder" in data[0]
+        assert data[0].get("placeholder") is False  # real Velocity card
         assert data[0].get("gap_type") == "fast_threat"
 
 
