@@ -231,23 +231,31 @@
       overflow: auto;
     }
     .tilt {
-      width: 48px;
-      height: 28px;
-      border: 1px solid var(--border);
+      width: 72px;
+      height: 44px;
+      border: 2px solid var(--focus);
       border-radius: 3px;
       position: relative;
       overflow: hidden;
       background: #0a1018;
       margin-top: 0.35rem;
+      flex-shrink: 0;
     }
     .tilt-horizon {
       position: absolute;
-      left: -20%;
-      right: -20%;
+      left: -30%;
+      right: -30%;
       top: 50%;
-      height: 2px;
+      height: 3px;
       background: var(--warn);
       transform-origin: center center;
+    }
+    #btn-zero-tilt {
+      background: #243044;
+    }
+    @media (min-width: 1440px) {
+      .tilt { width: 88px; height: 52px; }
+      #rack-panel .unit-card { font-size: 0.95rem; }
     }
     @media (prefers-reduced-motion: reduce) {
       .tilt-horizon { transition: none !important; }
@@ -427,6 +435,8 @@
       <button type="button" id="btn-pause">Pause</button>
       <button type="button" id="btn-reset">Reset</button>
       <button type="button" id="btn-mock" aria-pressed="true">Mock</button>
+      <button type="button" id="btn-zero-tilt">Zero tilt</button>
+      <button type="button" id="btn-swap-a">Swap U1 to A</button>
       <button type="button" id="btn-after">After-action</button>
     </div>
   </section>
@@ -445,6 +455,7 @@
       <ol id="after-events"></ol>
       <div class="after-actions">
         <button type="button" id="btn-swap">SWAP</button>
+        <button type="button" id="btn-swap-a-after">Swap U1 back to A</button>
         <button type="button" id="btn-after-close">Close</button>
       </div>
     </div>
@@ -467,6 +478,8 @@
     unknown: "UNKNOWN",
     friendly: "FRIENDLY"
   };
+  var tiltZeroRoll = 0;
+  var tiltZeroPitch = 0;
   var LABEL_COLOR = {
     threat: "#ff6b6b",
     decoy: "#9da7b3",
@@ -842,7 +855,7 @@
     var units = s.units || [];
     var key = JSON.stringify(units.map(function (u) {
       return [u.id, u.source, u.battery_v, u.battery_pct, u.ready, u.variant, u.state, u.roll, u.pitch];
-    }));
+    })) + "|tz=" + tiltZeroRoll + "," + tiltZeroPitch;
     if (key === lastRackKey) return;
     lastRackKey = key;
     el.rack.innerHTML = "";
@@ -889,9 +902,9 @@
         tilt.title = "Tilt indicator";
         var horizon = document.createElement("div");
         horizon.className = "tilt-horizon";
-        var roll = Number(u.roll) || 0;
-        var pitch = Number(u.pitch) || 0;
-        horizon.style.transform = "translateY(" + (-pitch * 0.35) + "px) rotate(" + roll + "deg)";
+        var roll = (Number(u.roll) || 0) - tiltZeroRoll;
+        var pitch = (Number(u.pitch) || 0) - tiltZeroPitch;
+        horizon.style.transform = "translateY(" + (-pitch * 0.45) + "px) rotate(" + roll + "deg)";
         tilt.appendChild(horizon);
         card.appendChild(tilt);
         var tiltTxt = document.createElement("div");
@@ -956,8 +969,27 @@
     send({ type: "pause" });
   });
   document.getElementById("btn-reset").addEventListener("click", function () {
+    if (afterOpen) closeAfter();
     send({ type: "reset" });
   });
+  document.getElementById("btn-zero-tilt").addEventListener("click", function () {
+    var u1 = null;
+    if (state && state.units) {
+      for (var i = 0; i < state.units.length; i++) {
+        if (state.units[i].id === "U1") { u1 = state.units[i]; break; }
+      }
+    }
+    if (!u1) return;
+    tiltZeroRoll = Number(u1.roll) || 0;
+    tiltZeroPitch = Number(u1.pitch) || 0;
+    if (state) onState(state);
+  });
+  function swapU1ToA() {
+    if (!state) return;
+    if (state.phase !== "idle" && state.phase !== "ended") return;
+    send({ type: "swap_variant", unit_id: "U1", variant: "A" });
+  }
+  document.getElementById("btn-swap-a").addEventListener("click", swapU1ToA);
   el.mockBtn.addEventListener("click", function () {
     mockWanted = !mockWanted;
     el.mockBtn.setAttribute("aria-pressed", mockWanted ? "true" : "false");
@@ -1024,8 +1056,13 @@
       evRoot.appendChild(li);
     });
     var swapBtn = document.getElementById("btn-swap");
+    var swapABtn = document.getElementById("btn-swap-a-after");
     var phase = state ? state.phase : "idle";
-    swapBtn.disabled = !(phase === "idle" || phase === "ended");
+    var canSwap = phase === "idle" || phase === "ended";
+    swapBtn.disabled = !canSwap;
+    if (swapABtn) swapABtn.disabled = !canSwap;
+    var swapACtrl = document.getElementById("btn-swap-a");
+    if (swapACtrl) swapACtrl.disabled = !canSwap;
 
     var briefP = fetch("/gap_brief").then(function (r) { return r.text(); }).then(function (txt) {
       document.getElementById("after-brief").textContent = txt || "(no gap brief yet)";
@@ -1090,6 +1127,7 @@
       navigator.clipboard.writeText(txt);
     }
   });
+  document.getElementById("btn-swap-a-after").addEventListener("click", swapU1ToA);
   document.getElementById("btn-swap").addEventListener("click", function () {
     var btn = document.getElementById("btn-swap");
     send({
