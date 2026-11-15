@@ -319,6 +319,32 @@ Scenario waypoints may be tuned to pass the gate tests. Thresholds in `config.py
   "source": "Kearney Velocity AI"}]
 ```
 
+## 10a. Velocity AI loop
+
+Velocity is Kearney's own tool and we have no API for it, so the app does not call it. The integration is a visible round trip, with a person carrying the text across:
+
+1. **Triage writes the brief.** When a gap is logged, the after-action overlay shows a **"Velocity brief"** block with a **Copy** button. `GET /gap_brief` returns the same text. It is generated from real run data:
+   - threat speed, target asset, time from first contact to impact
+   - every rack unit with variant, speed, and why it was not capable (for example "30 < 40 x 1.2 = 48")
+   - required speed to be capable, and the shortfall
+   - constraint line: "Keep the shared core (flight controller, ESCs, radio, software). Propose module swaps only."
+2. **A person pastes the brief into Velocity** (Generate / Build stage) and gets the reconfiguration back.
+3. **Velocity's answer goes into `cards.json`**, with provenance:
+```json
+[{"gap_type": "fast_threat", "unit_id": "U1", "to_variant": "B",
+  "swap": ["motors", "props", "battery"], "keep": ["flight controller", "ESCs", "radio", "software"],
+  "reuse_pct": 80, "cost_delta": 3000, "swap_minutes": 15,
+  "source": "Kearney Velocity AI", "velocity_stage": "Build",
+  "generated_at": "2026-11-14", "placeholder": true}]
+```
+4. **The card drives the swap.** `VARIANTS["B"]` speed / range / cost should match what Velocity returned. The SWAP button applies the card's `to_variant`.
+
+Rules:
+- While `placeholder` is true the card shows a visible "PLACEHOLDER" tag. Set it to false only after real Velocity output is pasted in. Never show invented numbers as Velocity output to the judges.
+- If Velocity's numbers change Variant B's speed, it must stay above 48 or night 2 stops working. Re-run the S6 tests after editing.
+
+**Human task V1 (no code, due Sat 11 PM):** run the fast-threat gap through Velocity, save screenshots of each stage for the deck, paste the result into `cards.json`, update `VARIANTS["B"]`, set `placeholder` to false. Until S6 exists, write the brief by hand from the numbers in section 4.
+
 ## 11. Build order and gates
 
 Two tracks. **S gates** are built by the coding agent in mock mode and proven by `pytest`. **H gates** need a person at the drone and run in parallel. Nothing in the S track waits on hardware.
@@ -361,6 +387,8 @@ Rules for every gate:
 - `load_scenario juniper_night2` after the swap: U1 is still B. U1 gets `engage`, track ends `neutralized`.
 - night2 **without** the swap: gap again. This proves the swap is what fixed it.
 - `reset` from every phase returns to a clean idle state with variants kept.
+- After night1, `GET /gap_brief` returns text containing the threat speed (40), the required speed (48), and each unit's variant. Before any gap it returns an empty brief, not an error.
+- A card with `placeholder: true` is served with that flag intact (the UI tag depends on it).
 
 ### H track (human at the drone, in parallel)
 
