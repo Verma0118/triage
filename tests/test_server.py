@@ -147,3 +147,31 @@ def test_approve_stale_id_changes_nothing():
             )
             assert msg.get("phase") == "idle"
             assert msg.get("plan") == []
+
+
+# --- S5 --------------------------------------------------------------------
+
+
+def test_get_root_returns_real_ui():
+    with TestClient(app) as client:
+        response = client.get("/")
+        assert response.status_code == 200
+        html = response.text
+        assert "Placeholder UI" not in html
+        assert 'viewBox="0 0 1000 700"' in html
+        assert 'id="threat-list"' in html or "id='threat-list'" in html
+        assert "APPROVE" in html
+
+
+def test_ui_has_exactly_one_h1():
+    with TestClient(app) as client:
+        html = client.get("/").text
+        assert html.lower().count("<h1") == 1
+
+
+def test_ui_has_no_external_http_urls():
+    """Offline rule: no http:// or https:// anywhere in the served UI."""
+    with TestClient(app) as client:
+        html = client.get("/").text
+        assert "http://" not in html
+        assert "https://" not in html
