@@ -1,7 +1,12 @@
 # DEMO VIDEO: TRIAGE — AI air defense for small outposts
 
 **Length:** 75–90 seconds. **Tone:** calm, realistic, tense but not dramatic.
-No explosions, no gore, no real unit insignia. Intercepts appear only as icons on the screen.
+No explosions, no gore, no real unit insignia.
+
+**The interceptor is a real CAD model.** Launches, intercepts and the bench swap are rendered in
+3D from our own GLB, cut against the live tablet screen. Keep the hardware shots restrained and
+documentary — a small drone leaving a rack at night, not an action sequence. Intercepts land as
+a clean disappearance, not a fireball.
 
 **Source material:** every screen below is the real software. Run it with the **RUN FULL DEMO**
 button and it plays this exact sequence hands-free, so the tablet can be screen-captured
@@ -75,7 +80,10 @@ DECISION WINDOW — LAUNCH EARLY, DECIDE ON APPROACH
   can catch it, so Triage assigns **Unit 3**.
 
 The officer taps the large **APPROVE** button. It flashes **APPROVED ✓**.
-Cut outside: two interceptors lift off the rack, shown in silhouette.
+
+**Cut to 3D:** two interceptors spin up and lift off the rack into the dark. Low angle, close on
+the airframe, rotor wash kicking dust off the pad. Hold long enough to read the drone as a real
+designed object — this is our hardware, and it is the only time in the film we see it fly.
 
 > **VO:** "Triage recommends. The officer decides. Nothing launches without a human."
 
@@ -85,12 +93,15 @@ Cut outside: two interceptors lift off the rack, shown in silhouette.
 
 Back on the tablet.
 
-- **[t+15.8]** Track B's icon disappears. Event log: **"Unit 3 intercepted Track B."**
-  Unit 3's card flips to **EXPENDED · SLOT EMPTY**.
+- **[t+15.8]** **3D beat:** Unit 3 closes on the incoming drone against the night sky. Cut on the
+  moment of contact — no explosion, just both objects gone and empty sky. Back on the tablet,
+  Track B's icon is gone. Event log: **"Unit 3 intercepted Track B."** Unit 3's card flips to
+  **EXPENDED · SLOT EMPTY**.
 - **[t+21.8]** Track A's tag sharpens to grey: **DECOY — "Erratic path · no asset targeted."**
   A new plan line appears: **Unit 1 → Track A · return — "now likely decoy."** Officer approves.
-- **[t+34]** Unit 1's card reads **RETURNING**, then **READY** again. Event log:
-  **"Unit 1 returned, not expended."**
+- **[t+34]** **3D beat:** Unit 1 banks away from the decoy and settles back onto its pad, intact.
+  Tablet reads **RETURNING**, then **READY**. Event log: **"Unit 1 returned, not expended."**
+  This shot is the thesis of the whole product — let it breathe.
 
 > **VO:** "Interceptors go out early, but Triage only commits at the last moment. When a track
 > turns out to be a decoy, the interceptor comes home. Decoys don't drain the rack."
@@ -112,7 +123,8 @@ Track C at 40 · needs 48 · rack tops out at 30
 - A full-width red banner: **ALERT · personnel near parking take cover.** The PARKING zone
   pulses on the map.
 - **"Unit 4 launched (best effort)"** — shown honestly, not as a save.
-- **[t+56.7]** Event log: **"could not match speed."**
+- **[t+56.7]** **3D beat:** Unit 4 chasing, falling behind, the faster track pulling away out of
+  frame. Event log: **"could not match speed."**
 - **[t+64.9]** **IMPACT · parking area. No personnel. Logged as capability gap.**
 
 Hold on the officer's face. No music sting.
@@ -137,9 +149,13 @@ Below it, the Velocity card:
 > `CORE · REUSED 80% / SWAPPED 20%`
 > *Built with Kearney Velocity AI*
 
-Cut to a bench: a technician swapping modules on an interceptor in under a minute, core parts
-and swappable parts in different colours. Back on the tablet, Unit 1 reads **RECONFIG (A → B)**,
-then **Unit 1 · Variant B · READY**.
+**Cut to 3D, the money shot:** the interceptor on a bench, exploded-view. The shared core —
+flight controller, ESCs, radio, airframe — holds still and stays lit. The swappable modules —
+motors, props, battery — lift away in one colour and the Variant B parts drop in. The model
+reassembles. Same core, different capability. Then a short live-action insert of a technician's
+hands doing the same swap, to ground it.
+
+Back on the tablet, Unit 1 reads **RECONFIG (A → B)**, then **Unit 1 · Variant B · READY**.
 
 > **VO:** "Every interceptor shares one core. Velocity tells us which modules to change. The
 > swap takes minutes, between attacks — not during one."
@@ -151,7 +167,8 @@ then **Unit 1 · Variant B · READY**.
 Night again. The same kind of fast track crosses the wire.
 
 The plan panel reads **Unit 1 (Variant B) → Track T1 · engage**. One tap.
-**[t+9.9]** Event log: **"Unit 1 intercepted Track T1."** The map clears.
+**3D:** Unit 1 launches and closes fast this time — same airframe, visibly quicker, and it keeps
+up. **[t+9.9]** Event log: **"Unit 1 intercepted Track T1."** The map clears.
 
 > **VO:** "Same threat. Different outcome."
 
@@ -175,6 +192,12 @@ Title card:
 - **Unit 1 is a real drone.** Its battery voltage, percentage and attitude horizon on screen are
   live telemetry over USB from an actual flight controller. Worth one insert shot of the physical
   drone next to the tablet, tilting it and showing the horizon follow.
+- **The 3D model is the one we actually designed and built.** The GLB, the physical drone on the
+  desk and the Variant B BOM are the same airframe, so the launch shots, the exploded-view swap
+  and the hardware on the table should all read as one object. Match the 3D lighting to the night
+  palette of the UI rather than a studio look.
+- **Variant A and Variant B must be visually distinguishable** in the 3D — different motors and
+  props, same core — or the night 2 payoff doesn't land.
 - **Night 1 runs about 70 seconds of sim time.** If the cut needs to be tighter, the safe
   compressions are: the quiet stretch between the recall (t+34) and the fast threat (t+52), and
   the after-action hold.
