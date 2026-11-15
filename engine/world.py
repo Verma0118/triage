@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import math
 
-from models import Event, Track
+from models import Event, PlanLine, Track
 from scenarios import get_scenario
 
+from engine.planner import plan_tick
 from engine.scoring import ScoreState, update_scores
-from engine.sim import move_track
+from engine.sim import move_track, move_units
 
 
 class World:
@@ -20,7 +21,7 @@ class World:
         self.assets: list = []
         self.tracks: list[Track] = []
         self.units: list = []
-        self.plan: list = []
+        self.plan: list[PlanLine] = []
         self.events: list[Event] = []
         self.gaps: list = []
         self.alerts: list[str] = []
@@ -28,6 +29,8 @@ class World:
         self._spawned_ids: set[str] = set()
         self._kept_variants: dict[str, str] = {}
         self._score_state: dict[str, ScoreState] = {}
+        self._ever_proposed: set[str] = set()
+        self._decoy_hold: dict[str, float] = {}
 
     def load_scenario(self, name: str) -> None:
         data = get_scenario(name)
@@ -50,6 +53,8 @@ class World:
         self._spawns = sorted(data["spawns"], key=lambda s: (s["t"], s["id"]))
         self._spawned_ids = set()
         self._score_state = {}
+        self._ever_proposed = set()
+        self._decoy_hold = {}
         self.units = data["units"]
         self._apply_kept_variants()
 
@@ -66,6 +71,28 @@ class World:
             u.max_range = spec["max_range"]
             u.cost = spec["cost"]
             u.range = u.max_range * u.battery_pct
+
+    def apply_u1_snapshot(self, snap: dict) -> None:
+        """Apply bridge read() dict onto Unit 1. Engine never imports bridge."""
+        u1 = next((u for u in self.units if u.id == "U1"), None)
+        if u1 is None:
+            return
+        if "battery_v" in snap:
+            u1.battery_v = float(snap["battery_v"])
+        if "battery_pct" in snap:
+            u1.battery_pct = float(snap["battery_pct"])
+            u1.range = u1.max_range * u1.battery_pct
+        if "ready" in snap:
+            # Readiness only gates while on rack; still store the value.
+            u1.ready = bool(snap["ready"])
+        if "source" in snap:
+            u1.source = str(snap["source"])
+        if "roll" in snap:
+            u1.roll = float(snap["roll"])
+        if "pitch" in snap:
+            u1.pitch = float(snap["pitch"])
+        if "yaw" in snap:
+            u1.yaw = float(snap["yaw"])
 
     def reset(self) -> list:
         """Reload current scenario. Variants kept. Returns hardware effects."""
@@ -86,13 +113,8 @@ class World:
                 self.load_scenario(name)
             return []
         if ctype == "start":
-            if self.phase in ("idle", "paused", "ended"):
-                if self.phase == "ended":
-                    # Starting from ended requires a reset/load first; ignore.
-                    if self.scenario is None:
-                        return []
-                if self.phase == "idle" or self.phase == "paused":
-                    self.phase = "live"
+            if self.phase in ("idle", "paused"):
+                self.phase = "live"
             return []
         if ctype == "pause":
             if self.phase == "live":
@@ -101,14 +123,48 @@ class World:
         if ctype == "reset":
             return self.reset()
         if ctype == "approve":
-            # S1: no planner; approvals are no-ops.
-            return []
+            return self._approve(cmd.get("line_ids", []))
         if ctype == "swap_variant":
-            # Implemented in a later gate; refuse during live here for safety.
+            # S6.
             return []
         if ctype == "set_mock":
             return []
         return []
+
+    def _approve(self, line_ids) -> list:
+        effects: list = []
+        if not isinstance(line_ids, list):
+            return effects
+        for lid in line_ids:
+            line = next((ln for ln in self.plan if ln.id == lid), None)
+            if line is None or line.approved:
+                continue
+            line.approved = True
+            self.events.append(
+                Event(t=self.t, kind="approve", msg=f"approved {lid}")
+            )
+            unit = next((u for u in self.units if u.id == line.unit_id), None)
+            if unit is None:
+                continue
+
+            launch_actions = ("launch_early", "engage", "best_effort")
+            if (
+                line.action in launch_actions
+                and unit.source == "live"
+                and unit.state == "rack"
+            ):
+                effects.append(("motor_test", unit.id))
+
+            unit.assigned_track = line.track_id
+            if line.action == "return":
+                unit.state = "returning"
+                self.events.append(
+                    Event(t=self.t, kind="recall", msg=f"{unit.id} recalling")
+                )
+            elif line.action in launch_actions:
+                # Leave rack or break out of shadowing into pursuit.
+                unit.state = "outbound"
+        return effects
 
     def step(self, dt: float) -> None:
         """Advance exactly dt seconds of sim time. Never reads the wall clock."""
@@ -121,6 +177,8 @@ class World:
             if track.status == "active":
                 move_track(track, dt)
         update_scores(self.tracks, self.assets, dt, self._score_state)
+        plan_tick(self)
+        move_units(self.units, self.tracks, self.plan, dt, self.events, self.t)
 
         if self._scenario_complete():
             self.phase = "ended"
@@ -152,7 +210,6 @@ class World:
                 target_asset=spawn.get("target_asset"),
                 status="active",
             )
-            # If only one waypoint and we already sit on it, index points past start.
             if len(wps) == 1:
                 track.wp_index = 0
             self.tracks.append(track)
@@ -165,7 +222,7 @@ class World:
             return False
         if any(tr.status == "active" for tr in self.tracks):
             return False
-        if any(u.state != "rack" for u in self.units):
+        if any(u.state != "rack" and u.state != "expended" for u in self.units):
             return False
         return True
 
