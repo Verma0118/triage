@@ -154,8 +154,19 @@ def compute_ready(board: MSPy, voltage: float) -> bool:
     return voltage > config.BATTERY_V_MIN and gyro_present(board)
 
 
-def send_motors(board: MSPy, value: int) -> None:
-    board.send_RAW_MOTORS([int(value)] * 8)
+def motor_frame(value: int, *, test_channels: bool = False) -> list[int]:
+    """MSP motor frame. During a blip, only MOTOR_TEST_INDICES (1/3/4) get value; motor 2 stays 1000."""
+    if not test_channels or value <= 1000:
+        return [int(value)] * 8
+    frame = [1000] * 8
+    for i in config.MOTOR_TEST_INDICES:
+        if 0 <= i < 8:
+            frame[i] = int(value)
+    return frame
+
+
+def send_motors(board: MSPy, value: int, *, test_channels: bool = False) -> None:
+    board.send_RAW_MOTORS(motor_frame(value, test_channels=test_channels))
     # Drain ACK if present so the next command is not confused.
     try:
         handler = board.receive_msg()
@@ -276,8 +287,9 @@ def cmd_motor(board: MSPy) -> None:
 
     try:
         deadline = time.monotonic() + duration
+        print(f"Spinning motors {[i + 1 for i in config.MOTOR_TEST_INDICES]} only (motor 2 idle)…")
         while time.monotonic() < deadline:
-            send_motors(board, value)
+            send_motors(board, value, test_channels=True)
             time.sleep(interval)
     finally:
         print("Stopping motors (1000 x 3)…")

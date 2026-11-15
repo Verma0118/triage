@@ -470,12 +470,25 @@ class LiveUnit:
         if after != name:
             self._emit("name write unverified")
 
-    def _send_motors_all(self, value: int, times: int = 1) -> None:
+    def _motor_frame(self, value: int, *, test_channels: bool) -> list[int]:
+        """Build an 8-channel motor frame. test_channels: only MOTOR_TEST_INDICES get value."""
+        if not test_channels or value <= 1000:
+            return [int(value)] * 8
+        frame = [1000] * 8
+        for i in config.MOTOR_TEST_INDICES:
+            if 0 <= i < 8:
+                frame[i] = int(value)
+        return frame
+
+    def _send_motors_all(
+        self, value: int, times: int = 1, *, test_channels: bool = False
+    ) -> None:
         board = self._board
         if board is None:
             return
+        frame = self._motor_frame(value, test_channels=test_channels)
         for _ in range(times):
-            board.send_RAW_MOTORS([int(value)] * 8)
+            board.send_RAW_MOTORS(frame)
             if not self._injected:
                 try:
                     handler = board.receive_msg()
@@ -485,14 +498,14 @@ class LiveUnit:
                     pass
 
     def _do_motor_test(self) -> None:
-        # Sole path that may send a motor value above 1000.
+        # Sole path that may send a motor value above 1000 (motors 1/3/4 only).
         value = min(config.MOTOR_TEST_VALUE, config.MOTOR_HARD_CAP)
         duration = float(config.MOTOR_TEST_SECONDS)
         interval = 0.1
         try:
             deadline = time.monotonic() + duration
             while time.monotonic() < deadline and not self._stop.is_set():
-                self._send_motors_all(value, times=1)
+                self._send_motors_all(value, times=1, test_channels=True)
                 time.sleep(interval)
         except Exception as err:
             self._emit(f"motor test error: {err}")

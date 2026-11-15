@@ -18,6 +18,8 @@ BATTERY_V_MIN, BATTERY_V_MAX = 13.2, 16.8  # 4S. CONFIRM the pack at gate H1.
 MOTOR_TEST_VALUE = 1080
 MOTOR_HARD_CAP = 1100  # enforced in bridge code, not just here
 MOTOR_TEST_SECONDS = 1.0
+# 0-based MSP motor indices to spin during motor_test. Motor 2 (index 1) skipped (bad ESC/connection).
+MOTOR_TEST_INDICES = (0, 2, 3)  # motors 1, 3, 4
 
 THREAT_HIGH, THREAT_LOW = 70, 40
 LABEL_HYSTERESIS = 3  # must cross a threshold by this much to change label

@@ -161,10 +161,33 @@ def test_two_motor_tests_only_one_run(monkeypatch):
         deadline = time.monotonic() + 1.0
         while unit._motor_running and time.monotonic() < deadline:
             time.sleep(0.02)
-        spin = [f for f in board.motor_frames if f[0] > 1000]
-        # One contiguous run only — all spin frames share the capped value.
+        spin = [f for f in board.motor_frames if any(v > 1000 for v in f)]
+        # One contiguous run only — spin channels share the capped value.
         assert spin
         assert all(f[0] == spin[0][0] for f in spin)
+    finally:
+        unit.close()
+
+
+def test_motor_test_skips_motor_2(monkeypatch):
+    monkeypatch.setattr(config, "MOTORS_ENABLED", True)
+    monkeypatch.setattr(config, "MOTOR_TEST_SECONDS", 0.12)
+    board = FakeBoard()
+    unit = LiveUnit(board=board, autostart=True)
+    try:
+        time.sleep(0.1)
+        assert unit.motor_test() is True
+        _wait_motors(board, 4)
+        deadline = time.monotonic() + 1.5
+        while unit._motor_running and time.monotonic() < deadline:
+            time.sleep(0.02)
+        spin = [f for f in board.motor_frames if any(v > 1000 for v in f)]
+        assert spin
+        for frame in spin:
+            assert frame[1] == 1000  # motor 2 idle
+            for i in config.MOTOR_TEST_INDICES:
+                assert frame[i] > 1000
+                assert frame[i] <= config.MOTOR_HARD_CAP
     finally:
         unit.close()
 
