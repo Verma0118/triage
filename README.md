@@ -38,7 +38,9 @@ Optional port: `TRIAGE_PORT=/dev/cu.usbmodem…`
 
 ### Live + motors
 
-Props **OFF**. Drone strapped. Hand on the battery lead. Physical stop = pull the battery.
+**Motors are off by default.** The UI shows **MOTORS SAFE** unless you explicitly enable them. Approving a plan never spins hardware until `TRIAGE_MOTORS=1`.
+
+Props **OFF**. Drone strapped. Hand on the battery lead. Physical stop = pull the battery. Motor blip uses channels **1, 3, 4** only (motor 2 skipped).
 
 ```bash
 TRIAGE_MOCK=0 TRIAGE_MOTORS=1 .venv/bin/python -m uvicorn main:app --host 127.0.0.1 --port 8000

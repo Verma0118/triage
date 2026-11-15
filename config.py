@@ -2,7 +2,8 @@ import os
 
 SERIAL_PORT = os.environ.get("TRIAGE_PORT")  # None = autodetect first /dev/cu.usbmodem* (Windows: set COM3)
 USE_MOCK = os.environ.get("TRIAGE_MOCK", "1") == "1"  # default MOCK. Live needs TRIAGE_MOCK=0
-MOTORS_ENABLED = os.environ.get("TRIAGE_MOTORS", "0") == "1"  # default OFF. Only a human sets this.
+# Motors NEVER default on. Approve will not spin hardware unless a human sets TRIAGE_MOTORS=1.
+MOTORS_ENABLED = os.environ.get("TRIAGE_MOTORS", "0") == "1"
 
 MAP_W, MAP_H = 1000, 700  # map units, shown as meters
 TICK_HZ = 10

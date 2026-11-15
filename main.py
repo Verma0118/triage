@@ -73,9 +73,18 @@ def apply_set_mock(value: bool) -> None:
     bridge = make_bridge(use_mock=bool(value))
 
 
-async def broadcast_state() -> None:
+def public_state() -> dict:
+    """World public snapshot plus bridge safety flags for the UI."""
     payload = world.to_public()
-    text = json.dumps(payload)
+    # Motors never look armed unless a human set TRIAGE_MOTORS=1 (default off).
+    payload["motors_enabled"] = bool(config.MOTORS_ENABLED)
+    u1 = next((u for u in world.units if u.id == "U1"), None)
+    payload["bridge_source"] = (u1.source if u1 else "mock")
+    return payload
+
+
+async def broadcast_state() -> None:
+    text = json.dumps(public_state())
     dead: list[WebSocket] = []
     for ws in list(sockets):
         try:
@@ -215,7 +224,7 @@ async def ws_endpoint(ws: WebSocket):
     sockets.add(ws)
     # Immediate snapshot so clients do not wait a full tick.
     try:
-        await ws.send_text(json.dumps(world.to_public()))
+        await ws.send_text(json.dumps(public_state()))
     except Exception:
         sockets.discard(ws)
         return

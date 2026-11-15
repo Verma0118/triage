@@ -54,8 +54,12 @@ def test_ws_delivers_state():
                 "events",
                 "gaps",
                 "alerts",
+                "motors_enabled",
+                "bridge_source",
             ):
                 assert key in msg, f"missing {key}"
+            assert msg["motors_enabled"] is False
+            assert msg["bridge_source"] in ("mock", "live", "sim")
 
 
 def test_truth_never_in_ws_messages_across_night1():
