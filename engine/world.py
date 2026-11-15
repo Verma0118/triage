@@ -7,6 +7,7 @@ import math
 from models import Event, Track
 from scenarios import get_scenario
 
+from engine.scoring import ScoreState, update_scores
 from engine.sim import move_track
 
 
@@ -26,6 +27,7 @@ class World:
         self._spawns: list[dict] = []
         self._spawned_ids: set[str] = set()
         self._kept_variants: dict[str, str] = {}
+        self._score_state: dict[str, ScoreState] = {}
 
     def load_scenario(self, name: str) -> None:
         data = get_scenario(name)
@@ -47,6 +49,7 @@ class World:
         self.alerts = []
         self._spawns = sorted(data["spawns"], key=lambda s: (s["t"], s["id"]))
         self._spawned_ids = set()
+        self._score_state = {}
         self.units = data["units"]
         self._apply_kept_variants()
 
@@ -117,6 +120,7 @@ class World:
         for track in self.tracks:
             if track.status == "active":
                 move_track(track, dt)
+        update_scores(self.tracks, self.assets, dt, self._score_state)
 
         if self._scenario_complete():
             self.phase = "ended"

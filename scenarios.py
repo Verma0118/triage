@@ -97,13 +97,12 @@ def _decoy_waypoints() -> list[tuple[float, float]]:
 
 
 def _friendly_waypoints() -> list[tuple[float, float]]:
-    """Registered friendly returning toward base, then clears off-map -> gone."""
-    # From north of the outpost, approach a base point near the rack, then leave west.
+    """Registered friendly returning to rack/base inside the map; gone on arrival."""
+    # From north of the outpost, approach the rack/base and end there (not off-map).
     return [
         (500.0, 80.0),
         (560.0, 300.0),
-        (600.0, 380.0),
-        (-20.0, 380.0),
+        (600.0, 400.0),  # rack/base — inside map
     ]
 
 
