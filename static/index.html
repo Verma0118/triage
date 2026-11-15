@@ -627,9 +627,6 @@
       </div>
     </header>
     <div class="control-strip" id="controls" role="toolbar" aria-label="Scenario controls">
-      <button type="button" data-scenario="juniper_night1">Night 1</button>
-      <button type="button" data-scenario="juniper_night2">Night 2</button>
-      <button type="button" data-scenario="tower22">Tower 22</button>
       <button type="button" id="btn-start" class="btn-primary">Start</button>
       <button type="button" id="btn-pause">Pause</button>
       <button type="button" id="btn-reset" class="btn-danger">Reset</button>
@@ -688,33 +685,34 @@
               <circle cx="500" cy="350" r="310"/>
               <circle cx="500" cy="350" r="400"/>
             </g>
-            <!-- cross: horizontal + vertical only -->
-            <g fill="none" stroke="#3A6B55" stroke-opacity="0.5" stroke-width="16" stroke-linecap="square">
-              <line x1="0" y1="350" x2="1000" y2="350"/>
-              <line x1="500" y1="0" x2="500" y2="700"/>
+            <!-- imperfect roads (bent cross) — white centerline on E–W only -->
+            <g fill="none" stroke="#3A6B55" stroke-opacity="0.5" stroke-width="14" stroke-linecap="square" stroke-linejoin="miter">
+              <polyline points="0,372 140,348 310,362 500,346 690,358 860,334 1000,352"/>
+              <polyline points="488,0 512,120 492,240 508,350 486,470 518,590 498,700"/>
             </g>
-            <!-- white centerline on horizontal only -->
-            <line x1="0" y1="350" x2="1000" y2="350" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1.4"/>
+            <polyline points="0,372 140,348 310,362 500,346 690,358 860,334 1000,352"
+                      fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="1.3"/>
             <polygon points="500,265 575,308 575,392 500,435 425,392 425,308"
                      fill="none" stroke="#D7E2E8" stroke-opacity="0.5" stroke-width="1.3" stroke-dasharray="6 5"/>
             <text x="500" y="458" text-anchor="middle" fill="#E8F0F2" font-size="12"
                   font-weight="650" letter-spacing="0.16em">FOB SENTINEL</text>
-            <!-- legend lower, still centered (third-image strip) -->
+            <!-- legend lower, still centered -->
             <g transform="translate(500,625)" font-size="10" fill="#A8B4BC">
               <circle cx="-135" cy="0" r="4" fill="#E06B66"/><text x="-118" y="3">Threat</text>
               <circle cx="-55" cy="0" r="4" fill="#D4A017"/><text x="-38" y="3">Unknown</text>
               <circle cx="40" cy="0" r="4" fill="#5BA3C9"/><text x="57" y="3">Friendly</text>
               <circle cx="135" cy="0" r="4" fill="#8B949E"/><text x="152" y="3">Decoy</text>
             </g>
-            <!-- rack: slot centers = unit docks -->
+            <!-- compact rack building; slot centers 261/297/333/369 @ y=421 -->
             <g id="rack-bay">
-              <rect x="238" y="386" width="152" height="56" fill="#121C18" stroke="#5FAE7A" stroke-width="1.5"/>
-              <rect x="238" y="386" width="152" height="14" fill="#18241E" stroke="#5FAE7A" stroke-width="1"/>
-              <text x="314" y="396" text-anchor="middle" fill="#8FD4A0" font-size="8" font-weight="700" letter-spacing="0.14em">INTERCEPTOR RACK</text>
-              <rect x="250" y="406" width="22" height="30" fill="#15241E" stroke="#3D4A5C"/>
-              <rect x="286" y="406" width="22" height="30" fill="#15241E" stroke="#3D4A5C"/>
-              <rect x="322" y="406" width="22" height="30" fill="#15241E" stroke="#3D4A5C"/>
-              <rect x="358" y="406" width="22" height="30" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="246" y="400" width="136" height="34" fill="#121C18" stroke="#5FAE7A" stroke-width="1.2"/>
+              <line x1="252" y1="403" x2="252" y2="414" stroke="#C5D0D6" stroke-width="1"/>
+              <path d="M252,403 L262,406 L252,409 Z" fill="#7DCF8A"/>
+              <text x="314" y="412" text-anchor="middle" fill="#8FD4A0" font-size="6.5" font-weight="700" letter-spacing="0.1em">RACK</text>
+              <rect x="254" y="414" width="14" height="14" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="290" y="414" width="14" height="14" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="326" y="414" width="14" height="14" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="362" y="414" width="14" height="14" fill="#15241E" stroke="#3D4A5C"/>
             </g>
             <g transform="translate(40,40)" fill="none">
               <polygon points="0,-11 3.5,2 -3.5,2" fill="#E8F0F2"/>
@@ -791,14 +789,7 @@
     unknown: "#D4A017",
     friendly: "#5BA3C9"
   };
-  // Fan flags off each pad so labels do not collide near the hub.
-  var ASSET_FLAG_OFFSET = {
-    housing: { x: -28, y: -16 },
-    generator: { x: 16, y: -18 },
-    comms: { x: -28, y: -16 },
-    fuel: { x: 16, y: 6 },
-    parking: { x: 16, y: 8 }
-  };
+  var SCENARIO_POOL = ["juniper_night1", "juniper_night2", "tower22"];
 
   var state = null;
   var ws = null;
@@ -955,52 +946,51 @@
     return document.createElementNS(SVG_NS, name);
   }
 
-  function assetIcon(kind) {
-    // Small sharp pad — flag + name sit beside it.
+  function assetMarker(name, kind) {
+    // Pad with flag drawn inside the square; name under the pad.
     var g = svgEl("g");
     g.setAttribute("class", "asset-marker");
-    var w = 12, h = 10;
-    if (kind === "housing") { w = 14; h = 11; }
-    else if (kind === "generator") { w = 11; h = 10; }
-    else if (kind === "comms") { w = 10; h = 12; }
-    else if (kind === "fuel") { w = 11; h = 13; }
-    else if (kind === "parking") { w = 12; h = 10; }
+    var w = 26, h = 20;
+    if (kind === "housing") { w = 30; h = 22; }
+    else if (kind === "generator") { w = 24; h = 20; }
+    else if (kind === "comms") { w = 24; h = 22; }
+    else if (kind === "fuel") { w = 24; h = 22; }
+    else if (kind === "parking") { w = 26; h = 18; }
     var pad = svgEl("rect");
     pad.setAttribute("x", String(-w / 2));
     pad.setAttribute("y", String(-h / 2));
     pad.setAttribute("width", String(w));
     pad.setAttribute("height", String(h));
     pad.setAttribute("fill", "#1B3A2C");
-    pad.setAttribute("stroke", "none");
+    pad.setAttribute("stroke", "#2F4A3A");
+    pad.setAttribute("stroke-width", "1");
     g.appendChild(pad);
-    return g;
-  }
-
-  function assetFlag(name, kind) {
-    var g = svgEl("g");
-    g.setAttribute("class", "asset-flag");
-    var off = ASSET_FLAG_OFFSET[name] || ASSET_FLAG_OFFSET[kind] || { x: 14, y: -12 };
-    g.setAttribute("transform", "translate(" + off.x + "," + off.y + ")");
+    var poleX = -w / 2 + 5;
+    var poleTop = -h / 2 + 3;
     var pole = svgEl("line");
-    pole.setAttribute("x1", "0"); pole.setAttribute("y1", "0");
-    pole.setAttribute("x2", "0"); pole.setAttribute("y2", "16");
-    pole.setAttribute("stroke", "#C5D0D6"); pole.setAttribute("stroke-width", "1.2");
+    pole.setAttribute("x1", String(poleX));
+    pole.setAttribute("y1", String(poleTop));
+    pole.setAttribute("x2", String(poleX));
+    pole.setAttribute("y2", String(poleTop + 11));
+    pole.setAttribute("stroke", "#C5D0D6");
+    pole.setAttribute("stroke-width", "1.1");
     var flag = svgEl("path");
-    flag.setAttribute("d", "M0,0 L11,3 L0,6 Z");
+    flag.setAttribute("d", "M" + poleX + "," + poleTop + " L" + (poleX + 10) + "," + (poleTop + 3) +
+      " L" + poleX + "," + (poleTop + 6) + " Z");
     flag.setAttribute("fill", "#7DCF8A");
-    flag.setAttribute("opacity", "0.9");
-    var label = svgEl("text");
-    label.setAttribute("x", "0");
-    label.setAttribute("y", "28");
-    label.setAttribute("text-anchor", "middle");
-    label.setAttribute("fill", "#A8B4BC");
-    label.setAttribute("font-size", "9");
-    label.setAttribute("font-weight", "650");
-    label.setAttribute("letter-spacing", "0.04em");
-    label.setAttribute("class", "map-label");
-    label.textContent = name;
+    flag.setAttribute("opacity", "0.95");
     g.appendChild(pole);
     g.appendChild(flag);
+    var label = svgEl("text");
+    label.setAttribute("x", "0");
+    label.setAttribute("y", String(h / 2 + 11));
+    label.setAttribute("text-anchor", "middle");
+    label.setAttribute("fill", "#A8B4BC");
+    label.setAttribute("font-size", "8");
+    label.setAttribute("font-weight", "650");
+    label.setAttribute("letter-spacing", "0.03em");
+    label.setAttribute("class", "map-label");
+    label.textContent = name;
     g.appendChild(label);
     return { g: g, t: label };
   }
@@ -1016,17 +1006,15 @@
       g.setAttribute("data-asset", a.name);
       g.setAttribute("transform", "translate(" + a.x + "," + a.y + ")");
       var kind = a.kind || a.name;
-      var icon = assetIcon(kind);
+      var marker = assetMarker(a.name, kind);
       var hit = svgEl("circle");
-      hit.setAttribute("r", "16");
+      hit.setAttribute("r", "18");
       hit.setAttribute("fill", "transparent");
       hit.setAttribute("class", "asset-hit");
-      var flag = assetFlag(a.name, kind);
       g.appendChild(hit);
-      g.appendChild(icon);
-      g.appendChild(flag.g);
+      g.appendChild(marker.g);
       el.mapAssets.appendChild(g);
-      assetNodes[a.name] = { g: g, icon: icon, t: flag.t, hit: hit };
+      assetNodes[a.name] = { g: g, icon: marker.g, t: marker.t, hit: hit };
     });
   }
 
@@ -1088,12 +1076,12 @@
     g.setAttribute("data-unit", id);
     var craft = svgEl("g");
     craft.setAttribute("class", "unit-craft");
-    // Chevron sized to sit inside rack pads
+    // Chevron sized for compact rack pads
     var body = svgEl("polygon");
-    body.setAttribute("points", "0,-6 5,5 -5,5");
+    body.setAttribute("points", "0,-4 3.2,3.5 -3.2,3.5");
     body.setAttribute("fill", "#7DCF8A");
     body.setAttribute("stroke", "#0F141A");
-    body.setAttribute("stroke-width", "1");
+    body.setAttribute("stroke-width", "0.9");
     var hub = body;
     craft.appendChild(body);
     var t = svgEl("text");
@@ -1631,7 +1619,15 @@
       el.hold.blur();
     });
   }
+  function pickRandomScenario() {
+    return SCENARIO_POOL[Math.floor(Math.random() * SCENARIO_POOL.length)];
+  }
   document.getElementById("btn-start").addEventListener("click", function () {
+    var phase = state && state.phase;
+    // Idle/ended: load a random scenario then start. Live: ignore (already running).
+    if (phase === "idle" || phase === "ended" || !phase) {
+      send({ type: "load_scenario", name: pickRandomScenario() });
+    }
     send({ type: "start" });
   });
   document.getElementById("btn-pause").addEventListener("click", function () {
@@ -1640,6 +1636,7 @@
   document.getElementById("btn-reset").addEventListener("click", function () {
     if (afterOpen) closeAfter();
     send({ type: "reset" });
+    send({ type: "load_scenario", name: pickRandomScenario() });
   });
   document.getElementById("btn-zero-tilt").addEventListener("click", function () {
     var u1 = null;
@@ -1666,12 +1663,6 @@
     el.mockBtn.setAttribute("aria-pressed", mockWanted ? "true" : "false");
     send({ type: "set_mock", value: mockWanted });
   });
-  document.querySelectorAll("[data-scenario]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      send({ type: "load_scenario", name: btn.getAttribute("data-scenario") });
-    });
-  });
-
   document.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape" && afterOpen) {
       ev.preventDefault();

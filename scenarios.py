@@ -44,7 +44,7 @@ def _juniper_assets() -> list[Asset]:
 
 
 def _juniper_units() -> list[Unit]:
-    # Docked in interceptor rack bay (pads ~290–420 x, y≈416).
+    # Docked in compact rack building (slot centers match static map).
     # Keep unit-to-track proposal distances under 600 for Variant A at 50% battery.
     return [
         _unit("U1", 261.0, 421.0, "mock"),
@@ -113,7 +113,7 @@ def _friendly_waypoints() -> list[tuple[float, float]]:
     return [
         (500.0, 60.0),
         (420.0, 280.0),
-        (310.0, 421.0),  # rack/base — inside map
+        (300.0, 421.0),  # rack/base — inside map
     ]
 
 
@@ -175,7 +175,7 @@ def juniper_night2() -> dict:
     comms = (400.0, 255.0)
     # Fast threat at comms. ETA >= 20 s (dist >= 800 at speed 40).
     # Approach along rack latitude so unit-to-track at proposal stays under 600.
-    c_start = (comms[0] - 800.0, 421.0)  # west approach; ETA = 20.0 s
+    c_start = (comms[0] - 800.0, 421.0)  # west approach along rack lat; ETA = 20.0 s
     units = [
         _unit("U1", 261.0, 421.0, "mock"),
         _unit("U2", 297.0, 421.0, "sim"),
