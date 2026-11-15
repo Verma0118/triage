@@ -6,667 +6,613 @@
   <title>Triage</title>
   <style>
     :root {
-      /* Brand */
-      --obsidian: #322D29;
+      --bg: #0B0E11;
+      --bg-2: #10151A;
+      --panel: #141A21;
+      --panel-2: #1A222C;
+      --border: #2A3441;
+      --border-strong: #3D4A5C;
+      --text: #E6EDF3;
+      --text-2: #9AA4B2;
+      --muted: #6B7785;
+      --green: #7DCF8A;
+      --green-dim: #1E3A28;
+      --green-btn: #3D9B55;
+      --threat: #E06B66;
+      --unknown: #D4A017;
+      --friendly: #5BA3C9;
+      --decoy: #8B949E;
       --oxblood: #72383D;
-      --oxblood-hover: #5D2C31;
-      --oxblood-subtle: #F0E2E1;
-      --titanium: #AC9C8D;
-      --warm-stone: #D1C7BD;
-      --soft-silver: #D9D9D9;
-      --ivory: #EFE9E1;
-
-      /* Surfaces */
-      --bg: #F4F0EB;
-      --card: #FBF9F6;
-      --card-2: #EFE9E1;
-      --card-3: #E8E0D7;
-      --header: #322D29;
-
-      /* Text */
-      --text: #322D29;
-      --text-2: #655D56;
-      --muted: #756D66;
-
-      /* Borders */
-      --border: #DDD4CA;
-      --border-strong: #C5B8AC;
-
-      /* Operational (not brand) */
-      --threat: #B34F4B;
-      --unknown: #A8762C;
-      --friendly: #3F7891;
-      --decoy: #7B858B;
-      --ok: #527A5B;
-      --warn: #A8762C;
-      --danger: #B34F4B;
-      --accent: #72383D;
-      --plan-pending: #A8762C;
-      --focus: #72383D;
-
-      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --warn: #D4A017;
+      --danger: #E06B66;
+      --ok: #7DCF8A;
+      --focus: #7DCF8A;
+      --plan-pending: #D4A017;
+      --accent: #7DCF8A;
       --sans: "Segoe UI", system-ui, -apple-system, sans-serif;
-      --shadow: 0 2px 8px rgba(50, 45, 41, 0.04);
-      --radius: 8px;
-      --ease: 150ms ease-out;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --radius: 2px;
     }
     * { box-sizing: border-box; }
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+      margin: 0; padding: 0; height: 100%;
       background: var(--bg);
       color: var(--text);
       font-family: var(--sans);
-      font-size: 14px;
-      line-height: 1.4;
+      font-size: 13px;
+      line-height: 1.35;
       overflow: hidden;
       font-variant-numeric: tabular-nums;
     }
-    body {
+    /* Flex shell — map must always sit BESIDE the rail, never under it */
+    body.app {
       display: flex;
       flex-direction: column;
       height: 100vh;
-      max-height: 100vh;
-      padding: 0;
-      gap: 0;
-      overflow: hidden;
+      width: 100%;
+      max-width: 100vw;
     }
-    h1 {
+    .top-brand {
       margin: 0;
-      font-size: 1.35rem;
-      font-weight: 650;
-      letter-spacing: 0.12em;
+      font-size: 1.05rem;
+      font-weight: 750;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--ivory);
-    }
-    h1 .mark {
-      display: inline-block;
-      width: 0.55rem;
-      height: 0.55rem;
-      margin-right: 0.45rem;
-      background: var(--oxblood);
-      vertical-align: 0.1em;
-    }
-    h2 {
-      margin: 0 0 0.35rem;
-      font-size: 0.7rem;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    button {
-      font: inherit;
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      cursor: pointer;
-      background: var(--card-3);
-      color: var(--text);
-      border: 1px solid var(--border-strong);
-      border-radius: 6px;
-      padding: 0.4rem 0.75rem;
-      min-height: 38px;
-      transition: background var(--ease), border-color var(--ease), color var(--ease);
-    }
-    button:hover { background: var(--warm-stone); }
-    button:focus-visible {
-      outline: 3px solid var(--oxblood);
-      outline-offset: 2px;
-    }
-    button[aria-pressed="true"] {
-      background: var(--oxblood-subtle);
-      border-color: var(--oxblood);
-      color: var(--oxblood);
-    }
-    button:disabled { opacity: 0.42; cursor: not-allowed; }
-    button.btn-primary {
-      background: var(--oxblood);
-      border-color: var(--oxblood);
       color: #fff;
     }
-    button.btn-primary:hover:not(:disabled) {
-      background: var(--oxblood-hover);
-      border-color: var(--oxblood-hover);
-    }
-    button.btn-danger {
-      border-color: #c9a2a0;
-      color: var(--danger);
-      background: #fff;
-    }
-
-    .topbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0.65rem 1rem;
-      background: var(--header);
-      color: var(--ivory);
+    .top-brand::before {
+      content: "";
+      display: inline-block;
+      width: 3px; height: 0.9em;
+      background: var(--green);
+      margin-right: 0.5rem;
+      vertical-align: -0.08em;
     }
     .brand-block {
+      display: flex; align-items: baseline; gap: 0.85rem;
+    }
+    /* —— Sidebar (Figma) —— */
+    .sidebar {
+      flex: 0 0 220px;
+      width: 220px;
+      max-width: 220px;
+      background: var(--bg-2);
+      border-right: 1px solid var(--border);
       display: flex;
-      align-items: baseline;
-      gap: 0.75rem;
-    }
-    .tagline {
-      font-size: 0.72rem;
-      color: var(--titanium);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .status-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      align-items: center;
-    }
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.04em;
-      padding: 0.28rem 0.55rem;
-      border: 1px solid rgba(239, 233, 225, 0.18);
-      border-radius: 999px;
-      background: rgba(239, 233, 225, 0.06);
-      color: var(--ivory);
-      min-height: 30px;
-    }
-    .chip strong { color: #fff; font-weight: 650; }
-    #conn-status[data-state="connected"] {
-      border-color: rgba(82, 122, 91, 0.55);
-      color: #b7d0bc;
-    }
-    #conn-status[data-state="disconnected"] {
-      border-color: rgba(179, 79, 75, 0.65);
-      color: #e8b4b2;
-      font-weight: 700;
-    }
-    #motors-status[data-state="off"] { color: #b7d0bc; }
-    #motors-status[data-state="off"]::before {
-      content: "";
-      width: 0.45rem; height: 0.45rem; border-radius: 50%;
-      background: var(--ok);
-    }
-    #motors-status[data-state="on"] {
-      color: #e8b4b2; font-weight: 700;
-      border-color: rgba(179, 79, 75, 0.65);
-    }
-    #motors-status[data-state="on"]::before {
-      content: "";
-      width: 0.45rem; height: 0.45rem; border-radius: 50%;
-      background: var(--danger);
-    }
-
-    .workspace {
-      display: contents;
-    }
-    .alerts {
+      flex-direction: column;
+      padding: 1rem 0.85rem;
+      gap: 1rem;
       min-height: 0;
-      padding: 0.35rem 1rem;
-      color: var(--warn);
-      font-weight: 650;
-      font-size: 0.85rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    h1.side-brand, .side-brand {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #fff;
+      padding: 0 0.35rem;
+    }
+    .side-brand span {
+      display: inline-block;
+      width: 3px; height: 1em;
+      background: var(--green);
+      margin-right: 0.5rem;
+      vertical-align: -0.1em;
+    }
+    .nav-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 0.45rem;
+      margin-bottom: 0.35rem;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      color: var(--text-2);
+      border-radius: 2px;
+      padding: 0.55rem 0.65rem;
+      min-height: 40px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav-btn:hover { background: var(--panel); color: var(--text); }
+    .nav-btn[aria-current="page"] {
+      background: var(--green-dim);
+      color: var(--green);
+    }
+    .nav-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+    .dot {
+      width: 0.45rem; height: 0.45rem; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+    }
+    .dot.off { background: var(--muted); }
+    .side-list { list-style: none; margin: 0; padding: 0; }
+    .side-list li {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.45rem;
+      color: var(--text-2); font-size: 0.82rem;
+    }
+    .side-foot {
+      margin-top: auto;
+      padding: 0.75rem 0.45rem 0.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .side-foot .name { font-weight: 650; color: var(--text); }
+    .side-foot .meta { color: var(--muted); font-size: 0.75rem; margin-top: 0.15rem; }
+    .side-controls {
+      display: flex; flex-direction: column; gap: 0.3rem;
+      padding: 0 0.25rem;
+    }
+    .side-controls button {
+      font: inherit; font-size: 0.75rem; font-weight: 650;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      background: var(--panel); color: var(--text);
+      border: 1px solid var(--border-strong);
+      border-radius: 2px; padding: 0.4rem 0.55rem;
+      min-height: 36px; cursor: pointer; text-align: left;
+    }
+    .side-controls button:hover { border-color: var(--green); }
+    .side-controls button.btn-primary {
+      background: var(--green-btn); border-color: var(--green); color: #04120a;
+    }
+    .side-controls button.btn-danger { color: var(--threat); border-color: #5a3030; }
+    .side-controls button[aria-pressed="true"] {
+      border-color: var(--green); color: var(--green); background: var(--green-dim);
+    }
+    .side-controls button:focus-visible { outline: 2px solid var(--green); }
+    .side-controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* —— Main column —— */
+    .main {
+      flex: 1 1 0;
+      width: 100%;
+      display: flex; flex-direction: column;
+      min-width: 0; min-height: 0;
+      overflow: hidden;
+    }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem; flex-wrap: wrap;
+      padding: 0.55rem 0.85rem;
+      border-bottom: 1px solid var(--border);
       background: var(--bg);
+      flex: 0 0 auto;
+    }
+    .control-strip {
+      display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;
+      padding: 0.45rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-2);
+      flex: 0 0 auto;
+    }
+    .control-strip button {
+      font: inherit; font-size: 0.72rem; font-weight: 650;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      background: var(--panel); color: var(--text);
+      border: 1px solid var(--border-strong);
+      border-radius: 2px; padding: 0.35rem 0.6rem;
+      min-height: 34px; cursor: pointer;
+    }
+    .control-strip button:hover { border-color: var(--green); }
+    .control-strip button.btn-primary {
+      background: var(--green-btn); border-color: var(--green); color: #04120a;
+    }
+    .control-strip button.btn-danger { color: var(--threat); border-color: #5a3030; }
+    .control-strip button[aria-pressed="true"] {
+      border-color: var(--green); color: var(--green); background: var(--green-dim);
+    }
+    .control-strip button:focus-visible { outline: 2px solid var(--green); }
+    .control-strip button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .top-title {
+      font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-2); font-weight: 650;
+    }
+    .status-row { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.72rem; letter-spacing: 0.04em;
+      padding: 0.25rem 0.55rem; border-radius: 2px;
+      border: 1px solid var(--border); color: var(--text-2);
+      background: var(--panel); min-height: 28px;
+    }
+    .chip strong { color: var(--text); font-weight: 650; }
+    #conn-status[data-state="connected"] { color: var(--green); border-color: #2a5a38; }
+    #conn-status[data-state="disconnected"] { color: var(--threat); border-color: #5a3030; font-weight: 700; }
+    #motors-status[data-state="off"] { color: var(--green); }
+    #motors-status[data-state="off"]::before,
+    #motors-status[data-state="on"]::before {
+      content: ""; width: 0.4rem; height: 0.4rem; border-radius: 50%;
+    }
+    #motors-status[data-state="off"]::before { background: var(--green); }
+    #motors-status[data-state="on"] { color: var(--threat); font-weight: 700; }
+    #motors-status[data-state="on"]::before { background: var(--threat); }
+
+    .alerts {
+      min-height: 0; padding: 0.25rem 1rem; color: var(--warn); font-weight: 650;
     }
     #replay-banner {
-      margin: 0 1rem;
-      padding: 0.4rem 0.7rem;
-      background: var(--card-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-2);
-      font-size: 0.82rem;
+      margin: 0 1rem; padding: 0.4rem 0.65rem;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 2px; color: var(--text-2); font-size: 0.82rem;
     }
     #replay-banner[hidden] { display: none !important; }
-    body.replay-mode #plan-panel { display: none !important; }
+    body.replay-mode #plan-panel { opacity: 0.55; pointer-events: none; }
     body.replay-mode #btn-after { display: none !important; }
 
-    .main-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.85fr) minmax(280px, 0.85fr);
-      gap: 0.55rem;
-      flex: 1 1 0;
-      min-height: 0;
-      overflow: hidden;
-      padding: 0 1rem;
-      margin-bottom: 0.45rem;
+    .workspace {
+      flex: 1 1 0; min-height: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 0.65rem;
+      padding: 0.55rem 0.85rem 0.85rem;
     }
     .panel {
-      background: var(--card);
+      background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.5rem 0.65rem 0.55rem;
+      border-radius: 2px;
+      padding: 0.55rem 0.65rem;
       min-height: 0;
-      box-shadow: var(--shadow);
     }
+    h2 {
+      margin: 0 0 0.4rem;
+      font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); font-weight: 650;
+    }
+
     #map-panel {
+      flex: 1 1 0;
+      width: 0;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       min-height: 0;
-      overflow: hidden;
       padding: 0.45rem;
     }
-    #map-panel h2 { padding: 0 0.2rem; }
     #map-svg {
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      flex: 1;
-      background: #F1ECE5;
+      flex: 1; width: 100%; min-height: 0;
+      background: #0A0D10;
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 2px;
     }
-    #threat-panel {
+    .map-label {
+      font-size: 11px; font-weight: 700; font-family: var(--sans);
+      paint-order: stroke; stroke: #0A0D10; stroke-width: 3px;
+    }
+
+    .right-col {
+      flex: 0 0 440px;
+      width: 440px;
+      max-width: 46%;
       display: flex;
       flex-direction: column;
+      gap: 0.85rem;
       min-height: 0;
-      overflow: hidden;
+      overflow: auto;
+      padding: 0.15rem 0.15rem 0.15rem 0;
+    }
+    .side-card {
+      background: #141A21;
+      border: 1px solid #2A3441;
+      border-radius: 2px;
+      padding: 1.15rem 1.2rem;
+      min-height: 0;
+      flex-shrink: 0;
+    }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.5rem; margin-bottom: 0.7rem;
+    }
+    .card-head h2 {
+      margin: 0;
+      font-size: 1.05rem; letter-spacing: 0; text-transform: none;
+      color: #F2F5F8; font-weight: 700;
+    }
+    .pill-badge {
+      font-size: 0.75rem; font-weight: 650; letter-spacing: 0.02em;
+      text-transform: none;
+      padding: 0; border-radius: 0;
+      background: transparent; color: #E06B66;
+      border: none;
+    }
+    .pill-badge[hidden] { display: none !important; }
+    .rack-count {
+      font-size: 0.8rem; font-weight: 650; letter-spacing: 0;
+      color: var(--text-2); text-transform: none;
+    }
+
+    #plan-panel {
+      flex: 0 1 auto;
+      display: flex; flex-direction: column; gap: 0.7rem;
+      overflow: visible;
+    }
+    #plan-panel.has-pending {
+      border-color: #3d4a28;
+      box-shadow: inset 0 0 0 1px rgba(125,207,138,0.12);
+    }
+    #plan-lines { display: flex; flex-direction: column; gap: 0.55rem; }
+    .officer-empty {
+      color: var(--text-2); font-size: 0.9rem; padding: 0.15rem 0 0.25rem;
+    }
+    .officer-focus {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .officer-id {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem;
+      font-size: 1.55rem; font-weight: 700; letter-spacing: 0.02em;
+      color: #fff; line-height: 1.1;
+    }
+    .label-chip {
+      display: inline-block; vertical-align: middle;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em;
+      padding: 0.16rem 0.4rem; border-radius: 2px;
+      border: 1px solid var(--border-strong); color: var(--text-2);
+      text-transform: capitalize;
+    }
+    .label-chip.unknown { color: #E8C4A0; border-color: #6B4A32; background: #2A1E16; }
+    .label-chip.threat { color: #F0B4B0; border-color: #6B3030; background: #2A1616; }
+    .label-chip.decoy { color: #B0B8C0; border-color: #3D4A5C; background: #1A222C; }
+    .label-chip.friendly { color: #A8D4E8; border-color: #2A4A5A; background: #142028; }
+    .decision-window { text-align: right; flex: 0 0 auto; }
+    .decision-window .dw-label {
+      font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); font-weight: 650;
+    }
+    .decision-window .dw-time {
+      font-size: 1.65rem; font-weight: 700; color: #E6B84D;
+      font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 0.1rem;
+    }
+    .officer-headline {
+      font-size: 0.98rem; font-weight: 650; color: var(--text); margin: 0.15rem 0 0;
+    }
+    .officer-sub {
+      font-size: 0.78rem; color: var(--muted); margin: 0.2rem 0 0; line-height: 1.35;
+    }
+    .fit-card {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: 2px; padding: 0.55rem 0.65rem; margin-top: 0.15rem;
+    }
+    .fit-card .fit-title { font-weight: 650; color: var(--text); font-size: 0.88rem; }
+    .fit-card .fit-meta { color: var(--muted); font-size: 0.75rem; margin-top: 0.12rem; }
+    .fit-card .fit-tag {
+      font-size: 0.62rem; font-weight: 800; letter-spacing: 0.06em;
+      color: var(--green); text-transform: uppercase; white-space: nowrap;
+    }
+    .class-block { margin-top: 0.15rem; }
+    .class-block .class-title {
+      font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); font-weight: 650; margin-bottom: 0.3rem;
+    }
+    .class-block ul {
+      margin: 0; padding-left: 1rem; color: var(--text-2); font-size: 0.78rem;
+      line-height: 1.45;
+    }
+    .class-block strong { color: var(--text); font-weight: 650; }
+    .officer-actions {
+      display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.45rem;
+    }
+    .officer-actions-row { display: flex; gap: 0.45rem; }
+    #approve-btn {
+      flex: 1 1 auto; width: 100%; min-height: 48px;
+      font-size: 0.92rem; font-weight: 750; letter-spacing: 0.02em;
+      text-transform: none;
+      background: var(--green); color: #04120a;
+      border: 1px solid var(--green); border-radius: 2px; cursor: pointer;
+    }
+    #approve-btn:hover:not(:disabled) { filter: brightness(1.06); }
+    #approve-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+    #approve-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+    #hold-btn {
+      flex: 1 1 auto; width: 100%; min-height: 40px;
+      font: inherit; font-size: 0.85rem; font-weight: 650;
+      background: transparent; color: var(--text-2);
+      border: 1px solid var(--border-strong); border-radius: 2px; cursor: pointer;
+    }
+    #hold-btn:hover { border-color: var(--text-2); }
+    #hold-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+    #hold-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #threat-panel {
+      flex: 0 0 auto;
+      display: flex; flex-direction: column; overflow: visible;
     }
     #threat-list {
-      overflow: auto;
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
+      overflow: visible; display: flex; flex-direction: column; gap: 0.5rem;
     }
     .track-card {
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--border-strong);
-      border-radius: 6px;
-      padding: 0.45rem 0.55rem;
-      background: #fff;
+      border: 1px solid var(--border); border-radius: 2px;
+      padding: 0.65rem 0.75rem; background: var(--bg-2);
     }
-    .track-card.threat { border-left-color: var(--threat); background: #FBF4F3; }
-    .track-card.decoy { border-left-color: var(--decoy); }
-    .track-card.unknown { border-left-color: var(--unknown); background: #FBF7F0; }
-    .track-card.friendly { border-left-color: var(--friendly); background: #F3F7F9; }
-    .track-card.ended { opacity: 0.5; }
+    .track-card.threat { border-left: 3px solid var(--threat); }
+    .track-card.unknown { border-left: 3px solid var(--unknown); }
+    .track-card.friendly { border-left: 3px solid var(--friendly); }
+    .track-card.decoy { border-left: 3px solid var(--decoy); }
+    .track-card.ended { opacity: 0.45; }
     .track-card .label-row {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      font-weight: 650;
-      font-size: 0.95rem;
-      color: var(--text);
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 650; font-size: 0.95rem;
     }
     .swatch {
-      width: 0.7rem; height: 0.7rem;
-      border-radius: 2px;
-      border: 1px solid var(--border-strong);
-      flex-shrink: 0;
+      width: 0.55rem; height: 0.55rem; border-radius: 2px;
+      border: 1px solid var(--border-strong); flex-shrink: 0;
     }
     .swatch.threat { background: var(--threat); }
     .swatch.decoy { background: var(--decoy); }
     .swatch.unknown { background: var(--unknown); }
     .swatch.friendly { background: var(--friendly); }
-    .meta { color: var(--text-2); font-size: 0.82rem; margin-top: 0.2rem; }
-    .factors {
-      margin: 0.3rem 0 0;
-      padding-left: 1.05rem;
-      color: var(--muted);
-      font-size: 0.8rem;
-    }
+    .meta { color: var(--text-2); font-size: 0.85rem; margin-top: 0.25rem; line-height: 1.4; }
+    .factors { margin: 0.35rem 0 0; padding-left: 1.1rem; color: var(--muted); font-size: 0.8rem; line-height: 1.45; }
 
-    #rack-section, #plan-panel, #controls-section, #events-section {
-      margin-left: 1rem;
-      margin-right: 1rem;
+    #rack-section {
+      flex: 0 0 auto;
+      display: flex; flex-direction: column; gap: 0.65rem;
+      overflow: visible;
     }
-    #rack-section { margin-bottom: 0.4rem; overflow: hidden; }
+    #rack-summary { margin: 0; color: var(--muted); font-size: 0.75rem; }
     #rack-panel {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 0.4rem;
-      align-items: stretch;
-      max-height: 5.8rem;
-      overflow: auto;
+      display: flex; flex-direction: column;
+      border-top: 1px solid var(--border);
     }
-    .unit-card {
-      flex: 1 1 0;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.4rem 0.5rem;
-      background: #fff;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
+    .unit-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 0.85rem;
+      align-items: center;
+      padding: 0.95rem 0;
+      border-bottom: 1px solid var(--border);
+      min-height: 3.6rem;
     }
-    .unit-card .uid {
-      font-weight: 700;
-      font-size: 0.95rem;
-      letter-spacing: 0.04em;
-      color: var(--obsidian);
+    .unit-row .unit-chevron { display: none; }
+    .unit-row:last-child { border-bottom: none; }
+    .unit-chevron {
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 11px solid var(--green);
+      justify-self: center;
     }
+    .unit-chevron.dim { border-bottom-color: var(--muted); }
+    .unit-id {
+      display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+      font-weight: 700; color: #fff; font-size: 1.05rem; line-height: 1.15;
+    }
+    .unit-type { color: var(--muted); font-size: 0.82rem; margin-top: 0.2rem; }
+    .unit-pct { font-weight: 700; color: var(--text); font-size: 0.95rem; font-variant-numeric: tabular-nums; min-width: 2.8rem; text-align: right; }
+    .unit-status {
+      font-size: 0.85rem; color: var(--text-2); text-align: right; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 0.4rem; justify-content: flex-end;
+    }
+    .unit-status::before {
+      content: ""; width: 0.45rem; height: 0.45rem; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+    }
+    .unit-status.bad { color: var(--threat); }
+    .unit-status.bad::before { background: var(--threat); }
+    .unit-status.muted { color: var(--muted); }
+    .unit-status.muted::before { background: var(--muted); }
+    .unit-status.svc::before { background: var(--friendly); }
     .badge {
-      display: inline-block;
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      padding: 0.12rem 0.35rem;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      margin-left: 0.25rem;
-      vertical-align: middle;
-      color: var(--text-2);
-      background: var(--card-2);
+      display: inline-block; font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.06em; padding: 0.08rem 0.28rem; border-radius: 2px;
+      border: 1px solid var(--border); margin-left: 0.25rem;
+      color: var(--text-2); background: var(--bg-2);
     }
-    .badge.live { background: #E7F0EA; color: var(--ok); border-color: #B7CBBA; }
-    .badge.mock { background: var(--oxblood-subtle); color: var(--oxblood); border-color: #D4B4B2; }
-    .badge.sim { background: #EEF3F5; color: var(--friendly); border-color: #C2D2D9; }
+    .badge.live { color: var(--green); border-color: #2a5a38; }
+    .badge.mock { color: var(--unknown); border-color: #5a4a20; }
+    .badge.sim { color: var(--friendly); border-color: #2a4a5a; }
     .tilt {
-      width: 78px; height: 44px;
-      border: 1px solid var(--border-strong);
-      border-radius: 4px;
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(#D7E3EA 0 48%, #C5B8AC 48% 52%, #D8CFC4 52% 100%);
-      margin-top: 0.2rem;
-      flex-shrink: 0;
+      width: 52px; height: 28px; border: 1px solid var(--border-strong);
+      border-radius: 1px; position: relative; overflow: hidden;
+      background: linear-gradient(#1a3040 0 48%, #3D4A5C 48% 52%, #2a2218 52% 100%);
+      margin-top: 0.25rem;
     }
     .tilt-horizon {
-      position: absolute;
-      left: -35%; right: -35%; top: 50%;
-      height: 2px;
-      background: var(--oxblood);
-      transform-origin: center center;
+      position: absolute; left: -35%; right: -35%; top: 50%; height: 2px;
+      background: var(--green); transform-origin: center;
     }
-    @media (min-width: 1440px) {
-      .tilt { width: 92px; height: 52px; }
-      body { font-size: 15px; }
+    .u1-extra { grid-column: 1 / -1; padding-left: 1.4rem; }
+
+    #velocity-panel {
+      flex: 0 0 auto;
+      margin-top: 0.35rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border);
     }
-    @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; scroll-behavior: auto !important; }
+    #velocity-panel .vel-kicker {
+      font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--green); font-weight: 750; margin: 0 0 0.25rem;
+    }
+    #velocity-panel .vel-title {
+      font-size: 0.88rem; font-weight: 650; color: var(--text); margin: 0 0 0.45rem;
+    }
+    .vel-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .vel-chips span {
+      display: inline-block;
+      font-size: 0.72rem; letter-spacing: 0.02em; text-transform: none;
+      padding: 0.4rem 0.75rem; border-radius: 2px;
+      border: 1px solid var(--border-strong); color: var(--text-2); background: #10151A;
     }
 
-    #plan-panel[hidden] { display: none !important; }
-    #plan-panel {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.55rem;
-      margin-bottom: 0.4rem;
-      border: 1px solid var(--border);
-    }
-    #plan-panel.has-pending {
-      border-color: var(--warn);
-      background: #FBF7F0;
-      box-shadow: inset 0 0 0 1px rgba(168, 118, 44, 0.15);
-    }
-    #plan-lines {
-      flex: 1 1 280px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    .plan-line {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.4rem 0.55rem;
-      background: #fff;
-      font-size: 0.9rem;
-      color: var(--text);
-    }
-    #approve-btn {
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      min-width: 160px;
-      min-height: 48px;
-      background: var(--oxblood);
-      border-color: var(--oxblood);
-      color: #fff;
-    }
-    #plan-panel.has-pending #approve-btn {
-      background: var(--oxblood);
-      border-color: var(--oxblood);
-      box-shadow: 0 2px 8px rgba(114, 56, 61, 0.25);
-    }
-    #approve-btn:hover:not(:disabled) {
-      background: var(--oxblood-hover);
-    }
-    #controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.3rem;
-      align-items: center;
-    }
-    #controls-section { margin-bottom: 0.35rem; overflow: hidden; }
     #events-section {
-      margin-bottom: 0.55rem;
-      overflow: hidden;
-      min-height: 0;
       flex: 0 0 auto;
-      max-height: 5.5rem;
-    }
-    #rack-section, #plan-panel, #controls-section {
-      flex: 0 0 auto;
-    }
-    #events-panel {
-      height: 100%;
+      min-height: 7rem;
+      max-height: 11rem;
       overflow: auto;
-      min-height: 0;
+      padding: 0.85rem 1rem;
+    }
+    #events-section h2 {
+      margin: 0 0 0.25rem;
+      font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); font-weight: 650;
     }
     #event-log {
-      margin: 0;
-      padding-left: 1.15rem;
-      color: var(--text-2);
-      font-size: 0.8rem;
+      margin: 0; padding-left: 1.15rem; color: var(--text-2); font-size: 0.82rem;
+      line-height: 1.45; max-height: 8rem; overflow: auto;
     }
-    .map-label {
-      font-size: 12px;
-      font-weight: 700;
-      font-family: var(--sans);
-      paint-order: stroke;
-      stroke: #F1ECE5;
-      stroke-width: 3px;
-    }
+
     #after-overlay[hidden] { display: none !important; }
     #after-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(50, 45, 41, 0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 40;
-      padding: 1rem;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 40; padding: 1rem;
     }
     #after-dialog {
-      background: var(--card);
-      border: 1px solid var(--border-strong);
-      border-radius: 10px;
-      max-width: 740px;
-      width: 100%;
-      max-height: 90vh;
-      overflow: auto;
-      padding: 1.1rem 1.2rem;
-      color: var(--text);
-      box-shadow: 0 12px 40px rgba(50, 45, 41, 0.18);
+      background: var(--panel); border: 1px solid var(--border-strong);
+      border-radius: 2px; max-width: 720px; width: 100%; max-height: 90vh;
+      overflow: auto; padding: 1.1rem; color: var(--text);
     }
-    #after-dialog h2, #after-dialog h3 {
-      color: var(--text);
-      text-transform: none;
-      letter-spacing: 0.02em;
-    }
+    #after-dialog h2, #after-dialog h3 { color: var(--text); text-transform: none; letter-spacing: 0.02em; }
     #after-brief {
-      white-space: pre-wrap;
-      background: var(--card-2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.65rem;
-      font-family: var(--mono);
-      font-size: 0.82rem;
-      max-height: 12rem;
-      overflow: auto;
-      color: var(--text);
+      white-space: pre-wrap; background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: 2px; padding: 0.6rem; font-family: var(--mono); font-size: 0.8rem;
+      max-height: 12rem; overflow: auto;
     }
     .placeholder-tag {
-      display: inline-block;
-      margin-left: 0.4rem;
-      padding: 0.1rem 0.4rem;
-      border: 1px solid var(--oxblood);
-      background: var(--oxblood-subtle);
-      color: var(--oxblood);
-      font-weight: 800;
-      font-size: 0.68rem;
-      letter-spacing: 0.06em;
-      border-radius: 4px;
+      display: inline-block; margin-left: 0.35rem; padding: 0.1rem 0.35rem;
+      border: 1px solid var(--unknown); color: var(--unknown);
+      font-size: 0.65rem; font-weight: 800; border-radius: 2px;
     }
     .after-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
-    #btn-swap { background: var(--oxblood); border-color: var(--oxblood); color: #fff; }
+    .after-actions button, #btn-copy-brief {
+      font: inherit; font-size: 0.75rem; font-weight: 650; text-transform: uppercase;
+      background: var(--panel-2); color: var(--text); border: 1px solid var(--border-strong);
+      border-radius: 2px; padding: 0.4rem 0.7rem; min-height: 36px; cursor: pointer;
+    }
+    #btn-swap { background: var(--green-btn); border-color: var(--green); color: #04120a; }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
   </style>
 </head>
-<body>
-  <header class="topbar">
-    <div class="brand-block">
-      <h1><span class="mark" aria-hidden="true"></span>Triage</h1>
-      <span class="tagline">Outpost defense · watch officer</span>
-    </div>
-    <div class="status-row" aria-live="polite">
-      <span id="conn-status" class="chip" data-state="disconnected" role="status">Disconnected</span>
-      <span id="motors-status" class="chip" data-state="off" role="status" title="Hardware motors stay off unless TRIAGE_MOTORS=1">MOTORS SAFE</span>
-      <span id="scenario-status" class="chip">Scenario <strong>—</strong></span>
-      <span id="phase-status" class="chip" data-phase="idle">Phase <strong>IDLE</strong></span>
-      <span id="time-status" class="chip">t=<strong>0.0</strong>s</span>
-    </div>
-  </header>
-
-  <div id="alerts" class="alerts" aria-live="polite" aria-atomic="true"></div>
-  <p id="replay-banner" hidden role="status">
-    Replay: simplified schematic based on public reporting
-  </p>
-
-  <div class="main-grid">
-    <section id="map-panel" class="panel" aria-labelledby="map-heading">
-      <h2 id="map-heading">Outpost map</h2>
-      <svg id="map-svg" viewBox="0 0 1000 700" role="img" aria-label="Outpost map. Track details are in the threat list.">
-        <defs>
-          <pattern id="map-grid-pat" width="50" height="50" patternUnits="userSpaceOnUse">
-            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#E0D8CE" stroke-width="1"/>
-          </pattern>
-          <pattern id="gravel" width="8" height="8" patternUnits="userSpaceOnUse">
-            <rect width="8" height="8" fill="#E5DDD2"/>
-            <circle cx="2" cy="3" r="0.7" fill="#D1C7BD"/>
-            <circle cx="6" cy="6" r="0.6" fill="#C5B8AC"/>
-          </pattern>
-          <linearGradient id="terrain" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#E8E2D8"/>
-            <stop offset="40%" stop-color="#F1ECE5"/>
-            <stop offset="100%" stop-color="#DDD5C9"/>
-          </linearGradient>
-          <filter id="pad-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#322D29" flood-opacity="0.14"/>
-          </filter>
-        </defs>
-        <rect x="0" y="0" width="1000" height="700" fill="url(#terrain)"/>
-        <rect x="0" y="0" width="1000" height="700" fill="url(#map-grid-pat)" opacity="0.45"/>
-        <g id="map-terrain">
-          <!-- Outer berm / desert scrub bands -->
-          <path d="M0 520 Q200 480 400 540 T800 500 T1000 560 L1000 700 L0 700 Z"
-                fill="#D8CFC3" opacity="0.55"/>
-          <path d="M0 0 L1000 0 L1000 90 Q700 120 400 70 T0 100 Z"
-                fill="#E0D8CE" opacity="0.5"/>
-          <!-- Wire fence perimeter -->
-          <ellipse cx="720" cy="355" rx="235" ry="195"
-                   fill="#EDE6DC" stroke="#9E9489" stroke-width="2.5" stroke-dasharray="3 5"/>
-          <ellipse cx="720" cy="355" rx="248" ry="208"
-                   fill="none" stroke="#C5B8AC" stroke-width="1" opacity="0.7"/>
-          <!-- Inner compound apron -->
-          <path d="M560 300 L820 270 L900 380 L860 500 L620 520 L540 420 Z"
-                fill="url(#gravel)" stroke="#C5B8AC" stroke-width="1.5" opacity="0.85"/>
-          <!-- Access road -->
-          <path d="M40 420 C220 400 380 410 530 405"
-                fill="none" stroke="#C5B8AC" stroke-width="18" opacity="0.5"/>
-          <path d="M40 420 C220 400 380 410 530 405"
-                fill="none" stroke="#AC9C8D" stroke-width="1.5" stroke-dasharray="10 8"/>
-          <path d="M640 405 L900 560" fill="none" stroke="#C5B8AC" stroke-width="14" opacity="0.4"/>
-          <!-- HESCO / blast wall stubs -->
-          <g fill="#D1C7BD" stroke="#AC9C8D" stroke-width="1">
-            <rect x="580" y="250" width="22" height="14" rx="1"/>
-            <rect x="610" y="248" width="22" height="14" rx="1"/>
-            <rect x="840" y="290" width="22" height="14" rx="1"/>
-            <rect x="870" y="310" width="22" height="14" rx="1"/>
-            <rect x="860" y="470" width="22" height="14" rx="1"/>
-          </g>
-          <!-- Facility pads under assets -->
-          <g filter="url(#pad-shadow)">
-            <rect x="690" y="330" width="60" height="48" rx="3" fill="#FBF9F6" stroke="#C5B8AC"/>
-            <rect x="750" y="250" width="55" height="42" rx="3" fill="#FBF9F6" stroke="#C5B8AC"/>
-            <rect x="610" y="230" width="55" height="42" rx="3" fill="#FBF9F6" stroke="#C5B8AC"/>
-            <rect x="770" y="370" width="50" height="42" rx="3" fill="#FBF9F6" stroke="#C5B8AC"/>
-            <rect x="850" y="510" width="60" height="48" rx="3" fill="#FBF9F6" stroke="#C5B8AC"/>
-          </g>
-          <!-- Watch tower -->
-          <g transform="translate(900,240)">
-            <rect x="-8" y="-4" width="16" height="28" fill="#EFE9E1" stroke="#655D56"/>
-            <rect x="-14" y="-18" width="28" height="16" fill="#E8E0D7" stroke="#655D56"/>
-            <line x1="0" y1="24" x2="0" y2="36" stroke="#655D56" stroke-width="2"/>
-            <text y="48" text-anchor="middle" fill="#655D56" font-size="9" font-weight="600">TOWER</text>
-          </g>
-          <!-- Interceptor rack bay (units dock here) -->
-          <g id="rack-bay" filter="url(#pad-shadow)">
-            <rect x="490" y="378" width="128" height="52" rx="3"
-                  fill="#FBF9F6" stroke="#72383D" stroke-width="2"/>
-            <rect x="494" y="382" width="120" height="14" fill="#EFE9E1" stroke="#DDD4CA"/>
-            <text x="554" y="393" text-anchor="middle" fill="#72383D" font-size="9"
-                  font-weight="700" letter-spacing="0.1em">INTERCEPTOR RACK</text>
-            <rect x="500" y="402" width="22" height="22" rx="2" fill="#E8E0D7" stroke="#C5B8AC"/>
-            <rect x="528" y="402" width="22" height="22" rx="2" fill="#E8E0D7" stroke="#C5B8AC"/>
-            <rect x="556" y="402" width="22" height="22" rx="2" fill="#E8E0D7" stroke="#C5B8AC"/>
-            <rect x="584" y="402" width="22" height="22" rx="2" fill="#E8E0D7" stroke="#C5B8AC"/>
-          </g>
-          <text x="720" y="195" text-anchor="middle" fill="#322D29" font-size="14"
-                font-weight="700" letter-spacing="0.14em">FOB SENTINEL</text>
-          <text x="720" y="212" text-anchor="middle" fill="#655D56" font-size="10"
-                letter-spacing="0.06em">outpost perimeter</text>
-          <g transform="translate(40,40)">
-            <circle cx="0" cy="0" r="18" fill="#FBF9F6" stroke="#C5B8AC" stroke-width="1.5"/>
-            <polygon points="0,-12 4,2 -4,2" fill="#72383D"/>
-            <text y="28" text-anchor="middle" fill="#655D56" font-size="10" font-weight="700">N</text>
-          </g>
-          <g transform="translate(40,620)" font-size="10" fill="#655D56">
-            <rect x="-8" y="-18" width="168" height="62" rx="4" fill="#FBF9F6" stroke="#DDD4CA"/>
-            <circle cx="6" cy="-2" r="5" fill="#B34F4B"/><text x="16" y="2">Threat</text>
-            <circle cx="78" cy="-2" r="5" fill="#A8762C"/><text x="88" y="2">Unknown</text>
-            <circle cx="6" cy="20" r="5" fill="#3F7891"/><text x="16" y="24">Friendly</text>
-            <circle cx="78" cy="20" r="5" fill="#7B858B"/><text x="88" y="24">Decoy</text>
-          </g>
-        </g>
-        <g id="map-trails"></g>
-        <g id="map-assets"></g>
-        <g id="map-links"></g>
-        <g id="map-units"></g>
-        <g id="map-tracks"></g>
-      </svg>
-    </section>
-
-    <section id="threat-panel" class="panel" aria-labelledby="threat-heading">
-      <h2 id="threat-heading">Threat list</h2>
-      <div id="threat-list"></div>
-    </section>
-  </div>
-
-  <section id="rack-section" class="panel" aria-labelledby="rack-heading">
-    <h2 id="rack-heading">Rack</h2>
-    <div id="rack-panel"></div>
-  </section>
-
-  <section id="plan-panel" class="panel" aria-labelledby="plan-heading" aria-live="polite">
-    <h2 id="plan-heading">Plan</h2>
-    <div id="plan-lines"></div>
-    <button type="button" id="approve-btn" class="btn-primary">APPROVE</button>
-  </section>
-
-  <section id="controls-section" class="panel" aria-labelledby="controls-heading">
-    <h2 id="controls-heading">Controls</h2>
-    <div id="controls">
+<body class="app">
+  <div class="main">
+    <header class="topbar">
+      <div class="brand-block">
+        <h1 class="top-brand">Triage</h1>
+        <div class="top-title">Outpost defense</div>
+      </div>
+      <div class="status-row" aria-live="polite">
+        <span id="conn-status" class="chip" data-state="disconnected" role="status">Disconnected</span>
+        <span id="motors-status" class="chip" data-state="off" role="status">MOTORS SAFE</span>
+        <span id="scenario-status" class="chip">Scenario <strong>—</strong></span>
+        <span id="phase-status" class="chip" data-phase="idle">Phase <strong>IDLE</strong></span>
+        <span id="time-status" class="chip">t=<strong>0.0</strong>s</span>
+      </div>
+    </header>
+    <div class="control-strip" id="controls" role="toolbar" aria-label="Scenario controls">
       <button type="button" data-scenario="juniper_night1">Night 1</button>
       <button type="button" data-scenario="juniper_night2">Night 2</button>
       <button type="button" data-scenario="tower22">Tower 22</button>
@@ -678,7 +624,142 @@
       <button type="button" id="btn-swap-a">Swap U1 to A</button>
       <button type="button" id="btn-after">After-action</button>
     </div>
-  </section>
+    <div id="alerts" class="alerts" aria-live="polite" aria-atomic="true"></div>
+    <p id="replay-banner" hidden role="status">Replay: simplified schematic based on public reporting</p>
+
+    <div class="workspace">
+      <section id="map-panel" class="panel" aria-labelledby="map-heading">
+        <h2 id="map-heading">Outpost map</h2>
+        <svg id="map-svg" viewBox="0 0 1000 700" role="img" aria-label="Outpost map. Track details are in the threat list.">
+          <defs>
+            <pattern id="map-grid-pat" width="48" height="48" patternUnits="userSpaceOnUse">
+              <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#1A2830" stroke-width="0.8" opacity="0.55"/>
+            </pattern>
+            <radialGradient id="map-glow" cx="62%" cy="48%" r="55%">
+              <stop offset="0%" stop-color="#143028" stop-opacity="0.55"/>
+              <stop offset="45%" stop-color="#0E1A1C" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#0A1012" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="pad-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="1" stdDeviation="1.4" flood-color="#000" flood-opacity="0.5"/>
+            </filter>
+            <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="1.6" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <rect width="1000" height="700" fill="#0B1214"/>
+          <rect width="1000" height="700" fill="url(#map-grid-pat)"/>
+          <rect width="1000" height="700" fill="url(#map-glow)"/>
+          <g id="map-terrain">
+            <!-- radar rings -->
+            <g fill="none" stroke="#C8D5DC" stroke-opacity="0.14" stroke-width="1.1">
+              <circle cx="700" cy="350" r="90"/>
+              <circle cx="700" cy="350" r="160"/>
+              <circle cx="700" cy="350" r="230"/>
+              <circle cx="700" cy="350" r="300"/>
+            </g>
+            <!-- radial approach roads -->
+            <g fill="none" stroke="#2F5A48" stroke-opacity="0.45" stroke-width="10" stroke-linecap="round">
+              <path d="M700 350 L420 310"/>
+              <path d="M700 350 L520 520"/>
+              <path d="M700 350 L880 200"/>
+              <path d="M700 350 L920 480"/>
+              <path d="M700 350 L560 180"/>
+            </g>
+            <g fill="none" stroke="#4A8A6A" stroke-opacity="0.25" stroke-width="2">
+              <path d="M700 350 L420 310"/>
+              <path d="M700 350 L520 520"/>
+              <path d="M700 350 L880 200"/>
+              <path d="M700 350 L920 480"/>
+              <path d="M700 350 L560 180"/>
+            </g>
+            <!-- outpost perimeter (dashed hex-ish ellipse) -->
+            <ellipse cx="700" cy="350" rx="118" ry="100" fill="#102018" fill-opacity="0.55"
+                     stroke="#D6E2E8" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="7 6"/>
+            <text x="700" y="248" text-anchor="middle" fill="#E8F0F2" font-size="11"
+                  font-weight="650" letter-spacing="0.18em">FOB SENTINEL</text>
+            <!-- pad blocks -->
+            <g filter="url(#pad-shadow)">
+              <rect x="670" y="328" width="52" height="40" rx="0" fill="#1A3328" stroke="#3D6B55"/>
+              <rect x="728" y="268" width="48" height="36" rx="0" fill="#1A3328" stroke="#3D6B55"/>
+              <rect x="618" y="268" width="48" height="36" rx="0" fill="#1A3328" stroke="#3D6B55"/>
+              <rect x="748" y="360" width="44" height="36" rx="0" fill="#1A3328" stroke="#3D6B55"/>
+              <rect x="820" y="470" width="52" height="40" rx="0" fill="#1A3328" stroke="#3D6B55"/>
+            </g>
+            <g id="rack-bay" filter="url(#pad-shadow)">
+              <rect x="472" y="368" width="160" height="58" rx="0" fill="#101A16" stroke="#7DCF8A" stroke-width="2"/>
+              <rect x="472" y="368" width="160" height="16" fill="#15241E" stroke="#7DCF8A" stroke-width="1"/>
+              <text x="552" y="380" text-anchor="middle" fill="#7DCF8A" font-size="9" font-weight="700" letter-spacing="0.12em">INTERCEPTOR RACK</text>
+              <!-- slot pads centered on unit docks 500/536/572/608 -->
+              <rect x="488" y="392" width="24" height="26" rx="0" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="524" y="392" width="24" height="26" rx="0" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="560" y="392" width="24" height="26" rx="0" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="596" y="392" width="24" height="26" rx="0" fill="#15241E" stroke="#3D4A5C"/>
+            </g>
+            <g transform="translate(36,36)">
+              <circle r="16" fill="#101A16" stroke="#3D4A5C"/>
+              <polygon points="0,-10 3.5,2 -3.5,2" fill="#9EE0A8"/>
+              <text y="26" text-anchor="middle" fill="#9AA4B2" font-size="10" font-weight="700">N</text>
+            </g>
+            <g transform="translate(36,620)" font-size="11" fill="#B0BAC4">
+              <rect x="-6" y="-16" width="176" height="58" rx="0" fill="#101A16" fill-opacity="0.9" stroke="#2A3441"/>
+              <circle cx="8" cy="0" r="5" fill="#E06B66"/><text x="18" y="4">Threat</text>
+              <circle cx="90" cy="0" r="5" fill="#D4A017"/><text x="100" y="4">Unknown</text>
+              <circle cx="8" cy="24" r="5" fill="#5BA3C9"/><text x="18" y="28">Friendly</text>
+              <circle cx="90" cy="24" r="5" fill="#8B949E"/><text x="100" y="28">Decoy</text>
+            </g>
+          </g>
+          <g id="map-trails"></g>
+          <g id="map-assets"></g>
+          <g id="map-links"></g>
+          <g id="map-units"></g>
+          <g id="map-tracks"></g>
+        </svg>
+      </section>
+
+      <div class="right-col">
+        <section id="plan-panel" class="side-card" aria-labelledby="plan-heading" aria-live="polite">
+          <div class="card-head">
+            <h2 id="plan-heading">Review queue</h2>
+            <span id="plan-pending-badge" class="pill-badge" hidden>0 PENDING</span>
+          </div>
+          <div id="plan-lines"></div>
+          <div class="officer-actions">
+            <button type="button" id="approve-btn">APPROVE</button>
+            <div class="officer-actions-row">
+              <button type="button" id="hold-btn" title="Do not approve yet — keep watching">Hold</button>
+            </div>
+          </div>
+        </section>
+        <section id="threat-panel" class="side-card" aria-labelledby="threat-heading">
+          <div class="card-head">
+            <h2 id="threat-heading">Tracks</h2>
+          </div>
+          <div id="threat-list"></div>
+        </section>
+        <section id="rack-section" class="side-card" aria-labelledby="rack-heading">
+          <div class="card-head">
+            <h2 id="rack-heading">Fleet health</h2>
+            <span id="rack-waiting-badge" class="rack-count">0 WAITING</span>
+          </div>
+          <p id="rack-summary" class="meta"></p>
+          <div id="rack-panel"></div>
+          <div id="velocity-panel" aria-labelledby="vel-heading">
+            <p class="vel-kicker" id="vel-heading">Kearney Velocity AI</p>
+            <p class="vel-title">Module guidance · core stays the same</p>
+            <div class="vel-chips" aria-hidden="true">
+              <span>Motors</span><span>Props</span><span>Battery</span><span>Camera</span>
+            </div>
+          </div>
+        </section>
+        <section id="events-section" class="side-card" aria-labelledby="events-heading">
+          <h2 id="events-heading">Recent activity</h2>
+          <div id="events-panel"><ol id="event-log"></ol></div>
+        </section>
+      </div>
+    </div>
+  </div>
 
   <div id="after-overlay" hidden>
     <div id="after-dialog" role="dialog" aria-modal="true" aria-labelledby="after-title">
@@ -689,7 +770,7 @@
       <div id="after-brief-block">
         <h3>Velocity brief</h3>
         <pre id="after-brief"></pre>
-        <button type="button" id="btn-copy-brief" class="btn-primary">Copy</button>
+        <button type="button" id="btn-copy-brief">Copy</button>
       </div>
       <h3>Events</h3>
       <ol id="after-events"></ol>
@@ -701,14 +782,8 @@
     </div>
   </div>
 
-  <section id="events-section" class="panel" aria-labelledby="events-heading">
-    <h2 id="events-heading">Events</h2>
-    <div id="events-panel">
-      <ol id="event-log"></ol>
-    </div>
-  </section>
 
-  <script>
+<script>
 (function () {
   "use strict";
 
@@ -721,10 +796,10 @@
   var tiltZeroRoll = 0;
   var tiltZeroPitch = 0;
   var LABEL_COLOR = {
-    threat: "#B34F4B",
-    decoy: "#7B858B",
-    unknown: "#A8762C",
-    friendly: "#3F7891"
+    threat: "#E06B66",
+    decoy: "#8B949E",
+    unknown: "#D4A017",
+    friendly: "#5BA3C9"
   };
   var ASSET_LABEL_OFFSET = {
     housing: { x: 0, y: -36 },
@@ -759,9 +834,13 @@
     alerts: document.getElementById("alerts"),
     threatList: document.getElementById("threat-list"),
     rack: document.getElementById("rack-panel"),
+    rackSummary: document.getElementById("rack-summary"),
+    rackWaiting: document.getElementById("rack-waiting-badge"),
     planPanel: document.getElementById("plan-panel"),
     planLines: document.getElementById("plan-lines"),
+    planBadge: document.getElementById("plan-pending-badge"),
     approve: document.getElementById("approve-btn"),
+    hold: document.getElementById("hold-btn"),
     eventLog: document.getElementById("event-log"),
     mapAssets: document.getElementById("map-assets"),
     mapTracks: document.getElementById("map-tracks"),
@@ -773,6 +852,7 @@
     afterBtn: document.getElementById("btn-after"),
     motors: document.getElementById("motors-status")
   };
+  var VARIANT_TYPE = { A: "Standard", B: "Video" };
   var trailNodes = {};
   var unitPrev = {};
 
@@ -891,65 +971,65 @@
       var base = svgEl("rect");
       base.setAttribute("x", "-16"); base.setAttribute("y", "-6");
       base.setAttribute("width", "32"); base.setAttribute("height", "20");
-      base.setAttribute("fill", "#EFE9E1"); base.setAttribute("stroke", "#655D56");
+      base.setAttribute("fill", "#2A3441"); base.setAttribute("stroke", "#9AA4B2");
       base.setAttribute("stroke-width", "1.5");
       var roof = svgEl("polygon");
       roof.setAttribute("points", "-18,-6 0,-20 18,-6");
-      roof.setAttribute("fill", "#E8E0D7"); roof.setAttribute("stroke", "#655D56");
+      roof.setAttribute("fill", "#343E4C"); roof.setAttribute("stroke", "#9AA4B2");
       roof.setAttribute("stroke-width", "1.5");
       var door = svgEl("rect");
       door.setAttribute("x", "-4"); door.setAttribute("y", "2");
       door.setAttribute("width", "8"); door.setAttribute("height", "12");
-      door.setAttribute("fill", "#322D29"); door.setAttribute("stroke", "#AC9C8D");
+      door.setAttribute("fill", "#0F141A"); door.setAttribute("stroke", "#6B7785");
       g.appendChild(base); g.appendChild(roof); g.appendChild(door);
     } else if (kind === "generator") {
       var box = svgEl("rect");
       box.setAttribute("x", "-14"); box.setAttribute("y", "-10");
       box.setAttribute("width", "28"); box.setAttribute("height", "20");
       box.setAttribute("rx", "2");
-      box.setAttribute("fill", "#EFE9E1"); box.setAttribute("stroke", "#655D56");
+      box.setAttribute("fill", "#2A3441"); box.setAttribute("stroke", "#9AA4B2");
       box.setAttribute("stroke-width", "1.5");
       var bolt = svgEl("polyline");
       bolt.setAttribute("points", "2,-6 -4,1 2,1 -2,8");
-      bolt.setAttribute("fill", "none"); bolt.setAttribute("stroke", "#72383D");
+      bolt.setAttribute("fill", "none"); bolt.setAttribute("stroke", "#7DCF8A");
       bolt.setAttribute("stroke-width", "2");
       g.appendChild(box); g.appendChild(bolt);
     } else if (kind === "comms") {
       var mast = svgEl("line");
       mast.setAttribute("x1", "0"); mast.setAttribute("y1", "14");
       mast.setAttribute("x2", "0"); mast.setAttribute("y2", "-8");
-      mast.setAttribute("stroke", "#655D56"); mast.setAttribute("stroke-width", "2");
+      mast.setAttribute("stroke", "#9AA4B2"); mast.setAttribute("stroke-width", "2");
       var dish = svgEl("path");
       dish.setAttribute("d", "M-10,-2 Q0,-18 10,-2");
-      dish.setAttribute("fill", "none"); dish.setAttribute("stroke", "#655D56");
+      dish.setAttribute("fill", "none"); dish.setAttribute("stroke", "#9AA4B2");
       dish.setAttribute("stroke-width", "1.8");
       var pad = svgEl("rect");
       pad.setAttribute("x", "-8"); pad.setAttribute("y", "12");
       pad.setAttribute("width", "16"); pad.setAttribute("height", "4");
-      pad.setAttribute("fill", "#EFE9E1"); pad.setAttribute("stroke", "#AC9C8D");
+      pad.setAttribute("fill", "#2A3441"); pad.setAttribute("stroke", "#6B7785");
       g.appendChild(pad); g.appendChild(mast); g.appendChild(dish);
     } else if (kind === "fuel") {
       var tank = svgEl("ellipse");
       tank.setAttribute("cx", "0"); tank.setAttribute("cy", "0");
       tank.setAttribute("rx", "12"); tank.setAttribute("ry", "16");
-      tank.setAttribute("fill", "#EFE9E1"); tank.setAttribute("stroke", "#655D56");
+      tank.setAttribute("fill", "#2A3441"); tank.setAttribute("stroke", "#9AA4B2");
       tank.setAttribute("stroke-width", "1.5");
       var band = svgEl("line");
       band.setAttribute("x1", "-11"); band.setAttribute("y1", "0");
       band.setAttribute("x2", "11"); band.setAttribute("y2", "0");
-      band.setAttribute("stroke", "#72383D"); band.setAttribute("stroke-width", "2");
+      band.setAttribute("stroke", "#7DCF8A"); band.setAttribute("stroke-width", "2");
       g.appendChild(tank); g.appendChild(band);
     } else {
       var lot = svgEl("rect");
       lot.setAttribute("x", "-16"); lot.setAttribute("y", "-12");
       lot.setAttribute("width", "32"); lot.setAttribute("height", "24");
       lot.setAttribute("rx", "3");
-      lot.setAttribute("fill", "#E8E0D7"); lot.setAttribute("stroke", "#655D56");
+      lot.setAttribute("fill", "#243040"); lot.setAttribute("stroke", "#9AA4B2");
       lot.setAttribute("stroke-width", "1.5");
       lot.setAttribute("stroke-dasharray", "4 3");
       var p = svgEl("text");
       p.setAttribute("text-anchor", "middle"); p.setAttribute("dy", "5");
-      p.setAttribute("fill", "#655D56"); p.setAttribute("font-size", "14");
+      p.setAttribute("fill", "#9AA4B2"); p.setAttribute("font-size", "14");
       p.setAttribute("font-family", "ui-monospace, monospace");
       p.setAttribute("font-weight", "700");
       p.textContent = "P";
@@ -978,7 +1058,7 @@
       t.setAttribute("x", off.x);
       t.setAttribute("y", off.y);
       t.setAttribute("text-anchor", "middle");
-      t.setAttribute("fill", "#322D29");
+      t.setAttribute("fill", "#E6EDF3");
       t.setAttribute("class", "map-label");
       t.textContent = a.name;
       g.appendChild(hit);
@@ -995,24 +1075,38 @@
     g.setAttribute("data-track", id);
     var body = svgEl("g");
     body.setAttribute("class", "track-body");
-    var diamond = svgEl("polygon");
-    diamond.setAttribute("points", "0,-11 9,0 0,11 -9,0");
-    diamond.setAttribute("stroke", "#322D29");
+    // Dot + heading tick (no flags) — bright, readable on dark radar map
+    var halo = svgEl("circle");
+    halo.setAttribute("r", "11");
+    halo.setAttribute("fill", "none");
+    halo.setAttribute("stroke-width", "1.5");
+    halo.setAttribute("opacity", "0.55");
+    var diamond = svgEl("circle");
+    diamond.setAttribute("r", "5.5");
+    diamond.setAttribute("stroke", "#0B1214");
     diamond.setAttribute("stroke-width", "1.5");
     diamond.setAttribute("filter", "url(#soft-glow)");
-    var nose = svgEl("polygon");
-    nose.setAttribute("points", "0,-14 4,-4 -4,-4");
-    nose.setAttribute("fill", "#322D29");
+    var nose = svgEl("line");
+    nose.setAttribute("x1", "0");
+    nose.setAttribute("y1", "0");
+    nose.setAttribute("x2", "0");
+    nose.setAttribute("y2", "-16");
+    nose.setAttribute("stroke-width", "2");
+    nose.setAttribute("stroke-linecap", "round");
+    body.appendChild(halo);
     body.appendChild(diamond);
     body.appendChild(nose);
     var t = svgEl("text");
     t.setAttribute("x", "14");
-    t.setAttribute("y", "4");
+    t.setAttribute("y", "5");
     t.setAttribute("class", "map-label");
+    t.setAttribute("font-size", "12");
+    t.setAttribute("font-weight", "700");
+    t.setAttribute("letter-spacing", "0.04em");
     g.appendChild(body);
     g.appendChild(t);
     el.mapTracks.appendChild(g);
-    trackNodes[id] = { g: g, body: body, diamond: diamond, nose: nose, t: t };
+    trackNodes[id] = { g: g, body: body, diamond: diamond, nose: nose, halo: halo, t: t };
     return trackNodes[id];
   }
 
@@ -1024,18 +1118,19 @@
     craft.setAttribute("class", "unit-craft");
     // Compact chevron — reads as a small interceptor on the rack pad
     var body = svgEl("polygon");
-    body.setAttribute("points", "0,-7 5.5,5 -5.5,5");
-    body.setAttribute("fill", "#527A5B");
-    body.setAttribute("stroke", "#322D29");
+    body.setAttribute("points", "0,-5 4,4 -4,4");
+    body.setAttribute("fill", "#7DCF8A");
+    body.setAttribute("stroke", "#0F141A");
     body.setAttribute("stroke-width", "1");
     var hub = body;
     craft.appendChild(body);
     var t = svgEl("text");
-    t.setAttribute("y", "-10");
+    t.setAttribute("y", "18");
     t.setAttribute("text-anchor", "middle");
-    t.setAttribute("fill", "#655D56");
+    t.setAttribute("fill", "#C5D0D6");
     t.setAttribute("font-size", "9");
     t.setAttribute("font-weight", "700");
+    t.setAttribute("letter-spacing", "0.06em");
     t.setAttribute("class", "map-label");
     t.textContent = id;
     g.appendChild(craft);
@@ -1049,9 +1144,9 @@
     if (trailNodes[id]) return trailNodes[id];
     var poly = svgEl("polyline");
     poly.setAttribute("fill", "none");
-    poly.setAttribute("stroke-width", "2");
+    poly.setAttribute("stroke-width", "2.5");
     poly.setAttribute("stroke-linecap", "round");
-    poly.setAttribute("opacity", "0.55");
+    poly.setAttribute("opacity", "0.7");
     el.mapTrails.appendChild(poly);
     trailNodes[id] = poly;
     return poly;
@@ -1060,7 +1155,7 @@
   function ensureLink(uid) {
     if (linkNodes[uid]) return linkNodes[uid];
     var line = svgEl("line");
-    line.setAttribute("stroke", "#72383D");
+    line.setAttribute("stroke", "#7DCF8A");
     line.setAttribute("stroke-width", "2");
     line.setAttribute("stroke-dasharray", "6 4");
     line.setAttribute("opacity", "0.85");
@@ -1080,14 +1175,14 @@
       var node = assetNodes[name];
       if (!node || !node.hit) return;
       if (shelter[name]) {
-        node.hit.setAttribute("fill", "rgba(114,56,61,0.14)");
-        node.hit.setAttribute("stroke", "#72383D");
+        node.hit.setAttribute("fill", "rgba(125,207,138,0.15)");
+        node.hit.setAttribute("stroke", "#7DCF8A");
         node.hit.setAttribute("stroke-width", "2");
-        node.t.setAttribute("fill", "#72383D");
+        node.t.setAttribute("fill", "#7DCF8A");
       } else {
         node.hit.setAttribute("fill", "transparent");
         node.hit.setAttribute("stroke", "none");
-        node.t.setAttribute("fill", "#322D29");
+        node.t.setAttribute("fill", "#E6EDF3");
       }
     });
 
@@ -1102,9 +1197,10 @@
       node.g.setAttribute("transform", "translate(" + tr.x + "," + tr.y + ")");
       node.body.setAttribute("transform", "rotate(" + deg + ")");
       node.diamond.setAttribute("fill", color);
-      node.nose.setAttribute("fill", color);
+      node.nose.setAttribute("stroke", color);
+      if (node.halo) node.halo.setAttribute("stroke", color);
       node.t.setAttribute("fill", color);
-      node.t.textContent = tr.id + " " + (LABEL_TEXT[tr.label] || tr.label);
+      node.t.textContent = tr.id + " · " + (LABEL_TEXT[tr.label] || tr.label);
       node.g.style.display = "";
       node.g.setAttribute("opacity", "1");
 
@@ -1147,7 +1243,7 @@
       node.craft.setAttribute("transform", "rotate(" + yaw + ") scale(" + scale + ")");
       node.hub.setAttribute(
         "fill",
-        expended ? "#7B858B" : (away ? "#72383D" : "#527A5B")
+        expended ? "#6B7785" : (away ? "#C45C5C" : "#7DCF8A")
       );
       node.g.setAttribute("opacity", expended ? "0.35" : "1");
       node.t.setAttribute("x", "0");
@@ -1245,6 +1341,58 @@
     txt.textContent = "Attitude  R " + roll.toFixed(0) + "°  P " + pitch.toFixed(0) + "°";
   }
 
+  function unitStatusPhrase(u) {
+    var st = String(u.state || "rack").toLowerCase();
+    if (st === "expended") return { text: "Expended", cls: "bad" };
+    if (st === "rack") {
+      return { text: (u.ready ? "Healthy · waiting" : "Not ready · rack"), cls: u.ready ? "" : "muted" };
+    }
+    if (st === "shadowing") return { text: "In service", cls: "svc" };
+    if (st === "en_route" || st === "outbound") return { text: "In service", cls: "svc" };
+    if (st === "returning") return { text: "Returning", cls: "svc" };
+    if (st === "engaging") return { text: "Engaging", cls: "svc" };
+    return { text: st.replace(/_/g, " "), cls: "muted" };
+  }
+
+  function formatEta(sec) {
+    if (sec == null || !isFinite(sec) || sec < 0) return "—:—";
+    var s = Math.max(0, Math.round(Number(sec)));
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
+  }
+
+  function actionHeadline(action) {
+    var a = String(action || "");
+    if (a === "launch_early") return "Early launch. Hold commitment.";
+    if (a === "engage") return "Engage. Commit interceptor.";
+    if (a === "return") return "Recall. Return unused.";
+    if (a === "best_effort") return "Best effort. Gap response.";
+    return a.replace(/_/g, " ");
+  }
+
+  function approveLabel(action) {
+    var a = String(action || "");
+    if (a === "launch_early") return "APPROVE early launch";
+    if (a === "engage") return "APPROVE engage";
+    if (a === "return") return "APPROVE return";
+    if (a === "best_effort") return "APPROVE best effort";
+    return "APPROVE";
+  }
+
+  function updateDecisionWindow(s) {
+    var node = document.getElementById("decision-eta");
+    if (!node) return;
+    var pending = (s.plan || []).filter(function (ln) { return !ln.approved; });
+    if (!pending.length) return;
+    var tr = null;
+    var tracks = s.tracks || [];
+    for (var i = 0; i < tracks.length; i++) {
+      if (tracks[i].id === pending[0].track_id) { tr = tracks[i]; break; }
+    }
+    node.textContent = formatEta(tr && tr.eta);
+  }
+
   function updateRack(s) {
     var units = s.units || [];
     // Exclude continuous attitude from rebuild key — update tilt in place instead.
@@ -1253,7 +1401,7 @@
         u.id, u.source,
         Math.round((u.battery_v || 0) * 10) / 10,
         Math.round((u.battery_pct || 0) * 100),
-        u.ready, u.variant, u.state
+        u.ready, u.variant, u.state, u.assigned_track || ""
       ];
     })) + "|tz=" + tiltZeroRoll + "," + tiltZeroPitch;
     if (key === lastRackKey) {
@@ -1266,50 +1414,74 @@
     }
     lastRackKey = key;
     el.rack.innerHTML = "";
-    units.forEach(function (u) {
-      var card = document.createElement("div");
-      card.className = "unit-card";
-      card.setAttribute("data-unit", u.id);
-      var head = document.createElement("div");
-      var uid = document.createElement("span");
-      uid.className = "uid";
-      uid.textContent = u.id;
-      head.appendChild(uid);
-      var badge = document.createElement("span");
-      badge.className = "badge";
-      var src = u.source || "sim";
-      if (src === "live") {
-        badge.className += " live";
-        badge.textContent = "LIVE";
-      } else if (src === "mock") {
-        badge.className += " mock";
-        badge.textContent = "MOCK";
-      } else {
-        badge.className += " sim";
-        badge.textContent = "SIM";
-      }
-      head.appendChild(badge);
-      var varBadge = document.createElement("span");
-      varBadge.className = "badge";
-      varBadge.textContent = "VAR " + (u.variant || "?");
-      head.appendChild(varBadge);
-      card.appendChild(head);
 
-      var body = document.createElement("div");
-      body.className = "meta";
-      if (u.state === "expended") {
-        body.textContent = "EXPENDED";
-      } else if (u.id === "U1") {
-        var pct = Math.round((u.battery_pct || 0) * 100);
-        body.textContent = (Number(u.battery_v) || 0).toFixed(1) + "V · " + pct + "% · " +
-          (u.ready ? "READY" : "NOT READY") + " · " + String(u.state || "").toUpperCase();
-      } else {
-        body.textContent = String(u.state || "rack").toUpperCase() +
-          (u.assigned_track ? (" → " + u.assigned_track) : "");
+    var waiting = 0;
+    var returning = [];
+    var service = [];
+    units.forEach(function (u) {
+      var st = String(u.state || "rack").toLowerCase();
+      if (st === "rack" && u.ready) waiting += 1;
+      if (st === "returning") returning.push(u.id);
+      if (st === "en_route" || st === "outbound" || st === "shadowing" || st === "engaging") {
+        service.push(u.id);
       }
-      card.appendChild(body);
+    });
+    if (el.rackWaiting) {
+      el.rackWaiting.textContent = waiting + "/" + units.length + " available";
+    }
+    if (el.rackSummary) {
+      var bits = [waiting + " of " + units.length + " units ready"];
+      returning.forEach(function (id) { bits.push(id + " returning"); });
+      service.forEach(function (id) { bits.push(id + " in service"); });
+      el.rackSummary.textContent = bits.join(" · ");
+    }
+
+    units.forEach(function (u) {
+      var row = document.createElement("div");
+      row.className = "unit-row";
+      row.setAttribute("data-unit", u.id);
+
+      var chev = document.createElement("span");
+      chev.className = "unit-chevron" + (u.state === "expended" || !u.ready ? " dim" : "");
+      chev.setAttribute("aria-hidden", "true");
+      row.appendChild(chev);
+
+      var idCol = document.createElement("div");
+      var idLine = document.createElement("div");
+      idLine.className = "unit-id";
+      idLine.appendChild(document.createTextNode(u.id));
+      var src = u.source || "sim";
+      if (src === "live" || src === "mock") {
+        var badge = document.createElement("span");
+        badge.className = "badge " + src;
+        badge.textContent = src.toUpperCase();
+        idLine.appendChild(badge);
+      }
+      var type = document.createElement("div");
+      type.className = "unit-type";
+      type.textContent = VARIANT_TYPE[u.variant] || ("Var " + (u.variant || "?"));
+      idCol.appendChild(idLine);
+      idCol.appendChild(type);
+      row.appendChild(idCol);
+
+      var pct = document.createElement("div");
+      pct.className = "unit-pct";
+      if (u.id === "U1") {
+        pct.textContent = Math.round((u.battery_pct || 0) * 100) + "%";
+      } else {
+        pct.textContent = "—";
+      }
+      row.appendChild(pct);
+
+      var st = unitStatusPhrase(u);
+      var status = document.createElement("div");
+      status.className = "unit-status" + (st.cls ? (" " + st.cls) : "");
+      status.textContent = st.text;
+      row.appendChild(status);
 
       if (u.id === "U1" && u.state !== "expended") {
+        var extra = document.createElement("div");
+        extra.className = "u1-extra";
         var tilt = document.createElement("div");
         tilt.className = "tilt";
         tilt.id = "u1-tilt";
@@ -1319,41 +1491,163 @@
         horizon.className = "tilt-horizon";
         horizon.id = "u1-tilt-horizon";
         tilt.appendChild(horizon);
-        card.appendChild(tilt);
+        extra.appendChild(tilt);
         var tiltTxt = document.createElement("div");
         tiltTxt.className = "meta";
         tiltTxt.id = "u1-tilt-text";
-        card.appendChild(tiltTxt);
+        extra.appendChild(tiltTxt);
+        row.appendChild(extra);
         updateU1Tilt(u);
       }
-      el.rack.appendChild(card);
+      el.rack.appendChild(row);
     });
   }
 
   function updatePlan(s) {
     var plan = s.plan || [];
-    var key = JSON.stringify(plan) + "|" + !!s.replay;
-    if (key === lastPlanKey) return;
+    var tracks = s.tracks || [];
+    var units = s.units || [];
+    var pendingLines = plan.filter(function (ln) { return !ln.approved; });
+    var focusTrackId = pendingLines.length ? pendingLines[0].track_id : null;
+    var focusTrack = null;
+    for (var ti = 0; ti < tracks.length; ti++) {
+      if (tracks[ti].id === focusTrackId) { focusTrack = tracks[ti]; break; }
+    }
+    var key = JSON.stringify(plan) + "|" + !!s.replay + "|" +
+      (focusTrack ? [focusTrack.label, Math.round(Number(focusTrack.eta) || 0)].join(":") : "");
+    if (key === lastPlanKey) {
+      updateDecisionWindow(s);
+      return;
+    }
     lastPlanKey = key;
     el.planLines.innerHTML = "";
-    var pendingLines = plan.filter(function (ln) { return !ln.approved; });
-    pendingLines.forEach(function (ln) {
-      var div = document.createElement("div");
-      div.className = "plan-line";
-      div.textContent = ln.unit_id + " → " + ln.track_id + " " +
-        String(ln.action || "").replace(/_/g, " ") +
-        " (" + (ln.reason || "") + ")";
-      el.planLines.appendChild(div);
-    });
-    if (!pendingLines.length) {
-      el.planLines.textContent = "No pending plan";
+
+    if (el.planBadge) {
+      if (pendingLines.length && !s.replay) {
+        el.planBadge.hidden = false;
+        el.planBadge.textContent = pendingLines.length + " PENDING";
+      } else {
+        el.planBadge.hidden = true;
+      }
     }
-    if (pendingLines.length > 0 && !s.replay) {
-      el.planPanel.classList.add("has-pending");
-    } else {
+
+    if (!pendingLines.length || s.replay) {
+      var empty = document.createElement("div");
+      empty.className = "officer-empty";
+      empty.textContent = s.replay ? "Replay — scoring only, no plan approvals" : "No pending plan";
+      el.planLines.appendChild(empty);
       el.planPanel.classList.remove("has-pending");
+      el.approve.disabled = true;
+      el.approve.textContent = "APPROVE";
+      if (el.hold) el.hold.disabled = true;
+      return;
     }
-    el.approve.disabled = pendingLines.length === 0 || !!s.replay;
+
+    var ln = pendingLines[0];
+    var unit = null;
+    for (var ui = 0; ui < units.length; ui++) {
+      if (units[ui].id === ln.unit_id) { unit = units[ui]; break; }
+    }
+
+    var focus = document.createElement("div");
+    focus.className = "officer-focus";
+    var left = document.createElement("div");
+    var idEl = document.createElement("div");
+    idEl.className = "officer-id";
+    idEl.textContent = ln.track_id;
+    var chip = document.createElement("span");
+    var label = (focusTrack && focusTrack.label) || "unknown";
+    chip.className = "label-chip " + label;
+    chip.textContent = LABEL_TEXT[label] || String(label);
+    idEl.appendChild(chip);
+    left.appendChild(idEl);
+    focus.appendChild(left);
+
+    var dw = document.createElement("div");
+    dw.className = "decision-window";
+    var dwLab = document.createElement("div");
+    dwLab.className = "dw-label";
+    dwLab.textContent = "Decision window";
+    var dwTime = document.createElement("div");
+    dwTime.className = "dw-time";
+    dwTime.id = "decision-eta";
+    dwTime.textContent = formatEta(focusTrack && focusTrack.eta);
+    dw.appendChild(dwLab);
+    dw.appendChild(dwTime);
+    focus.appendChild(dw);
+    el.planLines.appendChild(focus);
+
+    var head = document.createElement("p");
+    head.className = "officer-headline";
+    head.textContent = actionHeadline(ln.action);
+    el.planLines.appendChild(head);
+    var sub = document.createElement("p");
+    sub.className = "officer-sub";
+    sub.textContent = ln.reason || "Resolve classification before the final decision.";
+    el.planLines.appendChild(sub);
+
+    if (pendingLines.length > 1) {
+      var more = document.createElement("p");
+      more.className = "officer-sub";
+      more.textContent = (pendingLines.length - 1) + " more pending line" +
+        (pendingLines.length > 2 ? "s" : "") + " will approve with this action.";
+      el.planLines.appendChild(more);
+    }
+
+    var fit = document.createElement("div");
+    fit.className = "fit-card";
+    var fitLeft = document.createElement("div");
+    var fitTitle = document.createElement("div");
+    fitTitle.className = "fit-title";
+    var vType = unit ? (VARIANT_TYPE[unit.variant] || ("Var " + unit.variant)) : "—";
+    fitTitle.textContent = ln.unit_id + " / " + vType + " core";
+    var fitMeta = document.createElement("div");
+    fitMeta.className = "fit-meta";
+    if (unit && unit.id === "U1") {
+      fitMeta.textContent = Math.round((unit.battery_pct || 0) * 100) + "% battery · " +
+        (unit.ready ? "healthy" : "not ready");
+    } else if (unit) {
+      fitMeta.textContent = String(unit.state || "rack") +
+        (unit.ready ? " · ready" : " · not ready");
+    } else {
+      fitMeta.textContent = "Unit unavailable";
+    }
+    fitLeft.appendChild(fitTitle);
+    fitLeft.appendChild(fitMeta);
+    fit.appendChild(fitLeft);
+    var fitTag = document.createElement("div");
+    fitTag.className = "fit-tag";
+    fitTag.textContent = "Lowest-cost fit";
+    fit.appendChild(fitTag);
+    el.planLines.appendChild(fit);
+
+    var cls = document.createElement("div");
+    cls.className = "class-block";
+    var clsTitle = document.createElement("div");
+    clsTitle.className = "class-title";
+    clsTitle.textContent = "If classification changes";
+    cls.appendChild(clsTitle);
+    var ul = document.createElement("ul");
+    [
+      ["Threat", "engage"],
+      ["Decoy", "return unused"],
+      ["Unresolved", "treat as threat. Officer approval required."]
+    ].forEach(function (pair) {
+      var li = document.createElement("li");
+      var strong = document.createElement("strong");
+      strong.textContent = pair[0];
+      li.appendChild(strong);
+      li.appendChild(document.createTextNode(" → " + pair[1]));
+      ul.appendChild(li);
+    });
+    cls.appendChild(ul);
+    el.planLines.appendChild(cls);
+
+    el.planPanel.classList.add("has-pending");
+    el.approve.disabled = false;
+    el.approve.textContent = approveLabel(ln.action);
+    if (el.hold) el.hold.disabled = false;
+    updateDecisionWindow(s);
   }
 
   function updateEvents(s) {
@@ -1376,6 +1670,12 @@
   }
 
   document.getElementById("approve-btn").addEventListener("click", approveVisible);
+  if (el.hold) {
+    el.hold.addEventListener("click", function () {
+      /* Hold = do not approve; keep watching the decision window. */
+      el.hold.blur();
+    });
+  }
   document.getElementById("btn-start").addEventListener("click", function () {
     send({ type: "start" });
   });
@@ -1638,6 +1938,8 @@
       first.focus();
     }
   });
+
+  
 
   connect();
 })();

@@ -43,13 +43,13 @@ def _juniper_assets() -> list[Asset]:
 
 
 def _juniper_units() -> list[Unit]:
-    # Docked in the interceptor rack bay (map pad ~500–628 x, pads at y≈413).
+    # Docked in the interceptor rack bay (map pad ~488–620 x, pads at y≈405).
     # Keep unit-to-track proposal distances under 600 for Variant A at 50% battery.
     return [
-        _unit("U1", 511.0, 413.0, "mock"),
-        _unit("U2", 539.0, 413.0, "sim"),
-        _unit("U3", 567.0, 413.0, "sim"),
-        _unit("U4", 595.0, 413.0, "sim"),
+        _unit("U1", 500.0, 405.0, "mock"),
+        _unit("U2", 536.0, 405.0, "sim"),
+        _unit("U3", 572.0, 405.0, "sim"),
+        _unit("U4", 608.0, 405.0, "sim"),
     ]
 
 
@@ -175,10 +175,10 @@ def juniper_night2() -> dict:
     # Approach along rack latitude so unit-to-track at proposal stays under 600.
     c_start = (comms[0] - 800.0, 413.0)  # (-160, 413); ETA = 20.0 s
     units = [
-        _unit("U1", 511.0, 413.0, "mock"),
-        _unit("U2", 539.0, 413.0, "sim"),
-        _unit("U3", 567.0, 413.0, "sim"),
-        _unit("U4", 595.0, 413.0, "sim"),
+        _unit("U1", 500.0, 405.0, "mock"),
+        _unit("U2", 536.0, 405.0, "sim"),
+        _unit("U3", 572.0, 405.0, "sim"),
+        _unit("U4", 608.0, 405.0, "sim"),
     ]
     return {
         "name": "juniper_night2",
