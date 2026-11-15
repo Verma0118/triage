@@ -193,6 +193,41 @@ def _track_age(world, track_id: str) -> float:
     return st.age if st is not None else 0.0
 
 
+def _variant_fast_enough(unit: Unit, track: Track) -> bool:
+    return unit.speed > track.speed * config.CAPABLE_SPEED_MARGIN
+
+
+def _roster_has_fast_enough(units: list[Unit], track: Track) -> bool:
+    return any(_variant_fast_enough(u, track) for u in units)
+
+
+def _fastest_ready_rack(units: list[Unit], plan: list[PlanLine]) -> Unit | None:
+    ready = [
+        u
+        for u in units
+        if u.state == "rack" and u.ready and not _unit_has_line(plan, u.id)
+    ]
+    if not ready:
+        return None
+    ready.sort(key=lambda u: (-u.speed, u.id))
+    return ready[0]
+
+
+def _log_gap(world, track: Track) -> None:
+    if track.id in world._gapped_tracks:
+        return
+    world._gapped_tracks.add(track.id)
+    gap = {"gap_type": "fast_threat", "track_id": track.id}
+    world.gaps.append(gap)
+    world.events.append(
+        Event(
+            t=world.t,
+            kind="gap",
+            msg=f"gap fast_threat on {track.id}",
+        )
+    )
+
+
 def _propose_new_assignments(world) -> None:
     candidates = [
         t
@@ -208,9 +243,29 @@ def _propose_new_assignments(world) -> None:
     candidates.sort(key=lambda t: (-t.priority, t.id))
 
     for track in candidates:
-        # S3: skip full gap/best_effort (S6). If nobody is capable, leave unassigned.
         unit = _cheapest_capable(world.units, track, world.plan)
         if unit is None:
+            # Rule 6: capability gap if no roster variant is fast enough.
+            if not _roster_has_fast_enough(world.units, track):
+                _log_gap(world, track)
+                if track.label == "threat" and track.id not in world._best_effort_tracks:
+                    be = _fastest_ready_rack(world.units, world.plan)
+                    if be is not None:
+                        world._best_effort_tracks.add(track.id)
+                        _add_line(
+                            world,
+                            be.id,
+                            track.id,
+                            "best_effort",
+                            "capability gap, best effort",
+                        )
+                        target = track.target_asset or "asset"
+                        alert = f"Shelter: {target}"
+                        if alert not in world.alerts:
+                            world.alerts.append(alert)
+                            world.events.append(
+                                Event(t=world.t, kind="shelter", msg=alert)
+                            )
             continue
         action = "engage" if track.label == "threat" else "launch_early"
         reason = (

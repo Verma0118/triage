@@ -307,6 +307,48 @@
       stroke: #0b0f14;
       stroke-width: 3px;
     }
+    #after-overlay[hidden] { display: none !important; }
+    #after-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      padding: 1rem;
+    }
+    #after-dialog {
+      background: var(--panel);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: auto;
+      padding: 1rem 1.1rem;
+      color: var(--text);
+    }
+    #after-dialog h2, #after-dialog h3 { color: var(--text); text-transform: none; }
+    #after-brief {
+      white-space: pre-wrap;
+      background: #0a1018;
+      border: 1px solid var(--border);
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      max-height: 12rem;
+      overflow: auto;
+    }
+    .placeholder-tag {
+      display: inline-block;
+      margin-left: 0.4rem;
+      padding: 0.1rem 0.4rem;
+      border: 1px solid var(--warn);
+      color: var(--warn);
+      font-weight: 800;
+      font-size: 0.75rem;
+    }
+    .after-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
   </style>
 </head>
 <body>
@@ -370,8 +412,28 @@
       <button type="button" id="btn-pause">Pause</button>
       <button type="button" id="btn-reset">Reset</button>
       <button type="button" id="btn-mock" aria-pressed="true">Mock</button>
+      <button type="button" id="btn-after">After-action</button>
     </div>
   </section>
+
+  <div id="after-overlay" hidden>
+    <div id="after-dialog" role="dialog" aria-modal="true" aria-labelledby="after-title">
+      <h2 id="after-title">After-action</h2>
+      <p id="after-gaps"></p>
+      <div id="after-card"></div>
+      <div id="after-brief-block">
+        <h3>Velocity brief</h3>
+        <pre id="after-brief"></pre>
+        <button type="button" id="btn-copy-brief">Copy</button>
+      </div>
+      <h3>Events</h3>
+      <ol id="after-events"></ol>
+      <div class="after-actions">
+        <button type="button" id="btn-swap">SWAP</button>
+        <button type="button" id="btn-after-close">Close</button>
+      </div>
+    </div>
+  </div>
 
   <section id="events-section" class="panel" aria-labelledby="events-heading">
     <h2 id="events-heading">Events</h2>
@@ -885,10 +947,147 @@
   });
 
   document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && afterOpen) {
+      ev.preventDefault();
+      closeAfter();
+      return;
+    }
     if (ev.key === "a" || ev.key === "A") {
       if (ev.target && (ev.target.tagName === "INPUT" || ev.target.tagName === "TEXTAREA")) return;
+      if (afterOpen) return;
       ev.preventDefault();
       approveVisible();
+    }
+  });
+
+  var afterOverlay = document.getElementById("after-overlay");
+  var afterDialog = document.getElementById("after-dialog");
+  var afterOpen = false;
+  var afterOpener = null;
+  var afterFocusables = [];
+  var cardsCache = null;
+
+  function getFocusable(root) {
+    return Array.prototype.slice.call(
+      root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    ).filter(function (n) { return !n.disabled && n.offsetParent !== null; });
+  }
+
+  function openAfter() {
+    afterOpener = document.activeElement;
+    afterOpen = true;
+    afterOverlay.hidden = false;
+    populateAfter().then(function () {
+      afterFocusables = getFocusable(afterDialog);
+      var first = afterFocusables[0] || afterDialog;
+      first.focus();
+    });
+  }
+
+  function closeAfter() {
+    afterOpen = false;
+    afterOverlay.hidden = true;
+    if (afterOpener && afterOpener.focus) afterOpener.focus();
+  }
+
+  function populateAfter() {
+    var gaps = (state && state.gaps) || [];
+    document.getElementById("after-gaps").textContent = "Gaps logged: " + gaps.length;
+    var evRoot = document.getElementById("after-events");
+    evRoot.innerHTML = "";
+    ((state && state.events) || []).slice().reverse().forEach(function (e) {
+      var li = document.createElement("li");
+      li.textContent = "t=" + Number(e.t).toFixed(1) + " [" + e.kind + "] " + e.msg;
+      evRoot.appendChild(li);
+    });
+    var swapBtn = document.getElementById("btn-swap");
+    var phase = state ? state.phase : "idle";
+    swapBtn.disabled = !(phase === "idle" || phase === "ended");
+
+    var briefP = fetch("/gap_brief").then(function (r) { return r.text(); }).then(function (txt) {
+      document.getElementById("after-brief").textContent = txt || "(no gap brief yet)";
+    }).catch(function () {
+      document.getElementById("after-brief").textContent = "(brief unavailable)";
+    });
+
+    var cardP = (cardsCache
+      ? Promise.resolve(cardsCache)
+      : fetch("/cards.json").then(function (r) { return r.json(); }).then(function (d) {
+          cardsCache = d;
+          return d;
+        })
+    ).then(function (cards) {
+      var cardRoot = document.getElementById("after-card");
+      cardRoot.innerHTML = "";
+      var card = null;
+      var gapType = gaps.length ? (gaps[0].gap_type || "fast_threat") : "fast_threat";
+      for (var i = 0; i < (cards || []).length; i++) {
+        if (cards[i].gap_type === gapType) { card = cards[i]; break; }
+      }
+      if (!card && cards && cards[0]) card = cards[0];
+      if (!card) {
+        cardRoot.textContent = "No card.";
+        return;
+      }
+      var title = document.createElement("div");
+      title.innerHTML = "";
+      var strong = document.createElement("strong");
+      strong.textContent = "Reconfigure " + (card.unit_id || "U1") + " → Variant " + (card.to_variant || "?");
+      title.appendChild(strong);
+      if (card.placeholder) {
+        var tag = document.createElement("span");
+        tag.className = "placeholder-tag";
+        tag.textContent = "PLACEHOLDER";
+        title.appendChild(tag);
+      }
+      var meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = "Swap: " + (card.swap || []).join(", ") +
+        " · Keep: " + (card.keep || []).join(", ") +
+        " · Reuse " + (card.reuse_pct != null ? card.reuse_pct + "%" : "—") +
+        " · Δ$" + (card.cost_delta != null ? card.cost_delta : "—") +
+        " · " + (card.swap_minutes != null ? card.swap_minutes + " min" : "") +
+        " · " + (card.source || "");
+      cardRoot.appendChild(title);
+      cardRoot.appendChild(meta);
+      swapBtn.dataset.toVariant = card.to_variant || "B";
+      swapBtn.dataset.unitId = card.unit_id || "U1";
+    }).catch(function () {
+      document.getElementById("after-card").textContent = "Card unavailable.";
+    });
+
+    return Promise.all([briefP, cardP]);
+  }
+
+  document.getElementById("btn-after").addEventListener("click", openAfter);
+  document.getElementById("btn-after-close").addEventListener("click", closeAfter);
+  document.getElementById("btn-copy-brief").addEventListener("click", function () {
+    var txt = document.getElementById("after-brief").textContent || "";
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt);
+    }
+  });
+  document.getElementById("btn-swap").addEventListener("click", function () {
+    var btn = document.getElementById("btn-swap");
+    send({
+      type: "swap_variant",
+      unit_id: btn.dataset.unitId || "U1",
+      variant: btn.dataset.toVariant || "B"
+    });
+    closeAfter();
+  });
+  afterDialog.addEventListener("keydown", function (ev) {
+    if (!afterOpen || ev.key !== "Tab") return;
+    afterFocusables = getFocusable(afterDialog);
+    if (!afterFocusables.length) return;
+    var first = afterFocusables[0];
+    var last = afterFocusables[afterFocusables.length - 1];
+    if (ev.shiftKey && document.activeElement === first) {
+      ev.preventDefault();
+      last.focus();
+    } else if (!ev.shiftKey && document.activeElement === last) {
+      ev.preventDefault();
+      first.focus();
     }
   });
 

@@ -133,7 +133,7 @@ def move_units(
         elif last.action == "engage":
             _pursue_engage(unit, track, dt, events, t)
         elif last.action == "best_effort":
-            _pursue_best_effort(unit, track, dt, events, t)
+            _pursue_best_effort(unit, track, dt, events, t, plan)
 
 
 def _pursue_standoff(unit: Unit, track: Track, dt: float) -> None:
@@ -177,16 +177,50 @@ def _pursue_engage(
 
 
 def _pursue_best_effort(
-    unit: Unit, track: Track, dt: float, events: list[Event], t: float
+    unit: Unit,
+    track: Track,
+    dt: float,
+    events: list[Event],
+    t: float,
+    plan: list[PlanLine],
 ) -> None:
-    """S6 behavior stub: close in, then miss. Non-capable never neutralizes."""
+    """Close in, then miss. Non-capable never neutralizes (deterministic)."""
     unit.state = "outbound"
     nx, ny, _ = _move_toward(unit.x, unit.y, track.x, track.y, unit.speed, dt)
     unit.x, unit.y = nx, ny
     dist = math.hypot(track.x - unit.x, track.y - unit.y)
-    if dist <= config.INTERCEPT_RADIUS:
+    capable = unit.speed > track.speed * config.CAPABLE_SPEED_MARGIN
+    # Compare to last tick's distance (track moves before units each step).
+    prev = getattr(unit, "_be_prev_dist", None)
+    miss = False
+    if capable:
+        miss = dist <= config.INTERCEPT_RADIUS
+    else:
+        chase = max(config.STANDOFF_RADIUS, 50.0)
+        if dist <= config.INTERCEPT_RADIUS:
+            miss = True
+        elif (
+            prev is not None
+            and dist <= chase
+            and dist >= prev - 1e-9
+        ):
+            miss = True
+    unit._be_prev_dist = dist
+    if miss:
         events.append(
             Event(t=t, kind="miss", msg="could not match speed")
         )
         unit.state = "returning"
         unit.assigned_track = None
+        if hasattr(unit, "_be_prev_dist"):
+            delattr(unit, "_be_prev_dist")
+        # Drop best_effort lines so the unit does not relaunch after returning.
+        plan[:] = [
+            ln
+            for ln in plan
+            if not (
+                ln.unit_id == unit.id
+                and ln.track_id == track.id
+                and ln.action == "best_effort"
+            )
+        ]

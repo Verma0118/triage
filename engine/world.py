@@ -31,6 +31,8 @@ class World:
         self._score_state: dict[str, ScoreState] = {}
         self._ever_proposed: set[str] = set()
         self._decoy_hold: dict[str, float] = {}
+        self._gapped_tracks: set[str] = set()
+        self._best_effort_tracks: set[str] = set()
 
     def load_scenario(self, name: str) -> None:
         data = get_scenario(name)
@@ -55,6 +57,8 @@ class World:
         self._score_state = {}
         self._ever_proposed = set()
         self._decoy_hold = {}
+        self._gapped_tracks = set()
+        self._best_effort_tracks = set()
         self.units = data["units"]
         self._apply_kept_variants()
 
@@ -125,11 +129,42 @@ class World:
         if ctype == "approve":
             return self._approve(cmd.get("line_ids", []))
         if ctype == "swap_variant":
-            # S6.
-            return []
+            return self._swap_variant(cmd.get("unit_id"), cmd.get("variant"))
         if ctype == "set_mock":
             return []
         return []
+
+    def _swap_variant(self, unit_id, variant) -> list:
+        """Swap only in idle or ended. Variants persist across load/reset."""
+        import config
+
+        if self.phase not in ("idle", "ended"):
+            return []
+        if not isinstance(unit_id, str) or not isinstance(variant, str):
+            return []
+        if variant not in config.VARIANTS:
+            return []
+        unit = next((u for u in self.units if u.id == unit_id), None)
+        if unit is None:
+            return []
+        spec = config.VARIANTS[variant]
+        unit.variant = variant
+        unit.speed = spec["speed"]
+        unit.max_range = spec["max_range"]
+        unit.cost = spec["cost"]
+        unit.range = unit.max_range * unit.battery_pct
+        self._kept_variants[unit_id] = variant
+        self.events.append(
+            Event(
+                t=self.t,
+                kind="swap",
+                msg=f"swapped {unit_id} to variant {variant}",
+            )
+        )
+        effects: list = []
+        if unit_id == "U1":
+            effects.append(("set_name", "U1", f"TRIAGE-{variant}-001"))
+        return effects
 
     def _approve(self, line_ids) -> list:
         effects: list = []

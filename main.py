@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 import config
@@ -111,6 +111,68 @@ def index():
 @app.get("/cards.json")
 def cards():
     return FileResponse(CARDS_PATH, media_type="application/json")
+
+
+def gap_brief_text(w: World | None = None) -> str:
+    """Velocity brief from run data. Empty string if no gap logged."""
+    w = w if w is not None else world
+    if not w.gaps:
+        return ""
+    # Prefer the fast_threat gap track (night1 C / night2 T1).
+    gap = next((g for g in w.gaps if g.get("gap_type") == "fast_threat"), w.gaps[0])
+    tid = gap.get("track_id")
+    track = next((t for t in w.tracks if t.id == tid), None)
+    if track is None:
+        # Fall back to any track that matches gap story (speed 40).
+        track = next((t for t in w.tracks if t.speed >= 40), None)
+    if track is None:
+        return ""
+
+    contact_t = None
+    for e in w.events:
+        if e.kind == "contact" and tid and tid in e.msg:
+            contact_t = e.t
+            break
+    impact_t = None
+    for e in w.events:
+        if e.kind == "impact" and tid and tid in e.msg:
+            impact_t = e.t
+            break
+    # Impact may only be reflected in track status (no dedicated event).
+    if impact_t is None and track.status == "impact":
+        impact_t = w.t
+
+    required = track.speed * config.CAPABLE_SPEED_MARGIN
+    lines = [
+        "TRIAGE VELOCITY BRIEF",
+        f"Threat speed: {track.speed:g}",
+        f"Target asset: {track.target_asset or 'unknown'}",
+    ]
+    if contact_t is not None and impact_t is not None:
+        lines.append(
+            f"Time from first contact to impact: {impact_t - contact_t:.1f} s"
+        )
+    lines.append(f"Required speed to be capable: {required:g} (threat x {config.CAPABLE_SPEED_MARGIN})")
+    lines.append(f"Shortfall vs Variant A (30): {required - 30:g}")
+    lines.append("Rack units:")
+    for u in w.units:
+        needed = track.speed * config.CAPABLE_SPEED_MARGIN
+        why = (
+            f"{u.speed:g} < {track.speed:g} x {config.CAPABLE_SPEED_MARGIN} = {needed:g}"
+            if u.speed <= needed
+            else "capable"
+        )
+        lines.append(f"  {u.id}: variant {u.variant}, speed {u.speed:g} — {why}")
+    lines.append(
+        "Keep the shared core (flight controller, ESCs, radio, software). "
+        "Propose module swaps only."
+    )
+    return "\n".join(lines) + "\n"
+
+
+@app.get("/gap_brief")
+def gap_brief():
+    return PlainTextResponse(gap_brief_text(world))
 
 
 @app.websocket("/ws")
