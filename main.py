@@ -13,8 +13,9 @@ from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 import config
-from bridge import MockUnit
+from bridge import LiveUnit, MockUnit
 from engine.world import World
+from models import Event
 
 ROOT = Path(__file__).resolve().parent
 STATIC_DIR = ROOT / "static"
@@ -26,10 +27,23 @@ log = logging.getLogger("triage")
 TICK_SLEEP = 1.0 / config.TICK_HZ
 
 world = World()
-bridge = MockUnit()
+bridge: MockUnit | LiveUnit = MockUnit()
 sockets: set[WebSocket] = set()
 _sim_task: asyncio.Task | None = None
 _stop = False
+
+
+def _hw_event(msg: str) -> None:
+    world.events.append(Event(t=world.t, kind="hw", msg=msg))
+
+
+def make_bridge(use_mock: bool | None = None):
+    """Build MockUnit or LiveUnit. LiveUnit falls back to mock source on connect fail."""
+    if use_mock is None:
+        use_mock = config.USE_MOCK
+    if use_mock:
+        return MockUnit()
+    return LiveUnit(on_event=_hw_event, autostart=True)
 
 
 def run_effects(effects: list) -> None:
@@ -43,6 +57,20 @@ def run_effects(effects: list) -> None:
             bridge.motors_off()
         elif kind == "set_name" and len(eff) >= 3:
             bridge.set_name(str(eff[2]))
+
+
+def apply_set_mock(value: bool) -> None:
+    """Close current bridge cleanly, then switch mock/live."""
+    global bridge
+    try:
+        bridge.motors_off()
+    except Exception:
+        pass
+    try:
+        bridge.close()
+    except Exception:
+        pass
+    bridge = make_bridge(use_mock=bool(value))
 
 
 async def broadcast_state() -> None:
@@ -82,7 +110,7 @@ async def lifespan(app: FastAPI):
     global _sim_task, _stop, bridge, world
     _stop = False
     world = World()
-    bridge = MockUnit()
+    bridge = make_bridge()
     sockets.clear()
     _sim_task = asyncio.create_task(sim_loop())
     yield
@@ -94,8 +122,14 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
         _sim_task = None
-    bridge.motors_off()
-    bridge.close()
+    try:
+        bridge.motors_off()
+    except Exception:
+        pass
+    try:
+        bridge.close()
+    except Exception:
+        pass
 
 
 app = FastAPI(title="Triage", lifespan=lifespan)
@@ -197,6 +231,8 @@ async def ws_endpoint(ws: WebSocket):
                 log.warning("malformed ws message (not object)")
                 continue
             try:
+                if cmd.get("type") == "set_mock":
+                    apply_set_mock(bool(cmd.get("value", True)))
                 effects = world.handle_command(cmd)
                 run_effects(effects)
             except Exception:
