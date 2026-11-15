@@ -56,13 +56,16 @@ def _decoy_waypoints() -> list[tuple[float, float]]:
     """Straight first leg ~12 s at speed 9, then 2–3 s loiter legs with ≥90° turns.
 
     First leg is not aimed inside 20° of housing/generator/comms/fuel.
-    Ends off-map so the track finishes as gone.
+    Keeps loitering until at least t=58 (spawn t=5 + 12 s straight + loiter),
+    then ends gone on a short final leg (≤3 s). No long straight exit.
     """
     speed = 9.0
+    spawn_t = 5.0
+    straight_s = 12.0
     # Close enough to the rack that every unit-to-track distance is < 600.
     start = (210.0, 50.0)
     # Fly due east (~12 s).
-    leg1_end = (start[0] + speed * 12.0, start[1])  # (308, 50)
+    leg1_end = (start[0] + speed * straight_s, start[1])  # (308, 50)
 
     # Verify cone constraint at definition time (guards against accidental edits).
     heading = 0.0  # east
@@ -73,26 +76,31 @@ def _decoy_waypoints() -> list[tuple[float, float]]:
         diff = abs((to_a - heading + math.pi) % (2 * math.pi) - math.pi)
         assert math.degrees(diff) > 20.0, f"decoy first leg aims at {name}"
 
-    # Loiter box: N/W/S/E legs of 2–3 s with 90° turns, then exit off-map south.
+    # Loiter box: N/W/S/E legs of 2–3 s with 90° turns until past t=58, then short end.
     wps: list[tuple[float, float]] = [start, leg1_end]
     x, y = leg1_end
-    pattern = [
-        (0.0, 1.0, 2.5),
-        (-1.0, 0.0, 2.5),
-        (0.0, -1.0, 2.5),
-        (1.0, 0.0, 2.5),
-        (0.0, 1.0, 2.5),
-        (-1.0, 0.0, 3.0),
-        (0.0, -1.0, 2.5),
-        (1.0, 0.0, 2.5),
-        (0.0, 1.0, 2.5),
-        (-1.0, 0.0, 2.5),
-        (0.0, -1.0, 20.0),  # long south leg off-map (y -> negative)
+    loiter_dirs = [
+        (0.0, 1.0),
+        (-1.0, 0.0),
+        (0.0, -1.0),
+        (1.0, 0.0),
     ]
-    for dx, dy, secs in pattern:
+    t_end = spawn_t + straight_s  # ~17
+    i = 0
+    while t_end < 58.0:
+        dx, dy = loiter_dirs[i % 4]
+        secs = 2.5 if (i % 5) != 4 else 3.0
         x = x + dx * speed * secs
         y = y + dy * speed * secs
         wps.append((x, y))
+        t_end += secs
+        i += 1
+    # Short final leg (≤3 s) then gone — no long straight exit.
+    dx, dy = loiter_dirs[i % 4]
+    secs = 2.5
+    x = x + dx * speed * secs
+    y = y + dy * speed * secs
+    wps.append((x, y))
     return wps
 
 

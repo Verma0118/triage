@@ -103,7 +103,7 @@ VARIANTS = {                           # speeds are map units per second, tuned 
   "A": {"speed": 30, "max_range": 1500, "cost": 2000},
   "B": {"speed": 60, "max_range": 1400, "cost": 5000},
 }
-ASSET_VALUE = {"housing": 1.0, "generator": 0.8, "comms": 0.7, "fuel": 0.7, "parking": 0.2}
+ASSET_VALUE = {"housing": 1.0, "generator": 0.8, "comms": 0.7, "fuel": 0.7, "parking": 0.4}
 
 BATTERY_V_MIN, BATTERY_V_MAX = 13.2, 16.8   # 4S. CONFIRM the pack at gate H1.
 MOTOR_TEST_VALUE = 1080

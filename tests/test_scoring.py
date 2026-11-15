@@ -332,3 +332,41 @@ def test_night1_c_is_threat_or_unknown():
         saw = True
         assert label in ("threat", "unknown"), f"t={t}: C label={label}"
     assert saw
+
+
+def test_night1_a_stays_decoy_after_first_decoy():
+    """Once A becomes decoy it never returns to unknown or threat."""
+    _world, series = _run_night1()
+    seen_decoy = False
+    for t, snap in series:
+        if "A" not in snap:
+            continue
+        _score, label, status = snap["A"]
+        if status != "active":
+            continue
+        if label == "decoy":
+            seen_decoy = True
+        if seen_decoy:
+            assert label == "decoy", f"t={t}: A left decoy -> {label}"
+    assert seen_decoy, "A never became decoy"
+
+
+def test_night1_c_threat_within_5s_and_stays_until_impact():
+    _world, series = _run_night1()
+    spawn = _spawn_t(series, "C")
+    first_threat_t = None
+    for t, snap in series:
+        if "C" not in snap:
+            continue
+        _score, label, status = snap["C"]
+        if label == "threat" and first_threat_t is None:
+            first_threat_t = t
+            assert t <= spawn + 5.0 + 1e-9, f"C became threat at t={t}, spawn={spawn}"
+        if first_threat_t is not None and status == "active":
+            assert label == "threat", f"t={t}: C left threat -> {label}"
+        if status == "impact":
+            assert first_threat_t is not None, "C impacted before becoming threat"
+    assert first_threat_t is not None, "C never became threat"
+    assert any(
+        "C" in snap and snap["C"][2] == "impact" for _t, snap in series
+    ), "C never reached impact"
