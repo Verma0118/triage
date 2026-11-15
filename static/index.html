@@ -253,9 +253,8 @@
     .workspace {
       flex: 1 1 0; min-height: 0;
       display: grid;
-      /* Wider rails for readable type; map keeps the flexible center. */
-      grid-template-columns: minmax(300px, 34vw) minmax(0, 1fr) minmax(320px, 36vw);
-      max-width: 100%;
+      /* Map-first center; rails wide enough to read, not steal the stage. */
+      grid-template-columns: minmax(260px, 300px) minmax(0, 1fr) minmax(280px, 320px);
       align-items: stretch;
       gap: 0.65rem;
       padding: 0.55rem 0.85rem 0.85rem;
