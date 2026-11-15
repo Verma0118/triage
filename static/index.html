@@ -288,7 +288,7 @@
     }
     .map-label {
       font-size: 11px; font-weight: 700; font-family: var(--sans);
-      paint-order: stroke; stroke: #0A0D10; stroke-width: 3px;
+      paint-order: stroke; stroke: #101618; stroke-width: 2.5px;
     }
 
     .right-col {
@@ -632,82 +632,70 @@
         <h2 id="map-heading">Outpost map</h2>
         <svg id="map-svg" viewBox="0 0 1000 700" role="img" aria-label="Outpost map. Track details are in the threat list.">
           <defs>
-            <pattern id="map-grid-pat" width="48" height="48" patternUnits="userSpaceOnUse">
-              <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#1A2830" stroke-width="0.8" opacity="0.55"/>
+            <pattern id="map-grid-pat" width="56" height="56" patternUnits="userSpaceOnUse">
+              <path d="M 56 0 L 0 0 0 56" fill="none" stroke="#243038" stroke-width="0.7" opacity="0.35"/>
             </pattern>
-            <radialGradient id="map-glow" cx="62%" cy="48%" r="55%">
-              <stop offset="0%" stop-color="#143028" stop-opacity="0.55"/>
-              <stop offset="45%" stop-color="#0E1A1C" stop-opacity="0.25"/>
-              <stop offset="100%" stop-color="#0A1012" stop-opacity="0"/>
-            </radialGradient>
-            <filter id="pad-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="1" stdDeviation="1.4" flood-color="#000" flood-opacity="0.5"/>
-            </filter>
             <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="1.6" result="b"/>
+              <feGaussianBlur stdDeviation="1.4" result="b"/>
               <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
-          <rect width="1000" height="700" fill="#0B1214"/>
+          <rect width="1000" height="700" fill="#101618"/>
           <rect width="1000" height="700" fill="url(#map-grid-pat)"/>
-          <rect width="1000" height="700" fill="url(#map-glow)"/>
           <g id="map-terrain">
-            <!-- radar rings -->
-            <g fill="none" stroke="#C8D5DC" stroke-opacity="0.14" stroke-width="1.1">
-              <circle cx="700" cy="350" r="90"/>
-              <circle cx="700" cy="350" r="160"/>
-              <circle cx="700" cy="350" r="230"/>
-              <circle cx="700" cy="350" r="300"/>
+            <!-- range rings — fine, quiet -->
+            <g fill="none" stroke="#9AAEB8" stroke-opacity="0.16" stroke-width="1">
+              <circle cx="700" cy="340" r="70"/>
+              <circle cx="700" cy="340" r="130"/>
+              <circle cx="700" cy="340" r="195"/>
+              <circle cx="700" cy="340" r="265"/>
+              <circle cx="700" cy="340" r="340"/>
             </g>
-            <!-- radial approach roads -->
-            <g fill="none" stroke="#2F5A48" stroke-opacity="0.45" stroke-width="10" stroke-linecap="round">
-              <path d="M700 350 L420 310"/>
-              <path d="M700 350 L520 520"/>
-              <path d="M700 350 L880 200"/>
-              <path d="M700 350 L920 480"/>
-              <path d="M700 350 L560 180"/>
+            <!-- angled road network (alive, not spokes) -->
+            <g fill="none" stroke="#3A6B55" stroke-opacity="0.42" stroke-width="14" stroke-linejoin="miter" stroke-linecap="square">
+              <polyline points="180,250 320,250 420,300 560,320 700,340"/>
+              <polyline points="700,340 780,300 880,220 960,200"/>
+              <polyline points="700,340 760,420 820,500 900,560"/>
+              <polyline points="700,340 620,420 520,500 400,560 280,600"/>
+              <polyline points="700,340 640,260 580,180 520,120"/>
             </g>
-            <g fill="none" stroke="#4A8A6A" stroke-opacity="0.25" stroke-width="2">
-              <path d="M700 350 L420 310"/>
-              <path d="M700 350 L520 520"/>
-              <path d="M700 350 L880 200"/>
-              <path d="M700 350 L920 480"/>
-              <path d="M700 350 L560 180"/>
+            <!-- outpost focus ring -->
+            <circle cx="700" cy="340" r="78" fill="none" stroke="#4AA3C7" stroke-opacity="0.85" stroke-width="2"/>
+            <!-- dashed hexagonal perimeter -->
+            <polygon points="700,262 768,300 768,380 700,418 632,380 632,300"
+                     fill="none" stroke="#D7E2E8" stroke-opacity="0.55" stroke-width="1.4" stroke-dasharray="6 5"/>
+            <!-- building cluster (static silhouette; live assets sit on top as simple pads) -->
+            <g fill="#1B3A2C" stroke="none">
+              <rect x="678" y="322" width="22" height="16"/>
+              <rect x="704" y="318" width="28" height="20"/>
+              <rect x="686" y="342" width="18" height="14"/>
+              <rect x="710" y="344" width="24" height="16"/>
+              <rect x="734" y="330" width="16" height="22"/>
+              <rect x="662" y="334" width="14" height="18"/>
             </g>
-            <!-- outpost perimeter (dashed hex-ish ellipse) -->
-            <ellipse cx="700" cy="350" rx="118" ry="100" fill="#102018" fill-opacity="0.55"
-                     stroke="#D6E2E8" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="7 6"/>
-            <text x="700" y="248" text-anchor="middle" fill="#E8F0F2" font-size="11"
-                  font-weight="650" letter-spacing="0.18em">FOB SENTINEL</text>
-            <!-- pad blocks -->
-            <g filter="url(#pad-shadow)">
-              <rect x="670" y="328" width="52" height="40" rx="0" fill="#1A3328" stroke="#3D6B55"/>
-              <rect x="728" y="268" width="48" height="36" rx="0" fill="#1A3328" stroke="#3D6B55"/>
-              <rect x="618" y="268" width="48" height="36" rx="0" fill="#1A3328" stroke="#3D6B55"/>
-              <rect x="748" y="360" width="44" height="36" rx="0" fill="#1A3328" stroke="#3D6B55"/>
-              <rect x="820" y="470" width="52" height="40" rx="0" fill="#1A3328" stroke="#3D6B55"/>
+            <text x="700" y="448" text-anchor="middle" fill="#E8F0F2" font-size="12"
+                  font-weight="650" letter-spacing="0.16em">FOB SENTINEL</text>
+            <!-- rack: quiet pad, sharp edges, 4 equal docks -->
+            <g id="rack-bay">
+              <rect x="476" y="372" width="156" height="54" fill="#121C18" stroke="#5FAE7A" stroke-width="1.5"/>
+              <rect x="476" y="372" width="156" height="15" fill="#18241E" stroke="#5FAE7A" stroke-width="1"/>
+              <text x="554" y="383" text-anchor="middle" fill="#8FD4A0" font-size="8" font-weight="700" letter-spacing="0.14em">INTERCEPTOR RACK</text>
+              <rect x="490" y="394" width="22" height="24" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="526" y="394" width="22" height="24" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="562" y="394" width="22" height="24" fill="#15241E" stroke="#3D4A5C"/>
+              <rect x="598" y="394" width="22" height="24" fill="#15241E" stroke="#3D4A5C"/>
             </g>
-            <g id="rack-bay" filter="url(#pad-shadow)">
-              <rect x="472" y="368" width="160" height="58" rx="0" fill="#101A16" stroke="#7DCF8A" stroke-width="2"/>
-              <rect x="472" y="368" width="160" height="16" fill="#15241E" stroke="#7DCF8A" stroke-width="1"/>
-              <text x="552" y="380" text-anchor="middle" fill="#7DCF8A" font-size="9" font-weight="700" letter-spacing="0.12em">INTERCEPTOR RACK</text>
-              <!-- slot pads centered on unit docks 500/536/572/608 -->
-              <rect x="488" y="392" width="24" height="26" rx="0" fill="#15241E" stroke="#3D4A5C"/>
-              <rect x="524" y="392" width="24" height="26" rx="0" fill="#15241E" stroke="#3D4A5C"/>
-              <rect x="560" y="392" width="24" height="26" rx="0" fill="#15241E" stroke="#3D4A5C"/>
-              <rect x="596" y="392" width="24" height="26" rx="0" fill="#15241E" stroke="#3D4A5C"/>
+            <!-- N -->
+            <g transform="translate(40,40)" fill="none">
+              <polygon points="0,-11 3.5,2 -3.5,2" fill="#E8F0F2"/>
+              <text y="18" text-anchor="middle" fill="#E8F0F2" font-size="11" font-weight="700">N</text>
             </g>
-            <g transform="translate(36,36)">
-              <circle r="16" fill="#101A16" stroke="#3D4A5C"/>
-              <polygon points="0,-10 3.5,2 -3.5,2" fill="#9EE0A8"/>
-              <text y="26" text-anchor="middle" fill="#9AA4B2" font-size="10" font-weight="700">N</text>
-            </g>
-            <g transform="translate(36,620)" font-size="11" fill="#B0BAC4">
-              <rect x="-6" y="-16" width="176" height="58" rx="0" fill="#101A16" fill-opacity="0.9" stroke="#2A3441"/>
-              <circle cx="8" cy="0" r="5" fill="#E06B66"/><text x="18" y="4">Threat</text>
-              <circle cx="90" cy="0" r="5" fill="#D4A017"/><text x="100" y="4">Unknown</text>
-              <circle cx="8" cy="24" r="5" fill="#5BA3C9"/><text x="18" y="28">Friendly</text>
-              <circle cx="90" cy="24" r="5" fill="#8B949E"/><text x="100" y="28">Decoy</text>
+            <!-- compact legend -->
+            <g transform="translate(28,640)" font-size="10" fill="#A8B4BC">
+              <circle cx="0" cy="0" r="4" fill="#E06B66"/><text x="10" y="3">Threat</text>
+              <circle cx="70" cy="0" r="4" fill="#D4A017"/><text x="80" y="3">Unknown</text>
+              <circle cx="150" cy="0" r="4" fill="#5BA3C9"/><text x="160" y="3">Friendly</text>
+              <circle cx="230" cy="0" r="4" fill="#8B949E"/><text x="240" y="3">Decoy</text>
             </g>
           </g>
           <g id="map-trails"></g>
@@ -802,11 +790,11 @@
     friendly: "#5BA3C9"
   };
   var ASSET_LABEL_OFFSET = {
-    housing: { x: 0, y: -36 },
-    generator: { x: 0, y: -34 },
-    comms: { x: 0, y: -40 },
-    fuel: { x: 0, y: 42 },
-    parking: { x: 0, y: 38 }
+    housing: { x: 0, y: 16 },
+    generator: { x: 0, y: 16 },
+    comms: { x: 0, y: 18 },
+    fuel: { x: 0, y: 20 },
+    parking: { x: 0, y: 16 }
   };
 
   var state = null;
@@ -965,76 +953,23 @@
   }
 
   function assetIcon(kind) {
+    // Clean outpost pads — solid blocks like the radar schematic (no toy icons).
     var g = svgEl("g");
     g.setAttribute("class", "asset-marker");
-    if (kind === "housing") {
-      var base = svgEl("rect");
-      base.setAttribute("x", "-16"); base.setAttribute("y", "-6");
-      base.setAttribute("width", "32"); base.setAttribute("height", "20");
-      base.setAttribute("fill", "#2A3441"); base.setAttribute("stroke", "#9AA4B2");
-      base.setAttribute("stroke-width", "1.5");
-      var roof = svgEl("polygon");
-      roof.setAttribute("points", "-18,-6 0,-20 18,-6");
-      roof.setAttribute("fill", "#343E4C"); roof.setAttribute("stroke", "#9AA4B2");
-      roof.setAttribute("stroke-width", "1.5");
-      var door = svgEl("rect");
-      door.setAttribute("x", "-4"); door.setAttribute("y", "2");
-      door.setAttribute("width", "8"); door.setAttribute("height", "12");
-      door.setAttribute("fill", "#0F141A"); door.setAttribute("stroke", "#6B7785");
-      g.appendChild(base); g.appendChild(roof); g.appendChild(door);
-    } else if (kind === "generator") {
-      var box = svgEl("rect");
-      box.setAttribute("x", "-14"); box.setAttribute("y", "-10");
-      box.setAttribute("width", "28"); box.setAttribute("height", "20");
-      box.setAttribute("rx", "2");
-      box.setAttribute("fill", "#2A3441"); box.setAttribute("stroke", "#9AA4B2");
-      box.setAttribute("stroke-width", "1.5");
-      var bolt = svgEl("polyline");
-      bolt.setAttribute("points", "2,-6 -4,1 2,1 -2,8");
-      bolt.setAttribute("fill", "none"); bolt.setAttribute("stroke", "#7DCF8A");
-      bolt.setAttribute("stroke-width", "2");
-      g.appendChild(box); g.appendChild(bolt);
-    } else if (kind === "comms") {
-      var mast = svgEl("line");
-      mast.setAttribute("x1", "0"); mast.setAttribute("y1", "14");
-      mast.setAttribute("x2", "0"); mast.setAttribute("y2", "-8");
-      mast.setAttribute("stroke", "#9AA4B2"); mast.setAttribute("stroke-width", "2");
-      var dish = svgEl("path");
-      dish.setAttribute("d", "M-10,-2 Q0,-18 10,-2");
-      dish.setAttribute("fill", "none"); dish.setAttribute("stroke", "#9AA4B2");
-      dish.setAttribute("stroke-width", "1.8");
-      var pad = svgEl("rect");
-      pad.setAttribute("x", "-8"); pad.setAttribute("y", "12");
-      pad.setAttribute("width", "16"); pad.setAttribute("height", "4");
-      pad.setAttribute("fill", "#2A3441"); pad.setAttribute("stroke", "#6B7785");
-      g.appendChild(pad); g.appendChild(mast); g.appendChild(dish);
-    } else if (kind === "fuel") {
-      var tank = svgEl("ellipse");
-      tank.setAttribute("cx", "0"); tank.setAttribute("cy", "0");
-      tank.setAttribute("rx", "12"); tank.setAttribute("ry", "16");
-      tank.setAttribute("fill", "#2A3441"); tank.setAttribute("stroke", "#9AA4B2");
-      tank.setAttribute("stroke-width", "1.5");
-      var band = svgEl("line");
-      band.setAttribute("x1", "-11"); band.setAttribute("y1", "0");
-      band.setAttribute("x2", "11"); band.setAttribute("y2", "0");
-      band.setAttribute("stroke", "#7DCF8A"); band.setAttribute("stroke-width", "2");
-      g.appendChild(tank); g.appendChild(band);
-    } else {
-      var lot = svgEl("rect");
-      lot.setAttribute("x", "-16"); lot.setAttribute("y", "-12");
-      lot.setAttribute("width", "32"); lot.setAttribute("height", "24");
-      lot.setAttribute("rx", "3");
-      lot.setAttribute("fill", "#243040"); lot.setAttribute("stroke", "#9AA4B2");
-      lot.setAttribute("stroke-width", "1.5");
-      lot.setAttribute("stroke-dasharray", "4 3");
-      var p = svgEl("text");
-      p.setAttribute("text-anchor", "middle"); p.setAttribute("dy", "5");
-      p.setAttribute("fill", "#9AA4B2"); p.setAttribute("font-size", "14");
-      p.setAttribute("font-family", "ui-monospace, monospace");
-      p.setAttribute("font-weight", "700");
-      p.textContent = "P";
-      g.appendChild(lot); g.appendChild(p);
-    }
+    var w = 18, h = 14;
+    if (kind === "housing") { w = 26; h = 18; }
+    else if (kind === "generator") { w = 20; h = 16; }
+    else if (kind === "comms") { w = 16; h = 20; }
+    else if (kind === "fuel") { w = 18; h = 22; }
+    else if (kind === "parking") { w = 22; h = 16; }
+    var pad = svgEl("rect");
+    pad.setAttribute("x", String(-w / 2));
+    pad.setAttribute("y", String(-h / 2));
+    pad.setAttribute("width", String(w));
+    pad.setAttribute("height", String(h));
+    pad.setAttribute("fill", "#1B3A2C");
+    pad.setAttribute("stroke", "none");
+    g.appendChild(pad);
     return g;
   }
 
@@ -1058,8 +993,10 @@
       t.setAttribute("x", off.x);
       t.setAttribute("y", off.y);
       t.setAttribute("text-anchor", "middle");
-      t.setAttribute("fill", "#E6EDF3");
+      t.setAttribute("fill", "#8A969E");
       t.setAttribute("class", "map-label");
+      t.setAttribute("font-size", "9");
+      t.setAttribute("letter-spacing", "0.06em");
       t.textContent = a.name;
       g.appendChild(hit);
       g.appendChild(icon);
@@ -1096,17 +1033,28 @@
     body.appendChild(halo);
     body.appendChild(diamond);
     body.appendChild(nose);
-    var t = svgEl("text");
-    t.setAttribute("x", "14");
-    t.setAttribute("y", "5");
-    t.setAttribute("class", "map-label");
-    t.setAttribute("font-size", "12");
-    t.setAttribute("font-weight", "700");
-    t.setAttribute("letter-spacing", "0.04em");
+    var label = svgEl("g");
+    label.setAttribute("class", "track-label");
+    var tClass = svgEl("text");
+    tClass.setAttribute("x", "12");
+    tClass.setAttribute("y", "-2");
+    tClass.setAttribute("class", "map-label");
+    tClass.setAttribute("font-size", "11");
+    tClass.setAttribute("font-weight", "750");
+    tClass.setAttribute("letter-spacing", "0.02em");
+    var tId = svgEl("text");
+    tId.setAttribute("x", "12");
+    tId.setAttribute("y", "12");
+    tId.setAttribute("class", "map-label");
+    tId.setAttribute("font-size", "10");
+    tId.setAttribute("font-weight", "600");
+    tId.setAttribute("opacity", "0.9");
+    label.appendChild(tClass);
+    label.appendChild(tId);
     g.appendChild(body);
-    g.appendChild(t);
+    g.appendChild(label);
     el.mapTracks.appendChild(g);
-    trackNodes[id] = { g: g, body: body, diamond: diamond, nose: nose, halo: halo, t: t };
+    trackNodes[id] = { g: g, body: body, diamond: diamond, nose: nose, halo: halo, t: tClass, tId: tId };
     return trackNodes[id];
   }
 
@@ -1200,7 +1148,11 @@
       node.nose.setAttribute("stroke", color);
       if (node.halo) node.halo.setAttribute("stroke", color);
       node.t.setAttribute("fill", color);
-      node.t.textContent = tr.id + " · " + (LABEL_TEXT[tr.label] || tr.label);
+      node.t.textContent = LABEL_TEXT[tr.label] || String(tr.label);
+      if (node.tId) {
+        node.tId.setAttribute("fill", color);
+        node.tId.textContent = tr.id;
+      }
       node.g.style.display = "";
       node.g.setAttribute("opacity", "1");
 
