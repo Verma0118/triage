@@ -379,7 +379,7 @@
     }
 
     #plan-panel {
-      flex: 1 1 0;
+      flex: 0.75 1 0;
       display: flex; flex-direction: column; gap: 0.55rem;
       overflow: hidden;
       min-height: 0;
@@ -610,16 +610,16 @@
     }
 
     #events-section {
-      flex: 1 1 0;
+      flex: 1.45 1 0;
       min-height: 0;
       max-height: none;
       overflow: hidden;
-      padding: 0.75rem 0.85rem;
+      padding: 0.85rem 0.9rem;
     }
     #events-section h2 {
-      margin: 0 0 0.25rem;
-      font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--muted); font-weight: 650;
+      margin: 0 0 0.55rem;
+      font-size: 1.05rem; letter-spacing: 0; text-transform: none;
+      color: #F2F5F8; font-weight: 700;
       flex: 0 0 auto;
     }
     #events-panel {
@@ -628,8 +628,67 @@
       overflow: auto;
     }
     #event-log {
-      margin: 0; padding-left: 1.15rem; color: var(--text-2); font-size: 0.82rem;
-      line-height: 1.45; max-height: none; overflow: visible;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      max-height: none;
+      overflow: visible;
+    }
+    .event-row {
+      display: grid;
+      grid-template-columns: 3.4rem 5.6rem 1fr;
+      gap: 0.55rem;
+      align-items: start;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.55rem 0.65rem;
+    }
+    .event-row .et {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #E6EDF3;
+      font-variant-numeric: tabular-nums;
+    }
+    .event-row .ek {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.35rem;
+      border-radius: 2px;
+      border: 1px solid var(--border-strong);
+      color: var(--text-2);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .event-row .ek.contact { color: #A8D4E8; border-color: #2A4A5A; background: #142028; }
+    .event-row .ek.plan { color: #E8C4A0; border-color: #6B4A32; background: #2A1E16; }
+    .event-row .ek.approve { color: #8FD4A0; border-color: #2a5a38; background: #142018; }
+    .event-row .ek.neutralized,
+    .event-row .ek.returned { color: #8FD4A0; border-color: #2a5a38; background: #142018; }
+    .event-row .ek.gap,
+    .event-row .ek.miss,
+    .event-row .ek.impact,
+    .event-row .ek.shelter { color: #F0B4B0; border-color: #6B3030; background: #2A1616; }
+    .event-row .ek.recall,
+    .event-row .ek.swap,
+    .event-row .ek.hw { color: #D4A017; border-color: #5a4a20; background: #2A2410; }
+    .event-row .em {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #E6EDF3;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+    .event-empty {
+      color: var(--text-2);
+      font-size: 0.95rem;
+      padding: 0.75rem 0.25rem;
     }
 
     #after-overlay[hidden] { display: none !important; }
@@ -747,9 +806,7 @@
             </g>
             <polyline points="0,318 95,355 210,300 340,375 490,332 640,378 790,310 910,360 1000,338"
                       fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="1.3"/>
-            <polygon points="500,265 575,308 575,392 500,435 425,392 425,308"
-                     fill="none" stroke="#D7E2E8" stroke-opacity="0.5" stroke-width="1.3" stroke-dasharray="6 5"/>
-            <text x="500" y="458" text-anchor="middle" fill="#E8F0F2" font-size="12"
+            <text x="500" y="448" text-anchor="middle" fill="#E8F0F2" font-size="12"
                   font-weight="650" letter-spacing="0.16em">FOB SENTINEL</text>
             <!-- compact interceptor rack building; slot centers 261/297/333/369 @ y=421 -->
             <g id="rack-bay">
@@ -843,7 +900,15 @@
     unknown: "#D4A017",
     friendly: "#5BA3C9"
   };
-  var SCENARIO_POOL = ["juniper_night1", "juniper_night2", "tower22"];
+  // Short live demos first — full night1 still exists for tests / after-action gap story.
+  var SCENARIO_POOL = [
+    "hot_inbound",
+    "two_front",
+    "gap_rush",
+    "clinic_raid",
+    "juniper_night2",
+    "tower22"
+  ];
 
   var state = null;
   var ws = null;
@@ -1680,17 +1745,32 @@
     if (key === lastEventsKey) return;
     lastEventsKey = key;
     el.eventLog.innerHTML = "";
-    var slice = events.slice(-30).reverse();
-    slice.forEach(function (e) {
-      var li = document.createElement("li");
-      li.textContent = "t=" + Number(e.t).toFixed(1) + " [" + e.kind + "] " + e.msg;
-      el.eventLog.appendChild(li);
-    });
+    var slice = events.slice(-40).reverse();
     if (!slice.length) {
       var empty = document.createElement("li");
-      empty.textContent = "No events yet.";
+      empty.className = "event-empty";
+      empty.textContent = "No events yet — hit Start.";
       el.eventLog.appendChild(empty);
+      return;
     }
+    slice.forEach(function (e) {
+      var li = document.createElement("li");
+      li.className = "event-row";
+      var t = document.createElement("span");
+      t.className = "et";
+      t.textContent = Number(e.t).toFixed(1) + "s";
+      var k = document.createElement("span");
+      var kind = String(e.kind || "event");
+      k.className = "ek " + kind.replace(/[^a-z0-9_-]/gi, "");
+      k.textContent = kind;
+      var m = document.createElement("span");
+      m.className = "em";
+      m.textContent = e.msg || "";
+      li.appendChild(t);
+      li.appendChild(k);
+      li.appendChild(m);
+      el.eventLog.appendChild(li);
+    });
   }
 
   document.getElementById("approve-btn").addEventListener("click", approveVisible);

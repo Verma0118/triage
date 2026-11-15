@@ -241,10 +241,157 @@ def tower22() -> dict:
     }
 
 
+def _short_decoy_waypoints() -> list[tuple[float, float]]:
+    """Faster decoy for live demos: short straight, brief loiter, gone ~t=28."""
+    speed = 11.0
+    spawn_t = 2.0
+    straight_s = 7.0
+    start = (200.0, 70.0)
+    leg1_end = (start[0] + speed * straight_s, start[1])
+    heading = 0.0
+    assets = {a.name: a for a in _juniper_assets()}
+    for name in ("housing", "generator", "clinic", "comms", "fuel", "radar"):
+        a = assets[name]
+        to_a = math.atan2(a.y - start[1], a.x - start[0])
+        diff = abs((to_a - heading + math.pi) % (2 * math.pi) - math.pi)
+        assert math.degrees(diff) > 20.0, f"short decoy aims at {name}"
+    wps: list[tuple[float, float]] = [start, leg1_end]
+    x, y = leg1_end
+    dirs = [(0.0, 1.0), (-1.0, 0.0), (0.0, -1.0), (1.0, 0.0)]
+    t_end = spawn_t + straight_s
+    i = 0
+    while t_end < 26.0:
+        dx, dy = dirs[i % 4]
+        secs = 2.0
+        x = x + dx * speed * secs
+        y = y + dy * speed * secs
+        wps.append((x, y))
+        t_end += secs
+        i += 1
+    dx, dy = dirs[i % 4]
+    wps.append((x + dx * speed * 2.0, y + dy * speed * 2.0))
+    return wps
+
+
+def hot_inbound() -> dict:
+    """~25 s: friendly in, then a real threat at housing from the west."""
+    housing = (500.0, 350.0)
+    b_start = (housing[0] - 480.0, housing[1])  # closer than night1 for pace
+    return {
+        "name": "hot_inbound",
+        "replay": False,
+        "assets": _juniper_assets(),
+        "units": _juniper_units(),
+        "spawns": [
+            {
+                "t": 0.5,
+                "id": "F1",
+                "speed": 18.0,
+                "truth": "friendly",
+                "registered_friendly": True,
+                "target_asset": None,
+                "waypoints": _friendly_waypoints(),
+            },
+            {
+                "t": 2.0,
+                "id": "B",
+                "speed": 22.0,
+                "truth": "real",
+                "registered_friendly": False,
+                "target_asset": "housing",
+                "waypoints": [b_start, housing],
+            },
+        ],
+    }
+
+
+def two_front() -> dict:
+    """~35 s: decoy + real threat overlapping for busy map."""
+    housing = (500.0, 350.0)
+    b_start = (housing[0] - 500.0, housing[1] + 20.0)
+    return {
+        "name": "two_front",
+        "replay": False,
+        "assets": _juniper_assets(),
+        "units": _juniper_units(),
+        "spawns": [
+            {
+                "t": 1.0,
+                "id": "A",
+                "speed": 11.0,
+                "truth": "decoy",
+                "registered_friendly": False,
+                "target_asset": None,
+                "waypoints": _short_decoy_waypoints(),
+            },
+            {
+                "t": 3.5,
+                "id": "B",
+                "speed": 20.0,
+                "truth": "real",
+                "registered_friendly": False,
+                "target_asset": "housing",
+                "waypoints": [b_start, housing],
+            },
+        ],
+    }
+
+
+def gap_rush() -> dict:
+    """~25 s: fast threat at parking — capability gap / best-effort story."""
+    parking = (655.0, 520.0)
+    # ETA >= 20 at speed 40 → dist >= 800.
+    c_start = (parking[0] - 800.0, 421.0)
+    return {
+        "name": "gap_rush",
+        "replay": False,
+        "assets": _juniper_assets(),
+        "units": _juniper_units(),
+        "spawns": [
+            {
+                "t": 1.0,
+                "id": "C",
+                "speed": 40.0,
+                "truth": "real",
+                "registered_friendly": False,
+                "target_asset": "parking",
+                "waypoints": [c_start, parking],
+            },
+        ],
+    }
+
+
+def clinic_raid() -> dict:
+    """~22 s: real threat aimed at high-value clinic from the south."""
+    clinic = (620.0, 380.0)
+    start = (clinic[0] - 40.0, clinic[1] + 300.0)  # from south, still on-map
+    return {
+        "name": "clinic_raid",
+        "replay": False,
+        "assets": _juniper_assets(),
+        "units": _juniper_units(),
+        "spawns": [
+            {
+                "t": 1.0,
+                "id": "T1",
+                "speed": 20.0,
+                "truth": "real",
+                "registered_friendly": False,
+                "target_asset": "clinic",
+                "waypoints": [start, clinic],
+            },
+        ],
+    }
+
+
 SCENARIOS: dict[str, dict] = {
     "juniper_night1": juniper_night1(),
     "juniper_night2": juniper_night2(),
     "tower22": tower22(),
+    "hot_inbound": hot_inbound(),
+    "two_front": two_front(),
+    "gap_rush": gap_rush(),
+    "clinic_raid": clinic_raid(),
 }
 
 
