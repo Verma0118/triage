@@ -457,3 +457,71 @@ def test_night1_flow_with_battery_pct_half():
     u1 = _unit_by_id(world, "U1")
     assert u1.state == "rack"
     assert any(e.kind == "returned" for e in world.events)
+
+
+# --- S3.1: wait for new-contact classification ---------------------------------
+
+
+def test_no_plan_line_for_track_younger_than_new_contact():
+    world = _night1_world()
+    world.handle_command({"type": "start"})
+    for _ in range(3000):
+        world.step(config.DT)
+        for line in world.plan:
+            st = world._score_state.get(line.track_id)
+            age = st.age if st is not None else 0.0
+            # Line may linger after the track ages; only check at first appearance.
+            # Verify: when a line first appears for a track, age was already >= NEW_CONTACT.
+            pass
+        # Stronger: any track with age < NEW_CONTACT must have no line yet.
+        for track in world.tracks:
+            st = world._score_state.get(track.id)
+            age = st.age if st is not None else 0.0
+            if age < config.NEW_CONTACT_SECONDS:
+                assert _active_line_for_track_safe(world, track.id) is None, (
+                    f"t={world.t}: track {track.id} age={age} has a plan line"
+                )
+        if world.phase == "ended":
+            break
+
+
+def _active_line_for_track_safe(world: World, track_id: str):
+    for line in world.plan:
+        if line.track_id == track_id:
+            return line
+    return None
+
+
+def test_night1_b_first_line_is_engage_never_launch_early():
+    """With 2 s delay, B's only launch line is engage; never U?:B:launch_early."""
+    world = _night1_world()
+    world.handle_command({"type": "start"})
+    first_seen: dict[str, float] = {}
+    b_actions: list[str] = []
+    a_first = None
+    b_unit = None
+    for _ in range(3000):
+        world.step(config.DT)
+        for line in world.plan:
+            if line.track_id == "B":
+                if line.action not in b_actions:
+                    b_actions.append(line.action)
+                if line.action == "engage":
+                    b_unit = line.unit_id
+            if line.track_id == "A" and line.action == "launch_early" and a_first is None:
+                a_first = line.unit_id
+            if ":B:launch_early" in line.id:
+                raise AssertionError(f"unexpected launch_early for B: {line.id}")
+        for line in world.plan:
+            if line.approved:
+                continue
+            if line.id not in first_seen:
+                first_seen[line.id] = world.t
+            if world.t - first_seen[line.id] + 1e-12 >= 2.0:
+                world.handle_command({"type": "approve", "line_ids": [line.id]})
+        if world.phase == "ended":
+            break
+
+    assert b_actions == ["engage"], f"B actions={b_actions}"
+    assert a_first == "U1", f"A first unit={a_first}"
+    assert b_unit == "U2", f"B unit={b_unit}"

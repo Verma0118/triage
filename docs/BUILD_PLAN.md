@@ -203,7 +203,7 @@ Every model that goes to the UI has `to_public() -> dict` with an explicit field
 ### 7.3 Planner (`planner.py`)
 The planner keeps its lines between ticks. Rules:
 
-1. **Candidates:** active tracks labeled threat or unknown that have no line yet, sorted by priority descending.
+1. **Candidates:** active tracks labeled threat or unknown that have no line yet, sorted by priority descending. A track is not a candidate until the new-contact window has passed.
 2. **Capable** unit: state `rack`, `ready`, `unit.speed > track.speed x CAPABLE_SPEED_MARGIN`, and `unit.range >= distance(unit, track)`.
 3. **Pick** the cheapest capable unit. Tie-break: lowest unit id. Label threat -> `engage`. Label unknown -> `launch_early`.
 4. **Sticky:** once a line exists for a (unit, track) pair, proposed or approved, the planner does not move that track to another unit. Exception: the unit is still on the rack and becomes not ready. Then drop the line and re-plan the track, with the reason naming the dropped unit ("U1 not ready, reassigned").

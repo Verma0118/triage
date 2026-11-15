@@ -188,11 +188,18 @@ def _propose_transitions(world) -> None:
                     )
 
 
+def _track_age(world, track_id: str) -> float:
+    st = world._score_state.get(track_id)
+    return st.age if st is not None else 0.0
+
+
 def _propose_new_assignments(world) -> None:
     candidates = [
         t
         for t in world.tracks
-        if t.status == "active" and t.label in ("threat", "unknown")
+        if t.status == "active"
+        and t.label in ("threat", "unknown")
+        and _track_age(world, t.id) >= config.NEW_CONTACT_SECONDS
     ]
     # Tracks that already have a line are sticky — skip.
     candidates = [
