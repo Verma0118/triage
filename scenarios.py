@@ -246,6 +246,7 @@ def _short_decoy_waypoints() -> list[tuple[float, float]]:
     speed = 11.0
     spawn_t = 2.0
     straight_s = 7.0
+    # On-map; east leg must stay outside 20° of site bearings.
     start = (200.0, 70.0)
     leg1_end = (start[0] + speed * straight_s, start[1])
     heading = 0.0
@@ -274,9 +275,10 @@ def _short_decoy_waypoints() -> list[tuple[float, float]]:
 
 
 def hot_inbound() -> dict:
-    """~25 s: friendly in, then a real threat at housing from the west."""
+    """~20 s: friendly in, then a real threat at housing — starts on-map."""
     housing = (500.0, 350.0)
-    b_start = (housing[0] - 480.0, housing[1])  # closer than night1 for pace
+    # Visible immediately (inside viewBox), ~12 s to impact at speed 22.
+    b_start = (220.0, housing[1])
     return {
         "name": "hot_inbound",
         "replay": False,
@@ -293,7 +295,7 @@ def hot_inbound() -> dict:
                 "waypoints": _friendly_waypoints(),
             },
             {
-                "t": 2.0,
+                "t": 1.5,
                 "id": "B",
                 "speed": 22.0,
                 "truth": "real",
@@ -306,9 +308,9 @@ def hot_inbound() -> dict:
 
 
 def two_front() -> dict:
-    """~35 s: decoy + real threat overlapping for busy map."""
+    """~30 s: decoy + real threat overlapping; both start on-map."""
     housing = (500.0, 350.0)
-    b_start = (housing[0] - 500.0, housing[1] + 20.0)
+    b_start = (200.0, housing[1] + 15.0)
     return {
         "name": "two_front",
         "replay": False,
@@ -325,7 +327,7 @@ def two_front() -> dict:
                 "waypoints": _short_decoy_waypoints(),
             },
             {
-                "t": 3.5,
+                "t": 2.5,
                 "id": "B",
                 "speed": 20.0,
                 "truth": "real",
@@ -338,10 +340,10 @@ def two_front() -> dict:
 
 
 def gap_rush() -> dict:
-    """~25 s: fast threat at parking — capability gap / best-effort story."""
+    """~15 s: fast threat at parking — gap story, starts on the visible map."""
     parking = (655.0, 520.0)
-    # ETA >= 20 at speed 40 → dist >= 800.
-    c_start = (parking[0] - 800.0, 421.0)
+    # On-map west approach (not off-screen). Still too fast for Variant A.
+    c_start = (180.0, 500.0)
     return {
         "name": "gap_rush",
         "replay": False,
@@ -349,7 +351,7 @@ def gap_rush() -> dict:
         "units": _juniper_units(),
         "spawns": [
             {
-                "t": 1.0,
+                "t": 0.8,
                 "id": "C",
                 "speed": 40.0,
                 "truth": "real",
@@ -362,9 +364,9 @@ def gap_rush() -> dict:
 
 
 def clinic_raid() -> dict:
-    """~22 s: real threat aimed at high-value clinic from the south."""
+    """~15 s: real threat at high-value clinic — starts on-map from the south."""
     clinic = (620.0, 380.0)
-    start = (clinic[0] - 40.0, clinic[1] + 300.0)  # from south, still on-map
+    start = (600.0, 620.0)
     return {
         "name": "clinic_raid",
         "replay": False,
@@ -372,13 +374,37 @@ def clinic_raid() -> dict:
         "units": _juniper_units(),
         "spawns": [
             {
-                "t": 1.0,
+                "t": 0.8,
                 "id": "T1",
-                "speed": 20.0,
+                "speed": 22.0,
                 "truth": "real",
                 "registered_friendly": False,
                 "target_asset": "clinic",
                 "waypoints": [start, clinic],
+            },
+        ],
+    }
+
+
+def comms_push() -> dict:
+    """~15 s: threat at comms — on-map west spawn (demo stand-in for night2)."""
+    comms = (400.0, 255.0)
+    # Visible left side; unit-to-track stays under 600 for rack units.
+    c_start = (120.0, 300.0)
+    return {
+        "name": "comms_push",
+        "replay": False,
+        "assets": _juniper_assets(),
+        "units": _juniper_units(),
+        "spawns": [
+            {
+                "t": 0.8,
+                "id": "T1",
+                "speed": 28.0,
+                "truth": "real",
+                "registered_friendly": False,
+                "target_asset": "comms",
+                "waypoints": [c_start, comms],
             },
         ],
     }
@@ -392,6 +418,7 @@ SCENARIOS: dict[str, dict] = {
     "two_front": two_front(),
     "gap_rush": gap_rush(),
     "clinic_raid": clinic_raid(),
+    "comms_push": comms_push(),
 }
 
 
