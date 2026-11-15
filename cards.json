@@ -1,0 +1,16 @@
+[
+  {
+    "gap_type": "fast_threat",
+    "unit_id": "U1",
+    "to_variant": "B",
+    "swap": ["motors", "props", "battery"],
+    "keep": ["flight controller", "ESCs", "radio", "software"],
+    "reuse_pct": 80,
+    "cost_delta": 3000,
+    "swap_minutes": 15,
+    "source": "Kearney Velocity AI",
+    "velocity_stage": "Build",
+    "generated_at": "2026-11-14",
+    "placeholder": true
+  }
+]
