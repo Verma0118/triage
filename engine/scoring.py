@@ -14,6 +14,7 @@ class ScoreState:
     ema: float = 0.0
     hist_acc: float = 0.0
     age: float = 0.0
+    seeded: bool = False
 
 
 def angle_diff_rad(a: float, b: float) -> float:
@@ -202,14 +203,22 @@ def score_track(
     raw = h_pts + s_pts + sp_pts + u_pts
     track.raw_score = raw
 
-    # Exponential smoothing toward raw with time constant SCORE_TAU.
-    alpha = 1.0 - math.exp(-dt / config.SCORE_TAU) if config.SCORE_TAU > 0 else 1.0
-    state.ema = state.ema + (raw - state.ema) * alpha
-    track.threat_score = int(round(state.ema))
-
+    # During new-contact, do not ramp EMA from zero. On the first tick after
+    # the window ends, seed smoothed score with the current raw score.
     if state.age < config.NEW_CONTACT_SECONDS:
+        state.ema = 0.0
+        state.seeded = False
         factors = ["new contact, classifying"] + factors
+    elif not state.seeded:
+        state.ema = raw
+        state.seeded = True
+    else:
+        alpha = (
+            1.0 - math.exp(-dt / config.SCORE_TAU) if config.SCORE_TAU > 0 else 1.0
+        )
+        state.ema = state.ema + (raw - state.ema) * alpha
 
+    track.threat_score = int(round(state.ema))
     track.factors = factors
     track.label = apply_label(
         track.label, float(track.threat_score), age=state.age, registered=False

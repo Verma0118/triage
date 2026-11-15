@@ -170,14 +170,20 @@ def juniper_night1() -> dict:
 
 def juniper_night2() -> dict:
     comms = (670.0, 300.0)
-    # Fast real threat aimed at comms. ~500 out so Variant A is not capable (30 < 48)
-    # but Variant B (60) is; unit-to-track under 600.
-    c_start = (comms[0] - 500.0, comms[1])  # (170, 300)
+    # Fast threat at comms. Spawn far enough for ETA >= 20 s (dist >= 800 at speed 40).
+    # Rack sits farther west so unit-to-track at proposal stays under 600.
+    c_start = (comms[0] - 820.0, comms[1])  # (-150, 300); ETA = 20.5 s
+    units = [
+        _unit("U1", 480.0, 320.0, "mock"),
+        _unit("U2", 495.0, 320.0, "sim"),
+        _unit("U3", 510.0, 320.0, "sim"),
+        _unit("U4", 525.0, 320.0, "sim"),
+    ]
     return {
         "name": "juniper_night2",
         "replay": False,
         "assets": _juniper_assets(),
-        "units": _juniper_units(),
+        "units": units,
         "spawns": [
             {
                 "t": 3.0,
