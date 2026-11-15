@@ -1,16 +1,29 @@
 # DEMO VIDEO: TRIAGE — AI air defense for small outposts
 
-**Length:** 75–90 seconds. **Tone:** calm, realistic, tense but not dramatic.
+**Length:** ~1:50. **Tone:** calm, realistic, tense but not dramatic.
 No explosions, no gore, no real unit insignia.
 
 **The interceptor is a real CAD model.** Launches, intercepts and the bench swap are rendered in
-3D from our own GLB, cut against the live tablet screen. Keep the hardware shots restrained and
-documentary — a small drone leaving a rack at night, not an action sequence. Intercepts land as
-a clean disappearance, not a fireball.
+3D from our own GLB, cut against the tablet screen. Keep the hardware shots restrained and
+documentary — a small drone leaving a rack at night, not an action sequence. An intercept is a
+clean disappearance, not a fireball.
 
-**Source material:** every screen below is the real software. Run it with the **RUN FULL DEMO**
-button and it plays this exact sequence hands-free, so the tablet can be screen-captured
-directly rather than mocked up. Timings in brackets are the app's own sim clock.
+---
+
+## How the tablet footage is made
+
+**The screen is not a mockup.** We screen-record the real software, and it plays itself.
+
+1. Open Triage, press **RUN FULL DEMO**, screen-record until it finishes. One take, ~96 seconds,
+   hands-free. It runs night 1, the capability gap, the after-action report, the module swap and
+   night 2, approving each decision on a beat so the **APPROVED ✓** flash reads on camera.
+2. That recording gets composited onto the tablet in the 3D scene.
+3. **Sync reference:** the app prints its own clock in the header — `SIM 11.7 s`. Every mark
+   below is **D+**, seconds after RUN FULL DEMO is pressed. The sim clock on screen is the
+   ground truth; if a mark drifts, trust the clock in the footage.
+
+**Capture notes:** full-screen the browser so no tabs or address bar are visible, hide the mouse
+cursor, and don't touch the machine during the take — any click will stop the demo runner.
 
 ---
 
@@ -25,32 +38,42 @@ pending, red = threat, grey-taupe = decoy.
 
 ---
 
-## SCENE 1 — Standby (0:00–0:10)
+# PART ONE — THE OPENING (0:00–0:16)
 
-Wide shot of the quiet outpost at night. Cut to the watch officer glancing at the tablet.
+*No demo footage yet. This is the setup, shot and rendered.*
 
-On screen: the outpost perimeter with labelled zones — HOUSING, COMMS, GENERATOR, CLINIC,
-PARKING, FUEL, RADAR, OPS — the high-value ones outlined in amber. The interceptor rack sits
-inside the wire. Header reads **FOB JUNIPER · WATCH OFFICER STATION**, a live clock, and a
-green **ARMED · MONITORING** pill. Footer: **PERIMETER SECURE**.
+**0:00** Wide shot of the outpost at night. Desert, wire, a few lit structures, nothing moving.
+Wind. A generator hum.
 
-The rack shows 4 units: **Unit 1** large, with a live attitude horizon, **15.8 V · 100%**,
-Variant A, READY. Units 2–4 below it: Var A, Var B, Var A.
+**0:05** Inside the BDOC. Tight on the watch officer: one person, a radio, a coffee cup, a
+tablet. On the tablet, the Triage map sits idle — the perimeter, the labelled zones, the rack
+showing **4 OF 4 READY**, the green **ARMED · MONITORING** pill, a clock ticking.
 
-> **VO:** "Small outposts like this one have no air defense crew. Just one person on watch."
+**0:11** Cut outside to the rack: four interceptors under a shelter, rotors still, in 3D.
+
+> **VO (0:01–0:15):**
+> "Imagine you're the only person awake on a small base like this one.
+> No air defense crew. No radar operator. Just you, a screen, and a rack of four interceptors.
+> When something crosses the wire, you have seconds to decide what it is — and you only get to
+> be wrong once."
+
+**0:16** Hard cut to the tablet, full frame. **The demo footage starts here.**
 
 ---
 
-## SCENE 2 — Contact (0:10–0:24)
+# PART TWO — THE DEMO (0:16–1:52)
 
-Tablet chimes softly. Tracks appear at the perimeter edge. Close-up of the officer leaning in.
+*One continuous screen recording, composited onto the tablet. 3D cutaways are intercut over it.*
 
-- **[t+2]** Green tag: **F1 · FRIENDLY — "Registered return flight."**
-- **[t+5]** Amber tag: **A · UNKNOWN — "Classifying…"**
-- **[t+8]** Second amber tag: **B · UNKNOWN**, resolving to red **THREAT — "High confidence ·
-  heading for housing"** with a countdown **ETA 0:18**.
+### Contact — D+2 to D+9
 
-Cut to the TRACKS rail. Each track carries a visible score and the reasoning behind it:
+| Mark | On screen |
+|---|---|
+| **D+2.7** | Green tag at the perimeter: **F1 · FRIENDLY — "Registered return flight"** |
+| **D+5.7** | Amber tag: **A · UNKNOWN — "Classifying…"** |
+| **D+8.7** | Second contact: **B · UNKNOWN**, resolving to red **THREAT — "High confidence · heading for housing"**, countdown **ETA 0:18** |
+
+Push in on the TRACKS rail. Every track shows its score and the reasoning that produced it:
 
 ```
 B · THREAT                    96
@@ -60,121 +83,123 @@ B · THREAT                    96
 +20 unregistered
 ```
 
-> **VO:** "Triage scores every track and shows its work. The officer can see exactly why
-> something was called a threat."
+> **VO (0:18–0:30):**
+> "Three contacts. One is a registered flight coming home. Two are unknown.
+> Triage scores every track and shows its work — where it's heading, how steadily it's flying,
+> whether anyone registered it. No black box. The officer can see exactly why something was
+> called a threat."
 
----
+### The plan — D+7 to D+13
 
-## SCENE 3 — Triage recommends (0:24–0:38)
+| Mark | On screen |
+|---|---|
+| **D+7.6** | Plan line: **Unit 1 (Variant A) → Track A · launch early** |
+| **D+9.1** | **APPROVED ✓** flashes |
+| **D+10.6** | Plan line: **Unit 3 (Variant B) → Track B · engage · threat** |
+| **D+12.1** | **APPROVED ✓** flashes |
 
-The plan panel, headed **TRIAGE · RECOMMENDED PLAN**:
+Panel header reads **TRIAGE · RECOMMENDED PLAN**, with the doctrine line
+**LAUNCH EARLY, DECIDE ON APPROACH**.
 
-```
-Unit 1 (Variant A) → Track A      launch early
-Unit 3 (Variant B) → Track B      engage · threat
-DECISION WINDOW — LAUNCH EARLY, DECIDE ON APPROACH
-```
-
-- **[t+6.9]** Unit 1 is sent out early against the still-unknown track.
-- **[t+9.9]** Track B is moving too fast for a Variant A. Only the rack's single **Variant B**
-  can catch it, so Triage assigns **Unit 3**.
-
-The officer taps the large **APPROVE** button. It flashes **APPROVED ✓**.
-
-**Cut to 3D:** two interceptors spin up and lift off the rack into the dark. Low angle, close on
+**3D cutaway:** two interceptors spin up and lift off the rack into the dark. Low angle, close on
 the airframe, rotor wash kicking dust off the pad. Hold long enough to read the drone as a real
-designed object — this is our hardware, and it is the only time in the film we see it fly.
+designed object.
 
-> **VO:** "Triage recommends. The officer decides. Nothing launches without a human."
+> **VO (0:32–0:44):**
+> "Triage recommends. It doesn't fire. Every launch waits for a human tap.
+> Track B is moving too fast for a standard interceptor, so it assigns the rack's one fast unit.
+> The unknown gets an interceptor sent out early — but Triage hasn't committed to anything yet."
 
----
+### Decide in flight — D+16 to D+35
 
-## SCENE 4 — Decide in flight (0:38–0:54)
+| Mark | On screen |
+|---|---|
+| **D+16.5** | **"Unit 3 intercepted Track B."** Unit 3's card flips to **EXPENDED · SLOT EMPTY** |
+| **D+22.5** | Track A turns grey: **DECOY — "Erratic path · no asset targeted."** New line: **Unit 1 → Track A · return — "now likely decoy"** |
+| **D+24.0** | **APPROVED ✓** |
+| **D+34.9** | **"Unit 1 returned, not expended."** Unit 1 back to **READY** |
 
-Back on the tablet.
+**3D cutaway at D+16:** Unit 3 closes on the incoming drone against the night sky. Cut on the
+moment of contact — no explosion, both objects simply gone, empty sky.
 
-- **[t+15.8]** **3D beat:** Unit 3 closes on the incoming drone against the night sky. Cut on the
-  moment of contact — no explosion, just both objects gone and empty sky. Back on the tablet,
-  Track B's icon is gone. Event log: **"Unit 3 intercepted Track B."** Unit 3's card flips to
-  **EXPENDED · SLOT EMPTY**.
-- **[t+21.8]** Track A's tag sharpens to grey: **DECOY — "Erratic path · no asset targeted."**
-  A new plan line appears: **Unit 1 → Track A · return — "now likely decoy."** Officer approves.
-- **[t+34]** **3D beat:** Unit 1 banks away from the decoy and settles back onto its pad, intact.
-  Tablet reads **RETURNING**, then **READY**. Event log: **"Unit 1 returned, not expended."**
-  This shot is the thesis of the whole product — let it breathe.
+**3D cutaway at D+35:** Unit 1 banks away from the decoy and settles back onto its pad, intact.
+*This shot is the thesis of the whole product. Let it breathe.*
 
-> **VO:** "Interceptors go out early, but Triage only commits at the last moment. When a track
-> turns out to be a decoy, the interceptor comes home. Decoys don't drain the rack."
+> **VO (0:46–1:02):**
+> "The threat is intercepted. And the other track? It wanders. It isn't heading for anything.
+> Triage calls it a decoy and brings its interceptor home — unused.
+> That's the whole idea. Cheap decoys are how these attacks work: send ten, make the defender
+> spend ten. Triage goes out early and only commits at the last moment. Decoys don't drain the
+> rack."
 
----
+### The gap — D+50 to D+66
 
-## SCENE 5 — The gap (0:54–1:08)
+| Mark | On screen |
+|---|---|
+| **D+50.7** | New contact, visibly faster than the others |
+| **D+52.6** | Plan panel turns red: **NO CAPABLE UNIT ON RACK** — *faster than Variant A · only Variant B unit already expended* — *Track C at 40 · needs 48 · rack tops out at 30* |
+| **D+52.6** | Full-width red banner: **ALERT · personnel near parking take cover.** PARKING pulses on the map |
+| **D+52.6** | **"Unit 4 launched (best effort)"** |
+| **D+54.1** | **APPROVED ✓** |
+| **D+57.4** | **"could not match speed"** |
+| **D+65.6** | **IMPACT · parking area. No personnel. Logged as capability gap.** |
 
-A new track crosses the perimeter, moving noticeably faster than the others.
+**3D cutaway at D+57:** Unit 4 chasing, falling behind, the faster track pulling away out of
+frame.
 
-- **[t+51.9]** The plan panel turns red:
+Hold on the officer's face. No music sting. Let the impact sit.
 
-```
-NO CAPABLE UNIT ON RACK
-faster than Variant A · only Variant B unit already expended
-Track C at 40 · needs 48 · rack tops out at 30
-```
+> **VO (1:06–1:22):**
+> "Then something faster comes in. And Triage says the hardest thing a defense system can say:
+> there is nothing on this rack that can catch it.
+> It had the right interceptor for this. It already spent it.
+> So it does the only useful thing left — it tells people where to take cover, launches what it
+> has, and says plainly that it won't make it.
+> No one is hurt. And the shortfall gets written down."
 
-- A full-width red banner: **ALERT · personnel near parking take cover.** The PARKING zone
-  pulses on the map.
-- **"Unit 4 launched (best effort)"** — shown honestly, not as a save.
-- **[t+56.7]** **3D beat:** Unit 4 chasing, falling behind, the faster track pulling away out of
-  frame. Event log: **"could not match speed."**
-- **[t+64.9]** **IMPACT · parking area. No personnel. Logged as capability gap.**
+### Morning after — D+67 to D+81
 
-Hold on the officer's face. No music sting.
+| Mark | On screen |
+|---|---|
+| **D+67.5** | After-action report opens: **TRACKS DETECTED 4 · DECOYS IDENTIFIED 1 · THREATS INTERCEPTED 1 · BEYOND RACK CAPABILITY 1** |
+| | Velocity card: **"Reconfigure 1 unit: swap the rotor kit. Core and software unchanged."** · `CORE · REUSED 80% / SWAPPED 20%` · *Built with Kearney Velocity AI* |
+| **D+76.5** | Overlay closes, Unit 1 shows **RECONFIG (A → B)** |
+| **D+81** | **Unit 1 · Variant B · READY** |
 
-> **VO:** "Triage had the right interceptor for this threat. It had already spent it. It says so,
-> protects people first, and logs what it was missing."
+Cut to daylight for this section.
 
----
-
-## SCENE 6 — Morning after (1:08–1:22)
-
-Cut to daylight. The after-action report is open on the tablet:
-
-```
-TRACKS DETECTED 4      DECOYS IDENTIFIED 1
-THREATS INTERCEPTED 1  BEYOND RACK CAPABILITY 1
-```
-
-Below it, the Velocity card:
-
-> **Reconfigure 1 unit: swap the rotor kit. Core and software unchanged.**
-> `CORE · REUSED 80% / SWAPPED 20%`
-> *Built with Kearney Velocity AI*
-
-**Cut to 3D, the money shot:** the interceptor on a bench, exploded-view. The shared core —
+**3D cutaway, the money shot:** the interceptor on a bench, exploded view. The shared core —
 flight controller, ESCs, radio, airframe — holds still and stays lit. The swappable modules —
 motors, props, battery — lift away in one colour and the Variant B parts drop in. The model
 reassembles. Same core, different capability. Then a short live-action insert of a technician's
-hands doing the same swap, to ground it.
+hands doing the same swap.
 
-Back on the tablet, Unit 1 reads **RECONFIG (A → B)**, then **Unit 1 · Variant B · READY**.
+> **VO (1:24–1:38):**
+> "By morning, that gap is a work order.
+> Every interceptor we build shares one core. Kearney Velocity AI takes the gap Triage logged
+> and tells us which modules to change — motors, props, battery. The flight controller, the
+> radio and the software stay exactly as they are. Eighty percent of the drone is reused.
+> The swap takes minutes, and it happens between attacks. Never during one."
 
-> **VO:** "Every interceptor shares one core. Velocity tells us which modules to change. The
-> swap takes minutes, between attacks — not during one."
+### Night 2 — D+85 to D+94
 
----
+| Mark | On screen |
+|---|---|
+| **D+84.9** | Night again. Same fast profile crosses the wire |
+| **D+86.9** | Plan: **Unit 1 (Variant B) → Track T1 · engage** |
+| **D+88.4** | **APPROVED ✓** |
+| **D+91.8** | **"Unit 1 intercepted Track T1."** Map clears |
 
-## SCENE 7 — Night 2 (1:22–1:32)
-
-Night again. The same kind of fast track crosses the wire.
-
-The plan panel reads **Unit 1 (Variant B) → Track T1 · engage**. One tap.
 **3D:** Unit 1 launches and closes fast this time — same airframe, visibly quicker, and it keeps
-up. **[t+9.9]** Event log: **"Unit 1 intercepted Track T1."** The map clears.
+up.
 
-> **VO:** "Same threat. Different outcome."
+> **VO (1:40–1:46):**
+> "Next night. Same threat.
+> Different outcome."
 
 ---
 
-## SCENE 8 — Close (1:32–1:40)
+# PART THREE — CLOSE (1:46–1:52)
 
 Dawn. The officer steps outside and looks at the quiet outpost.
 
@@ -183,24 +208,29 @@ Title card:
 > **TRIAGE — the right interceptor for every threat.**
 > *Built with Kearney Velocity AI*
 
+> **VO (1:47–1:51):**
+> "Triage handles the attack. Modularity makes sure the next one goes better."
+
 ---
 
 ## Notes for the editor
 
-- **The tablet footage is real.** Press RUN FULL DEMO and screen-record; every string above is
-  what the software actually prints. Nothing needs to be faked or re-created.
-- **Unit 1 is a real drone.** Its battery voltage, percentage and attitude horizon on screen are
-  live telemetry over USB from an actual flight controller. Worth one insert shot of the physical
-  drone next to the tablet, tilting it and showing the horizon follow.
-- **The 3D model is the one we actually designed and built.** The GLB, the physical drone on the
-  desk and the Variant B BOM are the same airframe, so the launch shots, the exploded-view swap
-  and the hardware on the table should all read as one object. Match the 3D lighting to the night
-  palette of the UI rather than a studio look.
+- **The tablet footage is one unbroken take.** Press RUN FULL DEMO and let it run ~96 seconds.
+  Every string in the tables above is what the software actually prints — nothing is faked.
+- **Timings are measured, not estimated**, but the app's own `SIM` clock in the header is the
+  real timecode. Use it to line the 3D cutaways up with the screen.
+- **Unit 1 is a real drone.** Its voltage, percentage and attitude horizon are live telemetry
+  over USB from an actual flight controller. Worth one insert shot of the physical drone beside
+  the tablet, tilting it so the horizon on screen follows.
+- **The 3D model is the one we designed and built.** The GLB, the physical drone and the Variant
+  B BOM are the same airframe, so the launch shots, the exploded view and the hardware on the
+  table should read as one object. Match the 3D lighting to the night palette of the UI rather
+  than a studio look.
 - **Variant A and Variant B must be visually distinguishable** in the 3D — different motors and
   props, same core — or the night 2 payoff doesn't land.
-- **Night 1 runs about 70 seconds of sim time.** If the cut needs to be tighter, the safe
-  compressions are: the quiet stretch between the recall (t+34) and the fast threat (t+52), and
-  the after-action hold.
+- **If the cut needs to be tighter**, the safe compressions are the quiet stretch between the
+  recall (D+35) and the fast threat (D+51), and the after-action hold (D+68 to D+76). Do not
+  compress the recall or the impact.
 - **Keep the capability gap honest.** The impact is the point of the film — it is what motivates
   the swap. Don't cut it or soften it.
 - **Colour meanings must stay consistent** with the UI: green friendly/ready, amber
