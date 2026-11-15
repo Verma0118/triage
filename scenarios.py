@@ -43,13 +43,13 @@ def _juniper_assets() -> list[Asset]:
 
 
 def _juniper_units() -> list[Unit]:
-    # Rack west of assets; spaced so map markers read as four craft, not a clump.
+    # Docked in the interceptor rack bay (map pad ~500–628 x, pads at y≈413).
     # Keep unit-to-track proposal distances under 600 for Variant A at 50% battery.
     return [
-        _unit("U1", 560.0, 400.0, "mock"),
-        _unit("U2", 600.0, 400.0, "sim"),
-        _unit("U3", 640.0, 400.0, "sim"),
-        _unit("U4", 680.0, 400.0, "sim"),
+        _unit("U1", 511.0, 413.0, "mock"),
+        _unit("U2", 539.0, 413.0, "sim"),
+        _unit("U3", 567.0, 413.0, "sim"),
+        _unit("U4", 595.0, 413.0, "sim"),
     ]
 
 
@@ -171,14 +171,14 @@ def juniper_night1() -> dict:
 
 def juniper_night2() -> dict:
     comms = (640.0, 260.0)
-    # Fast threat at comms. Spawn far enough for ETA >= 20 s (dist >= 800 at speed 40).
-    # Rack sits farther west so unit-to-track at proposal stays under 600.
-    c_start = (comms[0] - 820.0, comms[1])  # ETA ≈ 20.5 s
+    # Fast threat at comms. ETA >= 20 s (dist >= 800 at speed 40).
+    # Approach along rack latitude so unit-to-track at proposal stays under 600.
+    c_start = (comms[0] - 800.0, 413.0)  # (-160, 413); ETA = 20.0 s
     units = [
-        _unit("U1", 420.0, 300.0, "mock"),
-        _unit("U2", 460.0, 300.0, "sim"),
-        _unit("U3", 500.0, 300.0, "sim"),
-        _unit("U4", 540.0, 300.0, "sim"),
+        _unit("U1", 511.0, 413.0, "mock"),
+        _unit("U2", 539.0, 413.0, "sim"),
+        _unit("U3", 567.0, 413.0, "sim"),
+        _unit("U4", 595.0, 413.0, "sim"),
     ]
     return {
         "name": "juniper_night2",
