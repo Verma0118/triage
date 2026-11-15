@@ -253,7 +253,9 @@
     .workspace {
       flex: 1 1 0; min-height: 0;
       display: grid;
-      grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(240px, 300px);
+      /* Wider rails for readable type; map keeps the flexible center. */
+      grid-template-columns: minmax(300px, 34vw) minmax(0, 1fr) minmax(320px, 36vw);
+      max-width: 100%;
       align-items: stretch;
       gap: 0.65rem;
       padding: 0.55rem 0.85rem 0.85rem;
@@ -362,7 +364,7 @@
     }
     .card-head h2 {
       margin: 0;
-      font-size: 1.05rem; letter-spacing: 0; text-transform: none;
+      font-size: 1.15rem; letter-spacing: 0; text-transform: none;
       color: #F2F5F8; font-weight: 700;
     }
     .pill-badge {
@@ -492,7 +494,7 @@
     }
     .track-card {
       border: 1px solid var(--border); border-radius: 2px;
-      padding: 0.65rem 0.75rem; background: var(--bg-2);
+      padding: 0.75rem 0.85rem; background: var(--bg-2);
     }
     .track-card.threat { border-left: 3px solid var(--threat); }
     .track-card.unknown { border-left: 3px solid var(--unknown); }
@@ -501,7 +503,7 @@
     .track-card.ended { opacity: 0.45; }
     .track-card .label-row {
       display: flex; align-items: center; gap: 0.5rem;
-      font-weight: 650; font-size: 0.95rem;
+      font-weight: 650; font-size: 1.05rem;
     }
     .swatch {
       width: 0.55rem; height: 0.55rem; border-radius: 2px;
@@ -511,8 +513,8 @@
     .swatch.decoy { background: var(--decoy); }
     .swatch.unknown { background: var(--unknown); }
     .swatch.friendly { background: var(--friendly); }
-    .meta { color: var(--text-2); font-size: 0.85rem; margin-top: 0.25rem; line-height: 1.4; }
-    .factors { margin: 0.35rem 0 0; padding-left: 1.1rem; color: var(--muted); font-size: 0.8rem; line-height: 1.45; }
+    .meta { color: var(--text-2); font-size: 0.95rem; margin-top: 0.3rem; line-height: 1.45; }
+    .factors { margin: 0.4rem 0 0; padding-left: 1.15rem; color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
 
     #rack-section {
       flex: 1 1 0;
@@ -618,7 +620,7 @@
     }
     #events-section h2 {
       margin: 0 0 0.55rem;
-      font-size: 1.05rem; letter-spacing: 0; text-transform: none;
+      font-size: 1.15rem; letter-spacing: 0; text-transform: none;
       color: #F2F5F8; font-weight: 700;
       flex: 0 0 auto;
     }
@@ -639,27 +641,27 @@
     }
     .event-row {
       display: grid;
-      grid-template-columns: 3.4rem 5.6rem 1fr;
-      gap: 0.55rem;
+      grid-template-columns: 3.8rem 6.2rem 1fr;
+      gap: 0.65rem;
       align-items: start;
       background: var(--bg-2);
       border: 1px solid var(--border);
       border-radius: 2px;
-      padding: 0.55rem 0.65rem;
+      padding: 0.7rem 0.8rem;
     }
     .event-row .et {
       font-family: var(--mono);
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #E6EDF3;
       font-variant-numeric: tabular-nums;
     }
     .event-row .ek {
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 0.18rem 0.35rem;
+      padding: 0.22rem 0.4rem;
       border-radius: 2px;
       border: 1px solid var(--border-strong);
       color: var(--text-2);
@@ -679,10 +681,10 @@
     .event-row .ek.swap,
     .event-row .ek.hw { color: #D4A017; border-color: #5a4a20; background: #2A2410; }
     .event-row .em {
-      font-size: 0.92rem;
+      font-size: 1.02rem;
       font-weight: 600;
       color: #E6EDF3;
-      line-height: 1.35;
+      line-height: 1.4;
       word-break: break-word;
     }
     .event-empty {
