@@ -8,12 +8,12 @@ import config
 from models import Asset, Unit
 
 
-def _unit(uid: str, x: float, y: float, source: str) -> Unit:
-    v = config.VARIANTS["A"]
+def _unit(uid: str, x: float, y: float, source: str, variant: str = "A") -> Unit:
+    v = config.VARIANTS[variant]
     battery_pct = 1.0
     return Unit(
         id=uid,
-        variant="A",
+        variant=variant,
         speed=v["speed"],
         max_range=v["max_range"],
         range=v["max_range"] * battery_pct,
@@ -50,7 +50,10 @@ def _juniper_units() -> list[Unit]:
     return [
         _unit("U1", 261.0, 421.0, "mock"),
         _unit("U2", 297.0, 421.0, "sim"),
-        _unit("U3", 333.0, 421.0, "sim"),
+        # The rack's single Variant B: the only unit fast enough for track B.
+        # It is expended there, so the later fast threat finds no B left and the
+        # gap reads "only Variant B unit already expended".
+        _unit("U3", 333.0, 421.0, "sim", variant="B"),
         _unit("U4", 369.0, 421.0, "sim"),
     ]
 
@@ -153,7 +156,9 @@ def juniper_night1() -> dict:
             {
                 "t": 8.0,
                 "id": "B",
-                "speed": 18.0,
+                # 28 needs a unit above 33.6: Variant A (30) cannot take this,
+                # only the rack's single Variant B (60) can.
+                "speed": 28.0,
                 "truth": "real",
                 "registered_friendly": False,
                 "target_asset": "housing",

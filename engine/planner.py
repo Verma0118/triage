@@ -198,7 +198,15 @@ def _variant_fast_enough(unit: Unit, track: Track) -> bool:
 
 
 def _roster_has_fast_enough(units: list[Unit], track: Track) -> bool:
-    return any(_variant_fast_enough(u, track) for u in units)
+    """Is a fast-enough unit still recoverable tonight?
+
+    An expended unit is gone until resupply, so it does not count: a rack whose
+    only capable unit has been spent IS a capability gap. A capable unit that is
+    merely busy on another track is not a gap (plan 7.3 rule 6).
+    """
+    return any(
+        _variant_fast_enough(u, track) for u in units if u.state != "expended"
+    )
 
 
 def _fastest_ready_rack(units: list[Unit], plan: list[PlanLine]) -> Unit | None:

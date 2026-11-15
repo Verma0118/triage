@@ -247,3 +247,39 @@ def test_cards_json_placeholder_flag():
         assert "placeholder" in data[0]
         assert data[0]["placeholder"] is False
         assert "propulsion" in data[0].get("swap", [])
+
+
+def test_night1_gap_reason_is_expended_variant_b():
+    """The rack's only Variant B is spent on B, so C is a real capability gap.
+
+    This is what makes the demo's line honest: a capable variant existed and was
+    used, it was not simply absent.
+    """
+    import scenarios
+    from engine.world import World
+
+    world = World()
+    world.load_scenario("juniper_night1")
+    world.handle_command({"type": "start"})
+    for _ in range(700):
+        world.step(config.DT)
+        for line in list(world.plan):
+            if not line.approved:
+                world.handle_command({"type": "approve", "line_ids": [line.id]})
+
+    u3 = next(u for u in world.units if u.id == "U3")
+    assert u3.variant == "B", "U3 should start as the rack's single Variant B"
+    assert u3.state == "expended", "U3 must be spent on track B before C arrives"
+
+    # A capable variant exists on the roster but is gone, and the gap still fires.
+    assert any(g["track_id"] == "C" for g in world.gaps)
+    c = next(t for t in world.tracks if t.id == "C")
+    assert c.status == "impact"
+
+
+def test_night2_rack_has_no_variant_b_before_swap():
+    """Night 2 restocks with Variant A only: the swap is the only way to get a B."""
+    import scenarios
+
+    night2 = scenarios.get_scenario("juniper_night2")
+    assert all(u.variant == "A" for u in night2["units"])

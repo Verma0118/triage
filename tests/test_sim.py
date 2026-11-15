@@ -193,7 +193,7 @@ def test_night1_scenario_speeds_and_geometry():
     spawns = {s["id"]: s for s in scenario["spawns"]}
 
     assert spawns["A"]["speed"] == 9
-    assert spawns["B"]["speed"] == 18
+    assert spawns["B"]["speed"] == 28
     assert spawns["C"]["speed"] == 40
     assert spawns["F1"]["speed"] == 15
     assert spawns["A"]["truth"] == "decoy"

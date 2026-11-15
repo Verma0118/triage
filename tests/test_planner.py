@@ -127,7 +127,7 @@ def test_scripted_operator_u2_engage_b_neutralized():
     first_seen: dict[str, float] = {}
     for _ in range(3000):
         world.step(config.DT)
-        if _lines_for(world, unit_id="U2", track_id="B", action="engage"):
+        if _lines_for(world, unit_id="U3", track_id="B", action="engage"):
             saw_engage = True
         for line in world.plan:
             if line.approved:
@@ -138,14 +138,14 @@ def test_scripted_operator_u2_engage_b_neutralized():
                 world.handle_command({"type": "approve", "line_ids": [line.id]})
         if world.phase == "ended":
             break
-    assert saw_engage, "U2 never got engage on B"
+    assert saw_engage, "U3 (Variant B) never got engage on B"
     assert _track_by_id(world, "B").status == "neutralized"
-    assert _unit_by_id(world, "U2").state == "expended"
+    assert _unit_by_id(world, "U3").state == "expended"
     assert any(e.kind == "neutralized" for e in world.events)
 
 
 def test_stickiness_delayed_approval_a_u1_b_u2():
-    """If first approval waits until after B spawns, A still U1 and B still U2."""
+    """If first approval waits until after B spawns, A still U1 and B still U3."""
     world = _night1_world()
     world.handle_command({"type": "start"})
     first_seen: dict[str, float] = {}
@@ -171,7 +171,7 @@ def test_stickiness_delayed_approval_a_u1_b_u2():
             break
 
     assert a_unit == "U1", f"A assigned to {a_unit}"
-    assert b_unit == "U2", f"B assigned to {b_unit}"
+    assert b_unit == "U3", f"B assigned to {b_unit}"
 
 
 def test_approved_line_never_unapproved_and_id_not_reproposed():
@@ -453,7 +453,7 @@ def test_night1_flow_with_battery_pct_half():
     assert world.phase == "ended"
     assert saw_launch
     assert _track_by_id(world, "B").status == "neutralized"
-    assert _unit_by_id(world, "U2").state == "expended"
+    assert _unit_by_id(world, "U3").state == "expended"
     u1 = _unit_by_id(world, "U1")
     assert u1.state == "rack"
     assert any(e.kind == "returned" for e in world.events)
@@ -524,4 +524,4 @@ def test_night1_b_first_line_is_engage_never_launch_early():
 
     assert b_actions == ["engage"], f"B actions={b_actions}"
     assert a_first == "U1", f"A first unit={a_first}"
-    assert b_unit == "U2", f"B unit={b_unit}"
+    assert b_unit == "U3", f"B unit={b_unit}"
