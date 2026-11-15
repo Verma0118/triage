@@ -211,6 +211,16 @@ class World:
         for track in self.tracks:
             if track.status == "active":
                 move_track(track, dt)
+                if track.status == "impact":
+                    # UI-facing log line only. No decision logic reads this.
+                    where = track.target_asset or "open ground"
+                    self.events.append(
+                        Event(
+                            t=self.t,
+                            kind="impact",
+                            msg=f"{track.id} impact at {where}",
+                        )
+                    )
         update_scores(self.tracks, self.assets, dt, self._score_state)
         plan_tick(self)
         move_units(self.units, self.tracks, self.plan, dt, self.events, self.t)
@@ -262,8 +272,13 @@ class World:
         return True
 
     def to_public(self) -> dict:
+        import config
+
         return {
             "t": self.t,
+            # UI-facing only: lets the operator panel show the real capability
+            # margin instead of hard-coding it in the page.
+            "capable_margin": config.CAPABLE_SPEED_MARGIN,
             "scenario": self.scenario,
             "phase": self.phase,
             "replay": self.replay,

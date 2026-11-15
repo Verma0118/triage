@@ -98,7 +98,11 @@ def move_units(
                 unit.state = "rack"
                 unit.assigned_track = None
                 events.append(
-                    Event(t=t, kind="returned", msg="returned, not expended")
+                    Event(
+                        t=t,
+                        kind="returned",
+                        msg=f"{unit.id} returned, not expended",
+                    )
                 )
             continue
 
@@ -119,7 +123,11 @@ def move_units(
                 unit.state = "rack"
                 unit.assigned_track = None
                 events.append(
-                    Event(t=t, kind="returned", msg="returned, not expended")
+                    Event(
+                        t=t,
+                        kind="returned",
+                        msg=f"{unit.id} returned, not expended",
+                    )
                 )
             continue
 

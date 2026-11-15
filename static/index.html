@@ -3,1001 +3,1527 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Triage</title>
+  <title>Triage — Outpost Air Defense</title>
   <style>
     :root {
-      --bg: #322D29;
-      --panel: #3B3531;
-      --border: #4A423C;
+      /* Verified WCAG AA palette. No other colors appear in this file. */
+      --bg: #211E1B;
+      --panel: #2B2724;
+      --panel-2: #332E2A;
+      --border: #413A35;
       --text: #EFE9E1;
       --text-dim: #D1C7BD;
       --muted: #AC9C8D;
-      --threat: #E0817A;
+      --threat: #E8938C;
       --threat-fill: #72383D;
-      --unknown: #E0A95C;
+      --unknown: #E8B96F;
+      --friendly: #8ECF99;
       --decoy: #AC9C8D;
-      --friendly: #8FB3C7;
-      --sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --accent: #EFE9E1;
+
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      --radius: 2px;
-      --fs-body: 14px;
-      --fs-head: 1.1rem;
-      --fs-label: 13px;
+
+      /* Three type sizes, used consistently. */
+      --t1: 25px;   /* h1, big numbers, clock */
+      --t2: 18px;   /* section headings, unit names, plan lines, approve */
+      --t3: 14px;   /* small-caps labels, meta, event rows */
+
+      --r: 3px;
+      --gap: 10px;
     }
+
     * { box-sizing: border-box; }
+
     html, body {
-      margin: 0; padding: 0; height: 100%;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
       background: var(--bg);
       color: var(--text);
       font-family: var(--sans);
-      font-size: var(--fs-body);
-      line-height: 1.4;
-      overflow: hidden;
+      font-size: var(--t3);
+      line-height: 1.45;
       font-variant-numeric: tabular-nums;
+      -webkit-font-smoothing: antialiased;
     }
-    body.app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      width: 100%;
-      max-width: 100vw;
-    }
+
+    button { font-family: inherit; }
+
     button:focus-visible,
     [tabindex]:focus-visible {
       outline: 2px solid var(--unknown);
       outline-offset: 2px;
     }
-    .top-brand {
+
+    /* ---------- shell ---------- */
+    .shell { height: 100vh; display: flex; flex-direction: column; min-height: 0; }
+
+    /* ---------- header ---------- */
+    .hdr {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 9px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .hdr-left { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+    h1 {
       margin: 0;
-      font-size: var(--fs-head);
+      font-size: var(--t1);
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    h1::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 0.82em;
+      background: var(--unknown);
+      margin-right: 12px;
+      vertical-align: -0.04em;
+    }
+    .hdr-sub {
+      font-size: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .hdr-right { display: flex; align-items: center; gap: 20px; }
+    .readouts { display: flex; flex-wrap: wrap; gap: 5px 7px; justify-content: flex-end; max-width: 440px; }
+    .ro {
+      font-size: var(--t3);
+      color: var(--text-dim);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    .ro .k {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      font-weight: 650;
+      margin-right: 6px;
+    }
+    .ro .v { color: var(--text); font-weight: 700; }
+    .ro[data-state="connected"] .v { color: var(--friendly); }
+    .ro[data-state="disconnected"] { border-color: var(--threat); }
+    .ro[data-state="disconnected"] .v { color: var(--threat); }
+    .ro[data-state="off"] .v { color: var(--friendly); }
+    .ro[data-state="on"] { border-color: var(--threat); }
+    .ro[data-state="on"] .v { color: var(--threat); }
+
+    .clock-block { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+    .clock {
+      font-family: var(--mono);
+      font-size: var(--t1);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+    .posture {
+      font-size: var(--t3);
       font-weight: 750;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--text);
+      color: var(--bg);
+      background: var(--friendly);
+      border-radius: var(--r);
+      padding: 3px 10px;
+      white-space: nowrap;
     }
-    .top-brand::before {
-      content: "";
-      display: inline-block;
-      width: 3px; height: 0.9em;
-      background: var(--unknown);
-      margin-right: 0.5rem;
-      vertical-align: -0.08em;
-    }
-    .brand-block { display: flex; align-items: baseline; gap: 0.85rem; }
-    .main {
-      flex: 1 1 0;
-      width: 100%;
-      display: flex; flex-direction: column;
-      min-width: 0; min-height: 0;
-      overflow: hidden;
-    }
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 0.75rem; flex-wrap: wrap;
-      padding: 0.45rem 0.85rem;
+
+    /* ---------- toolbar ---------- */
+    .toolbar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
       border-bottom: 1px solid var(--border);
       background: var(--bg);
-      flex: 0 0 auto;
     }
-    .control-strip {
-      display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;
-      padding: 0.4rem 0.85rem;
-      border-bottom: 1px solid var(--border);
+    .toolbar button {
+      font-size: var(--t3);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       background: var(--panel);
-      flex: 0 0 auto;
-    }
-    .control-strip button {
-      font: inherit; font-size: var(--fs-label); font-weight: 650;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      background: var(--bg); color: var(--text);
+      color: var(--text);
       border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 0.35rem 0.65rem;
-      min-height: 34px; cursor: pointer;
+      border-radius: var(--r);
+      padding: 7px 13px;
+      min-height: 34px;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    .control-strip button:hover { border-color: var(--text-dim); }
-    .control-strip button.btn-primary {
-      background: var(--panel); border-color: var(--unknown); color: var(--text);
-    }
-    .control-strip button.btn-danger { color: var(--threat); border-color: var(--threat-fill); }
-    .control-strip button[aria-pressed="true"] {
-      border-color: var(--unknown); color: var(--unknown);
-    }
-    .control-strip button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .top-title {
-      font-size: var(--fs-label); letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--muted); font-weight: 650;
-    }
-    .status-row { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      font-size: var(--fs-label); letter-spacing: 0.04em;
-      padding: 0.25rem 0.55rem; border-radius: var(--radius);
-      border: 1px solid var(--border); color: var(--text-dim);
-      background: var(--panel); min-height: 28px;
-    }
-    .chip strong { color: var(--text); font-weight: 650; }
-    #conn-status[data-state="connected"] { color: var(--friendly); border-color: var(--friendly); }
-    #conn-status[data-state="disconnected"] { color: var(--threat); border-color: var(--threat); font-weight: 700; }
-    #motors-status[data-state="off"] { color: var(--friendly); }
-    #motors-status[data-state="off"]::before,
-    #motors-status[data-state="on"]::before {
-      content: ""; width: 0.4rem; height: 0.4rem; border-radius: 50%;
-    }
-    #motors-status[data-state="off"]::before { background: var(--friendly); }
-    #motors-status[data-state="on"] { color: var(--threat); font-weight: 700; }
-    #motors-status[data-state="on"]::before { background: var(--threat); }
+    .toolbar button:hover:not(:disabled) { border-color: var(--muted); background: var(--panel-2); }
+    .toolbar button.primary { border-color: var(--unknown); color: var(--unknown); }
+    .toolbar button[aria-pressed="true"] { border-color: var(--unknown); color: var(--unknown); }
+    .toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .toolbar .spacer { flex: 1 1 auto; }
 
-    .alerts {
-      min-height: 0; padding: 0.25rem 1rem; color: var(--unknown); font-weight: 650;
-      font-size: var(--fs-body);
+    /* ---------- alert banner ---------- */
+    .alert-banner {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 18px;
+      background: var(--threat-fill);
+      color: var(--text);
+      font-size: var(--t2);
+      font-weight: 750;
+      border-bottom: 1px solid var(--threat);
+    }
+    .alert-banner[hidden] { display: none !important; }
+    .alert-banner .tag {
+      font-size: var(--t3);
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      border: 1px solid var(--text);
+      border-radius: var(--r);
+      padding: 2px 8px;
+      flex: 0 0 auto;
     }
     #replay-banner {
-      margin: 0 1rem; padding: 0.4rem 0.65rem;
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: var(--radius); color: var(--text-dim); font-size: var(--fs-body);
+      flex: 0 0 auto;
+      margin: 0;
+      padding: 8px 18px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: var(--t3);
+      letter-spacing: 0.05em;
     }
     #replay-banner[hidden] { display: none !important; }
-    body.replay-mode #plan-panel { opacity: 0.55; pointer-events: none; }
-    body.replay-mode #btn-after { display: none !important; }
 
+    /* ---------- workspace ---------- */
     .workspace {
-      flex: 1 1 0; min-height: 0;
-      display: grid;
-      grid-template-columns: minmax(260px, 300px) minmax(0, 1fr) minmax(280px, 320px);
-      align-items: stretch;
-      gap: 0.55rem;
-      padding: 0.45rem 0.75rem 0.65rem;
-    }
-    .left-col,
-    .right-col {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-height: 0;
-      height: 100%;
-      overflow: hidden;
-      padding: 0;
-    }
-    .left-col > .side-card,
-    .right-col > .side-card {
       flex: 1 1 0;
       min-height: 0;
-      overflow: hidden;
+      display: grid;
+      grid-template-columns: 318px minmax(0, 1fr) 336px;
+      gap: var(--gap);
+      padding: var(--gap) 18px 14px;
+    }
+    .rail { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; min-width: 0; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 11px 12px;
+      min-height: 0;
+      min-width: 0;
       display: flex;
       flex-direction: column;
     }
-    .panel, .side-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.75rem 0.85rem;
-      min-height: 0;
-    }
-    h2, .card-head h2, #events-section h2 {
-      margin: 0 0 0.45rem;
-      font-size: var(--fs-head);
-      letter-spacing: 0;
-      text-transform: none;
-      color: var(--text);
-      font-weight: 700;
-    }
-    .card-head {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 0.5rem; margin-bottom: 0.5rem;
-    }
-    .card-head h2 { margin: 0; }
-    .pill-badge {
-      font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.04em;
-      color: var(--threat);
-      background: transparent; border: none; padding: 0;
-    }
-    .pill-badge[hidden] { display: none !important; }
-    .rack-count {
-      font-size: var(--fs-label); font-weight: 650; letter-spacing: 0.06em;
-      text-transform: uppercase; color: var(--muted);
-    }
-
-    #map-panel {
-      min-width: 0; min-height: 0; height: 100%;
-      display: flex; flex-direction: column;
-      padding: 0.4rem 0.45rem 0.45rem;
-      overflow: hidden;
-    }
-    .map-head {
-      flex: 0 0 auto;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 0.75rem; flex-wrap: wrap;
-      margin-bottom: 0.35rem;
-    }
-    .map-head h2 { margin: 0; }
-    .map-legend-inline {
-      display: flex; flex-wrap: wrap; gap: 0.45rem 0.75rem;
-      align-items: center;
-    }
-    .map-legend-inline .leg {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      font-size: var(--fs-label); letter-spacing: 0.06em;
-      text-transform: uppercase; color: var(--muted); font-weight: 650;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.2rem 0.45rem;
-    }
-    .map-legend-inline .swatch {
-      width: 0.65rem; height: 0.65rem; border-radius: 2px;
-      border: 1px solid var(--border); flex-shrink: 0;
-    }
-    .map-legend-inline .swatch.threat { background: var(--threat); }
-    .map-legend-inline .swatch.unknown { background: var(--unknown); }
-    .map-legend-inline .swatch.friendly { background: var(--friendly); }
-    .map-legend-inline .swatch.decoy { background: var(--decoy); }
-    #map-svg {
-      flex: 1 1 0; width: 100%; min-height: 0;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      display: block;
-    }
-    .map-label {
-      font-size: 13px; font-weight: 650; font-family: var(--sans);
-      paint-order: stroke; stroke: var(--bg); stroke-width: 3px;
-    }
-
-    #plan-panel {
-      flex: 0.75 1 0;
-      display: flex; flex-direction: column; gap: 0.55rem;
-      overflow: hidden; min-height: 0;
-    }
-    #plan-panel.has-pending {
-      border: 2px solid var(--unknown);
-      box-shadow: none;
-    }
-    #plan-lines {
-      display: flex; flex-direction: column; gap: 0.45rem;
-      overflow: auto; flex: 1 1 auto; min-height: 0;
-    }
-    .officer-empty { color: var(--text-dim); font-size: var(--fs-body); padding: 0.25rem 0; }
-    .officer-focus {
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
-    }
-    .officer-id {
-      display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem;
-      font-size: var(--fs-head); font-weight: 700; color: var(--text); line-height: 1.15;
-    }
-    .label-chip {
-      display: inline-block; vertical-align: middle;
-      font-size: var(--fs-label); font-weight: 750; letter-spacing: 0.06em;
-      padding: 0.18rem 0.4rem; border-radius: var(--radius);
-      text-transform: uppercase;
-    }
-    .label-chip.threat { background: var(--threat-fill); color: var(--text); }
-    .label-chip.unknown { background: var(--unknown); color: var(--bg); }
-    .label-chip.decoy { background: var(--decoy); color: var(--bg); }
-    .label-chip.friendly { background: var(--friendly); color: var(--bg); }
-    .decision-window { text-align: right; flex: 0 0 auto; }
-    .decision-window .dw-label {
-      font-size: var(--fs-label); letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--muted); font-weight: 650;
-    }
-    .decision-window .dw-time {
-      font-size: var(--fs-head); font-weight: 700; color: var(--unknown);
-      font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 0.1rem;
-    }
-    .officer-headline { font-size: var(--fs-body); font-weight: 650; color: var(--text); margin: 0.15rem 0 0; }
-    .officer-sub { font-size: var(--fs-body); color: var(--muted); margin: 0.2rem 0 0; line-height: 1.4; }
-    .fit-card {
-      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 0.55rem 0.65rem; margin-top: 0.15rem;
-    }
-    .fit-card .fit-title { font-weight: 650; color: var(--text); font-size: var(--fs-body); }
-    .fit-card .fit-meta { color: var(--muted); font-size: var(--fs-label); margin-top: 0.12rem; letter-spacing: 0.04em; }
-    .fit-card .fit-tag {
-      font-size: var(--fs-label); font-weight: 800; letter-spacing: 0.06em;
-      color: var(--unknown); text-transform: uppercase; white-space: nowrap;
-    }
-    .officer-actions {
-      display: flex; flex-direction: column; gap: 0.45rem; margin-top: auto;
-      flex: 0 0 auto; padding-top: 0.45rem;
-      border-top: 1px solid var(--border);
-      background: var(--panel);
-    }
-    #approve-btn {
-      flex: 1 1 auto; width: 100%; min-height: 48px;
-      font-size: var(--fs-body); font-weight: 800; letter-spacing: 0.04em;
-      text-transform: uppercase;
-      background: var(--text); color: var(--bg);
-      border: 1px solid var(--text); border-radius: var(--radius); cursor: pointer;
-    }
-    #approve-btn:hover:not(:disabled) { filter: brightness(1.04); }
-    #approve-btn:disabled,
-    #approve-btn[aria-disabled="true"] {
-      opacity: 0.35; cursor: not-allowed; filter: none;
-    }
-
-    #threat-panel { flex: 1 1 0; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-    #threat-list {
-      overflow: auto; display: flex; flex-direction: column; gap: 0.45rem;
-      min-height: 0; flex: 1 1 auto;
-    }
-    .track-card {
-      border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 0.7rem 0.8rem; background: var(--bg);
-    }
-    .track-card.threat { border-left: 3px solid var(--threat); }
-    .track-card.unknown { border-left: 3px solid var(--unknown); }
-    .track-card.friendly { border-left: 3px solid var(--friendly); }
-    .track-card.decoy { border-left: 3px solid var(--decoy); }
-    .track-card.ended { opacity: 0.45; }
-    .track-card .label-row {
-      display: flex; align-items: center; gap: 0.5rem;
-      font-weight: 700;
-    }
-    .track-title { flex: 1 1 auto; font-size: var(--fs-head); color: var(--text); }
-    .track-score {
-      font-size: var(--fs-head); font-weight: 800; color: var(--text);
-      font-variant-numeric: tabular-nums; margin-left: auto;
-    }
-    .swatch {
-      width: 0.55rem; height: 0.55rem; border-radius: 2px;
-      border: 1px solid var(--border); flex-shrink: 0;
-    }
-    .swatch.threat { background: var(--threat); }
-    .swatch.decoy { background: var(--decoy); }
-    .swatch.unknown { background: var(--unknown); }
-    .swatch.friendly { background: var(--friendly); }
-    .meta { color: var(--text-dim); font-size: var(--fs-body); margin-top: 0.3rem; line-height: 1.45; }
-    .factors { margin: 0.35rem 0 0; padding-left: 1.1rem; color: var(--muted); font-size: var(--fs-label); letter-spacing: 0.03em; line-height: 1.5; }
-
-    #rack-section {
-      flex: 1 1 0; display: flex; flex-direction: column; gap: 0.45rem;
-      overflow: hidden; max-height: none;
-    }
-    #rack-summary {
-      margin: 0; color: var(--muted); font-size: var(--fs-label); letter-spacing: 0.04em;
-    }
-    #rack-panel {
-      flex: 1 1 auto; min-height: 0; overflow: auto;
-      display: flex; flex-direction: column;
-      border-top: 1px solid var(--border);
-    }
-    .unit-row {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 0.65rem;
-      align-items: center;
-      padding: 0.65rem 0;
-      border-bottom: 1px solid var(--border);
-      min-height: 2.8rem;
-    }
-    .unit-row .unit-chevron { display: none; }
-    .unit-row:last-child { border-bottom: none; }
-    .unit-row-u1 {
-      grid-template-columns: 1fr auto;
-      align-items: start;
-      padding: 0.85rem 0 1rem;
-      min-height: 11rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .unit-row-u1 .unit-pct { display: none; }
-    .unit-id {
-      display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
-      font-weight: 700; color: var(--text); font-size: var(--fs-body); line-height: 1.15;
-    }
-    .unit-type {
-      color: var(--muted); font-size: var(--fs-label); margin-top: 0.2rem;
-      letter-spacing: 0.06em; text-transform: uppercase;
-    }
-    .unit-pct { font-weight: 700; color: var(--text); font-size: var(--fs-body); min-width: 2.8rem; text-align: right; }
-    .unit-status {
-      font-size: var(--fs-label); color: var(--text-dim); text-align: right; white-space: nowrap;
-      display: inline-flex; align-items: center; gap: 0.4rem; justify-content: flex-end;
+    h2 {
+      margin: 0;
+      font-size: var(--t2);
+      font-weight: 750;
       letter-spacing: 0.04em;
+      color: var(--text);
+      text-transform: uppercase;
+      line-height: 1.25;
     }
-    .unit-status::before {
-      content: ""; width: 0.45rem; height: 0.45rem; border-radius: 50%;
-      background: var(--friendly); flex-shrink: 0;
+    h3 { margin: 0; font-size: var(--t2); font-weight: 750; letter-spacing: 0.04em; color: var(--text); }
+    .card-head {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 2px 10px;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
     }
-    .unit-status.bad { color: var(--threat); }
-    .unit-status.bad::before { background: var(--threat); }
-    .unit-status.muted { color: var(--muted); }
-    .unit-status.muted::before { background: var(--muted); }
-    .unit-status.svc::before { background: var(--friendly); }
-    .badge {
-      display: inline-block; font-size: var(--fs-label); font-weight: 750;
-      letter-spacing: 0.08em; padding: 0.12rem 0.35rem; border-radius: var(--radius);
-      border: 1px solid var(--border); margin-left: 0.25rem;
-      color: var(--text-dim); background: var(--bg); text-transform: uppercase;
+    .tag-count {
+      font-size: var(--t3);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
     }
-    .badge.live { color: var(--bg); background: var(--friendly); border-color: var(--friendly); }
-    .badge.mock { color: var(--bg); background: var(--unknown); border-color: var(--unknown); }
-    .badge.sim { color: var(--bg); background: var(--decoy); border-color: var(--decoy); }
+    .tag-count.hot { color: var(--unknown); }
+    .scroll { overflow-y: auto; overflow-x: hidden; flex: 1 1 0; min-height: 0; }
+    .scroll::-webkit-scrollbar { width: 8px; }
+    .scroll::-webkit-scrollbar-track { background: var(--bg); }
+    .scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-    .u1-extra {
-      grid-column: 1 / -1;
-      display: flex; flex-wrap: wrap; align-items: center; gap: 0.85rem 1.1rem;
-      padding-top: 0.55rem;
-    }
-    .u1-vitals { display: flex; flex-direction: column; gap: 0.15rem; min-width: 5.5rem; }
-    .u1-volt { font-size: var(--fs-head); font-weight: 800; color: var(--text); line-height: 1.1; }
-    .u1-pct-lg { font-size: var(--fs-head); font-weight: 800; color: var(--text); line-height: 1.1; }
-    .art-horizon {
-      position: relative; width: 96px; height: 96px; border-radius: 50%;
-      border: 2px solid var(--border); overflow: hidden; flex-shrink: 0;
+    /* ---------- track list ---------- */
+    #tracks-card { flex: 1 1 0; min-height: 182px; }
+    #threat-list { display: flex; flex-direction: column; gap: 8px; }
+    .trk {
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--border);
+      border-radius: var(--r);
       background: var(--bg);
+      padding: 8px 10px;
     }
-    .ah-disc {
-      position: absolute; inset: -40%;
-      transform-origin: center center;
-    }
-    .ah-sky {
-      position: absolute; left: 0; right: 0; top: 0; height: 50%;
-      background: var(--friendly);
-    }
-    .ah-ground {
-      position: absolute; left: 0; right: 0; bottom: 0; height: 50%;
-      background: var(--threat-fill);
-    }
-    .ah-horizon-line {
-      position: absolute; left: 0; right: 0; top: 50%; height: 2px;
-      margin-top: -1px; background: var(--text);
-    }
-    .ah-wing {
-      position: absolute; left: 18%; right: 18%; top: 50%; height: 2px;
-      margin-top: -1px; background: var(--unknown); z-index: 2;
-      pointer-events: none;
-    }
-    .ah-wing::before, .ah-wing::after {
-      content: ""; position: absolute; top: -4px; width: 2px; height: 10px;
-      background: var(--unknown);
-    }
-    .ah-wing::before { left: 50%; margin-left: -1px; }
-    .ah-wing::after { display: none; }
-    .u1-tilt-deg {
-      font-size: var(--fs-label); letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--muted); font-weight: 650; width: 100%;
-    }
-
-    #velocity-panel {
-      flex: 0 0 auto; margin-top: 0.25rem; padding-top: 0.55rem;
-      border-top: 1px solid var(--border);
-    }
-    #velocity-panel .vel-kicker {
-      font-size: var(--fs-label); letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--muted); font-weight: 750; margin: 0 0 0.25rem;
-    }
-    #velocity-panel .vel-title {
-      font-size: var(--fs-body); font-weight: 650; color: var(--text); margin: 0 0 0.45rem;
-    }
-    .vel-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-    .vel-chips span {
+    .trk.threat { border-left-color: var(--threat); }
+    .trk.unknown { border-left-color: var(--unknown); }
+    .trk.friendly { border-left-color: var(--friendly); }
+    .trk.decoy { border-left-color: var(--decoy); }
+    .trk.gone { opacity: 0.55; }
+    .trk-top { display: flex; align-items: center; gap: 7px; }
+    .trk-id { font-size: var(--t2); font-weight: 750; color: var(--text); letter-spacing: 0.04em; }
+    .trk-score { margin-left: auto; font-size: var(--t2); font-weight: 800; color: var(--text); }
+    .chip {
       display: inline-block;
-      font-size: var(--fs-label); letter-spacing: 0.04em; text-transform: uppercase;
-      padding: 0.35rem 0.65rem; border-radius: var(--radius);
-      border: 1px solid var(--border); color: var(--text-dim); background: var(--bg);
+      font-size: var(--t3);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: var(--r);
+    }
+    .chip.threat { background: var(--threat-fill); color: var(--text); }
+    .chip.unknown { background: var(--unknown); color: var(--bg); }
+    .chip.friendly { background: var(--friendly); color: var(--bg); }
+    .chip.decoy { background: var(--decoy); color: var(--bg); }
+    .trk-why { margin: 6px 0 0; color: var(--text-dim); font-size: var(--t3); line-height: 1.45; }
+    .trk-meta {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: var(--t3);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+    .trk-meta.hv { color: var(--unknown); }
+    .empty { color: var(--muted); font-size: var(--t3); padding: 6px 2px; margin: 0; }
+
+    /* ---------- event log ---------- */
+    #events-card { flex: 1 1 0; }
+    #event-log { list-style: none; margin: 0; padding: 0; }
+    .ev {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      gap: 9px;
+      align-items: baseline;
+      padding: 5px 2px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ev:last-child { border-bottom: none; }
+    .ev .evt {
+      font-family: var(--mono);
+      font-size: var(--t3);
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: -0.03em;
+    }
+    .ev .evm { font-size: var(--t3); color: var(--text-dim); line-height: 1.4; }
+    .ev.k-impact .evm, .ev.k-miss .evm, .ev.k-gap .evm, .ev.k-shelter .evm {
+      color: var(--threat); font-weight: 700;
+    }
+    .ev.k-approve .evm, .ev.k-swap .evm { color: var(--text); font-weight: 700; }
+    .ev.k-neutralized .evm, .ev.k-returned .evm { color: var(--friendly); font-weight: 700; }
+    .ev.k-plan .evm { color: var(--unknown); }
+
+    /* ---------- map ---------- */
+    #map-card { padding: 11px 12px 10px; }
+    .map-head { align-items: flex-end; }
+    .legend { display: flex; gap: 13px; }
+    .legend .lg {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--t3);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .legend .sw { width: 11px; height: 11px; border-radius: 2px; flex: 0 0 auto; }
+    .legend .sw.threat { background: var(--threat); }
+    .legend .sw.unknown { background: var(--unknown); }
+    .legend .sw.friendly { background: var(--friendly); }
+    .legend .sw.decoy { background: var(--decoy); }
+    .map-body {
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #map-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 100%;
+      aspect-ratio: 1000 / 700;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+    }
+    .map-foot {
+      flex: 0 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 9px;
+      margin-top: 9px;
+      border-top: 1px solid var(--border);
+      font-size: var(--t3);
+      font-weight: 650;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .mlab { font-family: var(--sans); }
+
+    /* ---------- plan panel ---------- */
+    #plan-card { flex: 0 0 auto; }
+    #plan-card.pending { border: 2px solid var(--unknown); padding: 10px 11px; }
+    #plan-body { flex: 1 1 auto; min-height: 52px; }
+    .plan-empty { color: var(--muted); font-size: var(--t2); margin: 0; padding: 18px 0 22px; }
+    .plan-row { margin-bottom: 10px; }
+    .plan-row:last-of-type { margin-bottom: 0; }
+    .pl-main {
+      font-size: var(--t2);
+      font-weight: 750;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .act {
+      display: inline-block;
+      margin-top: 5px;
+      font-size: var(--t3);
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--unknown);
+      border-radius: var(--r);
+      padding: 2px 7px;
+    }
+    .act.engage { background: var(--threat-fill); color: var(--text); }
+    .act.recall { background: var(--decoy); color: var(--bg); }
+    .plan-reason { margin: 8px 0 0; font-size: var(--t3); color: var(--text-dim); line-height: 1.45; }
+    .plan-also { margin: 7px 0 0; padding: 0; list-style: none; }
+    .plan-also li {
+      font-size: var(--t3);
+      color: var(--muted);
+      font-weight: 650;
+      line-height: 1.4;
+    }
+    .plan-eta {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .plan-eta .k {
+      font-size: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
       font-weight: 650;
     }
+    .plan-eta .v { font-size: var(--t2); font-weight: 800; color: var(--unknown); font-family: var(--mono); }
+    .gap-block {
+      border: 1px solid var(--threat);
+      border-left: 4px solid var(--threat);
+      border-radius: var(--r);
+      background: var(--bg);
+      padding: 8px 10px;
+      margin-bottom: 11px;
+    }
+    .gap-title {
+      font-size: var(--t2);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--threat);
+      text-transform: uppercase;
+      line-height: 1.25;
+    }
+    .gap-reason { margin: 5px 0 0; font-size: var(--t3); color: var(--text); font-weight: 650; line-height: 1.45; }
+    .gap-math {
+      margin: 4px 0 0;
+      font-size: var(--t3);
+      color: var(--muted);
+      font-family: var(--mono);
+      letter-spacing: -0.02em;
+    }
+    .plan-foot { flex: 0 0 auto; margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .doctrine {
+      margin: 0 0 9px;
+      font-size: var(--t3);
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 650;
+    }
+    #approve-btn {
+      width: 100%;
+      min-height: 48px;
+      font-size: var(--t2);
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      color: var(--bg);
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: var(--r);
+      cursor: pointer;
+    }
+    #approve-btn[aria-disabled="true"] { opacity: 0.32; cursor: not-allowed; }
 
-    #events-section {
-      flex: 1.35 1 0; min-height: 0; overflow: hidden; padding: 0.75rem 0.85rem;
+    /* ---------- rack ---------- */
+    #rack-card { flex: 0 1 auto; min-height: 0; }
+    /* The rack sizes to its four slots; it only scrolls if the rail is squeezed. */
+    #rack-card .scroll { flex: 0 1 auto; overflow-y: auto; }
+    #rack-list { display: flex; flex-direction: column; gap: 8px; }
+    .slots { display: flex; flex-direction: column; gap: 6px; }
+    .unit {
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: var(--bg);
+      padding: 8px 10px;
+      min-width: 0;
     }
-    #events-section h2 { margin: 0 0 0.5rem; }
-    #events-panel { flex: 1 1 auto; min-height: 0; overflow: auto; }
-    #event-log {
-      list-style: none; margin: 0; padding: 0;
-      display: flex; flex-direction: column; gap: 0.4rem;
-    }
-    .event-row {
+    .unit.u1 {
+      background: var(--panel-2);
+      border-color: var(--muted);
+      padding: 10px 11px;
       display: grid;
-      grid-template-columns: 3.6rem 6rem 1fr;
-      gap: 0.55rem; align-items: start;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 0.55rem 0.65rem;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0 12px;
+      align-items: start;
     }
-    .event-row .et {
-      font-family: var(--mono); font-size: var(--fs-body); font-weight: 700; color: var(--text);
+    .unit.u1 .u1-main { min-width: 0; }
+    .unit.u1 .ustate { display: block; margin: 3px 0 0; text-align: left; }
+    .unit.u1 .unit-note { grid-column: 1 / -1; }
+    .unit.slot { padding: 7px 10px; }
+    .unit.slot .slot-row { display: flex; align-items: baseline; gap: 9px; }
+    .unit.slot .unit-name { flex: 0 0 auto; }
+    .unit.slot .unit-sub {
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+      letter-spacing: 0;
+      text-transform: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .event-row .ek {
-      font-size: var(--fs-label); font-weight: 800; letter-spacing: 0.06em;
-      text-transform: uppercase; padding: 0.18rem 0.35rem; border-radius: var(--radius);
-      border: 1px solid var(--border); color: var(--text-dim); text-align: center; line-height: 1.2;
-      background: var(--panel);
+    .unit.slot .ustate { flex: 0 0 auto; letter-spacing: 0.06em; }
+    .unit.slot .unit-note { margin-top: 3px; }
+    .unit.out { border-left: 4px solid var(--unknown); }
+    .unit.spent { opacity: 0.62; }
+    .unit-top { display: flex; align-items: center; gap: 8px; }
+    .unit-name {
+      font-size: var(--t2);
+      font-weight: 750;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
     }
-    .event-row .ek.contact { color: var(--bg); background: var(--friendly); border-color: var(--friendly); }
-    .event-row .ek.plan { color: var(--bg); background: var(--unknown); border-color: var(--unknown); }
-    .event-row .ek.approve,
-    .event-row .ek.neutralized,
-    .event-row .ek.returned { color: var(--text); background: var(--threat-fill); border-color: var(--threat-fill); }
-    .event-row .ek.gap,
-    .event-row .ek.miss,
-    .event-row .ek.impact,
-    .event-row .ek.shelter { color: var(--text); background: var(--threat-fill); border-color: var(--threat); }
-    .event-row .ek.recall,
-    .event-row .ek.swap,
-    .event-row .ek.hw { color: var(--bg); background: var(--unknown); border-color: var(--unknown); }
-    .event-row .em { font-size: var(--fs-body); font-weight: 600; color: var(--text); line-height: 1.35; word-break: break-word; }
-    .event-empty { color: var(--text-dim); font-size: var(--fs-body); padding: 0.5rem 0.15rem; }
+    .badge {
+      font-size: var(--t3);
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: var(--r);
+      padding: 1px 6px;
+      color: var(--bg);
+      background: var(--friendly);
+    }
+    .badge.mock { background: var(--unknown); }
+    .badge.sim { background: var(--decoy); }
+    .ustate {
+      margin-left: auto;
+      font-size: var(--t3);
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      text-align: right;
+    }
+    .ustate.ok { color: var(--friendly); }
+    .ustate.warn { color: var(--unknown); }
+    .ustate.bad { color: var(--threat); }
+    .ustate.dim { color: var(--muted); }
+    .unit-sub {
+      margin-top: 3px;
+      font-size: var(--t3);
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 650;
+    }
+    .unit-note { margin-top: 6px; font-size: var(--t3); color: var(--unknown); font-weight: 700; line-height: 1.4; }
+    .u1-big {
+      font-size: var(--t1);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.14;
+    }
+    .u1-big:first-of-type { margin-top: 6px; }
+    .u1-cap {
+      margin-top: 4px;
+      font-size: var(--t3);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 650;
+      line-height: 1.3;
+    }
+    .ai-wrap { flex: 0 0 auto; text-align: center; }
+    .ai-wrap svg { display: block; }
+    .ai-cap {
+      margin-top: 3px;
+      font-size: var(--t3);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      font-weight: 650;
+      font-family: var(--mono);
+    }
 
-    #after-overlay[hidden] { display: none !important; }
+    /* ---------- after-action overlay ---------- */
     #after-overlay {
-      position: fixed; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 40; padding: 1rem;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
     }
+    #after-overlay[hidden] { display: none !important; }
     #after-overlay::before {
       content: "";
-      position: absolute; inset: 0;
+      position: absolute;
+      inset: 0;
       background: var(--bg);
-      opacity: 0.82;
-      z-index: -1;
+      opacity: 0.9;
     }
     #after-dialog {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: var(--radius); max-width: 720px; width: 100%; max-height: 90vh;
-      overflow: auto; padding: 1.1rem; color: var(--text);
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      width: 100%;
+      max-width: 820px;
+      max-height: calc(100vh - 44px);
+      overflow-y: auto;
+      padding: 20px 22px 18px;
     }
-    #after-dialog h2, #after-dialog h3 { color: var(--text); text-transform: none; letter-spacing: 0; font-size: var(--fs-head); }
-    #after-brief {
-      white-space: pre-wrap; background: var(--bg); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 0.6rem; font-family: var(--mono); font-size: var(--fs-body);
-      max-height: 12rem; overflow: auto; color: var(--text-dim);
-    }
-    .placeholder-tag {
-      display: inline-block; margin-left: 0.35rem; padding: 0.1rem 0.35rem;
-      border: 1px solid var(--unknown); color: var(--unknown);
-      font-size: var(--fs-label); font-weight: 800; border-radius: var(--radius);
-      letter-spacing: 0.06em; text-transform: uppercase;
-    }
-    .after-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
-    .after-actions button, #btn-copy-brief {
-      font: inherit; font-size: var(--fs-label); font-weight: 650; letter-spacing: 0.06em;
+    .aa-sub {
+      margin: 5px 0 0;
+      font-size: var(--t3);
+      color: var(--muted);
       text-transform: uppercase;
-      background: var(--bg); color: var(--text); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 0.4rem 0.7rem; min-height: 36px; cursor: pointer;
+      letter-spacing: 0.1em;
+      font-weight: 650;
     }
-    #btn-swap { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .aa-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0 0; }
+    .stat { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 12px; }
+    .stat .n { font-size: var(--t1); font-weight: 800; color: var(--text); line-height: 1.1; }
+    .stat .l {
+      margin-top: 5px;
+      font-size: var(--t3);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+    .stat.hot { border-color: var(--threat); }
+    .stat.hot .n { color: var(--threat); }
+    .aa-sect { margin-top: 20px; }
+    .aa-sect > h3 { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .placeholder-tag {
+      font-size: var(--t3);
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--unknown);
+      border: 1px solid var(--unknown);
+      border-radius: var(--r);
+      padding: 1px 7px;
+    }
+    .placeholder-tag[hidden] { display: none !important; }
+    .vel-card {
+      margin-top: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--unknown);
+      border-radius: var(--r);
+      padding: 14px 15px;
+    }
+    .vel-head { margin: 0; font-size: var(--t2); font-weight: 750; color: var(--text); line-height: 1.4; }
+    .vel-meta { margin: 8px 0 0; font-size: var(--t3); color: var(--text-dim); line-height: 1.55; }
+    .reuse { margin-top: 14px; }
+    .reuse-label {
+      font-size: var(--t3);
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .reuse-bar {
+      margin-top: 6px;
+      display: flex;
+      height: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .reuse-bar span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--t3);
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .reuse-bar .keep { background: var(--friendly); }
+    .reuse-bar .swapped { background: var(--unknown); }
+    .vel-credit {
+      margin: 13px 0 0;
+      font-size: var(--t3);
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 650;
+    }
+    #after-brief {
+      margin: 10px 0 0;
+      white-space: pre-wrap;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 11px 12px;
+      font-family: var(--mono);
+      font-size: var(--t3);
+      color: var(--text-dim);
+      max-height: 148px;
+      overflow: auto;
+      line-height: 1.5;
+    }
+    #after-events {
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+      max-height: 148px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: var(--bg);
+    }
+    #after-events li {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 10px;
+      padding: 5px 11px;
+      border-bottom: 1px solid var(--border);
+      font-size: var(--t3);
+      color: var(--text-dim);
+    }
+    #after-events li:last-child { border-bottom: none; }
+    #after-events .evt { font-family: var(--mono); color: var(--muted); font-weight: 700; }
+    .aa-actions {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+      position: sticky;
+      bottom: -18px;
+      margin-top: 20px;
+      padding: 12px 0 18px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+    }
+    .aa-actions button, #btn-copy-brief {
+      font-size: var(--t3);
+      font-weight: 750;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 9px 14px;
+      min-height: 38px;
+      cursor: pointer;
+    }
+    #btn-copy-brief { margin-top: 9px; }
+    .aa-actions button:hover:not(:disabled), #btn-copy-brief:hover { border-color: var(--muted); }
+    .aa-actions button:disabled { opacity: 0.35; cursor: not-allowed; }
+    #btn-swap { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation: none !important; transition: none !important; scroll-behavior: auto !important;
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
       }
-      .ah-disc { transition: none !important; }
     }
   </style>
 </head>
-<body class="app">
-  <div class="main">
-    <header class="topbar">
-      <div class="brand-block">
-        <h1 class="top-brand">Triage</h1>
-        <div class="top-title">Outpost defense</div>
+<body>
+  <div class="shell">
+
+    <header class="hdr">
+      <div class="hdr-left">
+        <h1>Triage</h1>
+        <span class="hdr-sub">FOB Juniper &middot; Watch Officer Station</span>
       </div>
-      <div class="status-row" aria-live="polite">
-        <span id="conn-status" class="chip" data-state="disconnected" role="status">Disconnected</span>
-        <span id="motors-status" class="chip" data-state="off" role="status">MOTORS SAFE</span>
-        <span id="scenario-status" class="chip">Scenario <strong>—</strong></span>
-        <span id="phase-status" class="chip" data-phase="idle">Phase <strong>IDLE</strong></span>
-        <span id="time-status" class="chip">t=<strong>0.0</strong>s</span>
+      <div class="hdr-right">
+        <div class="readouts">
+          <span class="ro" id="conn-status" data-state="disconnected" role="status"><span class="k">Link</span><span class="v">Offline</span></span>
+          <span class="ro" id="motors-status" data-state="off" role="status"><span class="k">Motors</span><span class="v">Safe</span></span>
+          <span class="ro" id="scenario-status"><span class="k">Scenario</span><span class="v">&mdash;</span></span>
+          <span class="ro" id="phase-status"><span class="k">Phase</span><span class="v">Idle</span></span>
+          <span class="ro" id="time-status"><span class="k">Sim</span><span class="v">0.0 s</span></span>
+        </div>
+        <div class="clock-block">
+          <span class="clock" id="clock" role="timer" aria-label="Station time">--:--:--</span>
+          <span class="posture" id="posture">Armed &middot; Monitoring</span>
+        </div>
       </div>
     </header>
-    <div class="control-strip" id="controls" role="toolbar" aria-label="Scenario controls">
-      <button type="button" id="btn-start" class="btn-primary">Start</button>
+
+    <div class="toolbar" id="toolbar" role="toolbar" aria-label="Scenario controls">
+      <button type="button" id="btn-start" class="primary">Start</button>
       <button type="button" id="btn-pause">Pause</button>
-      <button type="button" id="btn-reset" class="btn-danger">Reset</button>
-      <button type="button" id="btn-mock" aria-pressed="true">Mock</button>
+      <button type="button" id="btn-reset">Reset</button>
+      <span class="spacer"></span>
+      <button type="button" id="btn-mock" aria-pressed="true">Mock bridge</button>
       <button type="button" id="btn-zero-tilt">Zero tilt</button>
-      <button type="button" id="btn-swap-a">Swap U1 to A</button>
+      <button type="button" id="btn-swap-a">Swap U1 &rarr; A</button>
       <button type="button" id="btn-after">After-action</button>
     </div>
-    <div id="alerts" class="alerts" aria-live="polite" aria-atomic="true"></div>
-    <p id="replay-banner" hidden role="status">Replay: simplified schematic based on public reporting</p>
 
-    <div class="workspace">
-      <div class="left-col">
-        <section id="threat-panel" class="side-card" aria-labelledby="threat-heading">
+    <div class="alert-banner" id="alert-banner" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <span class="tag">Alert</span><span id="alert-text"></span>
+    </div>
+    <p id="replay-banner" hidden role="status">Replay &middot; simplified schematic based on public reporting. Scoring only, no interceptors launched.</p>
+
+    <main class="workspace">
+
+      <div class="rail">
+        <section class="card" id="tracks-card" aria-labelledby="tracks-h">
           <div class="card-head">
-            <h2 id="threat-heading">Tracks</h2>
+            <h2 id="tracks-h">Tracks</h2>
+            <span class="tag-count" id="tracks-count">0 active</span>
           </div>
-          <div id="threat-list"></div>
+          <div class="scroll"><div id="threat-list"></div></div>
         </section>
-        <section id="rack-section" class="side-card" aria-labelledby="rack-heading">
+        <section class="card" id="rack-card" aria-labelledby="rack-h">
           <div class="card-head">
-            <h2 id="rack-heading">Fleet health</h2>
-            <span id="rack-waiting-badge" class="rack-count">0 WAITING</span>
+            <h2 id="rack-h">Interceptor rack</h2>
+            <span class="tag-count" id="rack-count">0 ready</span>
           </div>
-          <p id="rack-summary" class="meta"></p>
-          <div id="rack-panel"></div>
-          <div id="velocity-panel" aria-labelledby="vel-heading">
-            <p class="vel-kicker" id="vel-heading">Kearney Velocity AI</p>
-            <p class="vel-title">Module guidance · core stays the same</p>
-            <div class="vel-chips" aria-hidden="true">
-              <span>Propulsion</span><span>Power</span><span>Airframe</span>
-            </div>
-          </div>
+          <div class="scroll"><div id="rack-list"></div></div>
         </section>
       </div>
 
-      <section id="map-panel" class="panel" aria-labelledby="map-heading">
-        <div class="map-head">
-          <h2 id="map-heading">Outpost map</h2>
-          <div class="map-legend-inline" role="group" aria-label="Track classification legend">
-            <span class="leg"><span class="swatch threat" aria-hidden="true"></span>Threat</span>
-            <span class="leg"><span class="swatch unknown" aria-hidden="true"></span>Unknown</span>
-            <span class="leg"><span class="swatch friendly" aria-hidden="true"></span>Friendly</span>
-            <span class="leg"><span class="swatch decoy" aria-hidden="true"></span>Decoy</span>
+      <section class="card" id="map-card" aria-labelledby="map-h">
+        <div class="card-head map-head">
+          <h2 id="map-h">Live airspace picture</h2>
+          <div class="legend" role="group" aria-label="Track classification key">
+            <span class="lg"><span class="sw threat" aria-hidden="true"></span>Threat</span>
+            <span class="lg"><span class="sw unknown" aria-hidden="true"></span>Unknown</span>
+            <span class="lg"><span class="sw decoy" aria-hidden="true"></span>Decoy</span>
+            <span class="lg"><span class="sw friendly" aria-hidden="true"></span>Friendly</span>
           </div>
         </div>
-        <svg id="map-svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Outpost map. Track details are in the threat list.">
-          <title>Outpost map</title>
-          <defs>
-            <pattern id="map-grid-pat" width="50" height="50" patternUnits="userSpaceOnUse">
-              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="var(--border)" stroke-width="0.8" opacity="0.55"/>
-            </pattern>
-          </defs>
-          <rect width="1000" height="700" fill="var(--bg)"/>
-          <rect width="1000" height="700" fill="url(#map-grid-pat)"/>
-          <text x="18" y="28" fill="var(--muted)" font-size="13" font-weight="650" letter-spacing="0.12em">FOB SENTINEL</text>
-          <!-- World scale: expand site cluster into middle ~60% without changing engine coords -->
-          <g id="map-world" transform="translate(500 350) scale(1.45) translate(-500 -350)">
-            <g id="rack-bay">
-              <rect x="246" y="398" width="136" height="36" fill="var(--panel)" stroke="var(--border)" stroke-width="1.2"/>
-              <text x="314" y="412" text-anchor="middle" fill="var(--muted)" font-size="13" font-weight="700" letter-spacing="0.08em">INTERCEPTOR RACK</text>
-              <rect x="254" y="414" width="14" height="14" fill="var(--bg)" stroke="var(--border)"/>
-              <rect x="290" y="414" width="14" height="14" fill="var(--bg)" stroke="var(--border)"/>
-              <rect x="326" y="414" width="14" height="14" fill="var(--bg)" stroke="var(--border)"/>
-              <rect x="362" y="414" width="14" height="14" fill="var(--bg)" stroke="var(--border)"/>
-            </g>
+        <div class="map-body">
+          <svg id="map-svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"
+               role="img" aria-labelledby="map-title map-desc">
+            <title id="map-title">Outpost schematic of FOB Juniper</title>
+            <desc id="map-desc">Perimeter, named zones and the interceptor rack, with live tracks. The Tracks list is the text equivalent of this picture.</desc>
+            <defs>
+              <pattern id="grid" width="62.5" height="62.5" patternUnits="userSpaceOnUse">
+                <path d="M62.5 0 L0 0 L0 62.5" fill="none" stroke="var(--border)" stroke-width="1" opacity="0.45"/>
+              </pattern>
+              <pattern id="grid-lg" width="125" height="125" patternUnits="userSpaceOnUse">
+                <path d="M125 0 L0 0 L0 125" fill="none" stroke="var(--border)" stroke-width="1.8" opacity="0.85"/>
+              </pattern>
+            </defs>
+            <rect width="1000" height="700" fill="var(--bg)"/>
+            <rect width="1000" height="700" fill="url(#grid)"/>
+            <rect width="1000" height="700" fill="url(#grid-lg)"/>
+            <g id="map-scenery"></g>
             <g id="map-trails"></g>
-            <g id="map-assets"></g>
+            <g id="map-zones"></g>
+            <g id="map-zone-labels"></g>
             <g id="map-links"></g>
             <g id="map-units"></g>
             <g id="map-tracks"></g>
-          </g>
-        </svg>
+            <g id="map-chrome"></g>
+          </svg>
+        </div>
+        <div class="map-foot">
+          <span id="map-foot-left">Perimeter secure</span>
+          <span id="map-foot-right">Grid 100 m</span>
+        </div>
       </section>
 
-      <div class="right-col">
-        <section id="plan-panel" class="side-card" aria-labelledby="plan-heading" aria-live="polite">
+      <div class="rail">
+        <section class="card" id="plan-card" aria-labelledby="plan-h" aria-live="polite">
           <div class="card-head">
-            <h2 id="plan-heading">Review queue</h2>
-            <span id="plan-pending-badge" class="pill-badge" hidden>0 PENDING</span>
+            <h2 id="plan-h">Triage &middot; Recommended plan</h2>
           </div>
-          <div id="plan-lines"></div>
-          <div class="officer-actions">
-            <button type="button" id="approve-btn" aria-disabled="true" disabled>APPROVE</button>
+          <div id="plan-body"></div>
+          <div class="plan-foot">
+            <div class="plan-eta">
+              <span class="k">Decision window</span>
+              <span class="v" id="plan-eta-v">&mdash;</span>
+            </div>
+            <p class="doctrine">Launch early, decide on approach</p>
+            <button type="button" id="approve-btn" aria-disabled="true">APPROVE</button>
           </div>
         </section>
-        <section id="events-section" class="side-card" aria-labelledby="events-heading">
-          <h2 id="events-heading">Recent activity</h2>
-          <div id="events-panel"><ol id="event-log"></ol></div>
+        <section class="card" id="events-card" aria-labelledby="events-h">
+          <div class="card-head">
+            <h2 id="events-h">Event log</h2>
+            <span class="tag-count" id="events-count">0 entries</span>
+          </div>
+          <div class="scroll"><ol id="event-log"></ol></div>
         </section>
       </div>
-    </div>
+
+    </main>
   </div>
 
   <div id="after-overlay" hidden>
-    <div id="after-dialog" role="dialog" aria-modal="true" aria-labelledby="after-title">
-      <h2 id="after-title">After-action</h2>
-      <p id="after-gaps"></p>
-      <div id="after-summary" class="meta"></div>
-      <div id="after-card"></div>
-      <div id="after-brief-block">
+    <div id="after-dialog" role="dialog" aria-modal="true" aria-labelledby="after-title" tabindex="-1">
+      <h2 id="after-title">After-action report</h2>
+      <p class="aa-sub" id="after-sub">&mdash;</p>
+
+      <div class="aa-stats" id="after-stats"></div>
+
+      <div class="aa-sect">
+        <h3>Velocity recommendation <span class="placeholder-tag" id="after-placeholder" hidden>Placeholder</span></h3>
+        <div class="vel-card">
+          <p class="vel-head" id="vel-head">Reconfigure 1 unit: swap the rotor kit. Core and software unchanged.</p>
+          <p class="vel-meta" id="vel-meta"></p>
+          <div class="reuse">
+            <div class="reuse-label" id="reuse-label">Core &middot; reused &mdash; / swapped &mdash;</div>
+            <div class="reuse-bar" id="reuse-bar" role="img" aria-labelledby="reuse-label"></div>
+          </div>
+          <p class="vel-credit">Built with Kearney Velocity AI</p>
+        </div>
+      </div>
+
+      <div class="aa-sect">
         <h3>Velocity brief</h3>
         <pre id="after-brief"></pre>
-        <button type="button" id="btn-copy-brief">Copy</button>
+        <button type="button" id="btn-copy-brief">Copy brief</button>
       </div>
-      <h3>Events</h3>
-      <ol id="after-events"></ol>
-      <div class="after-actions">
-        <button type="button" id="btn-swap">SWAP</button>
+
+      <div class="aa-sect">
+        <h3>Event log</h3>
+        <ol id="after-events"></ol>
+      </div>
+
+      <div class="aa-actions">
+        <button type="button" id="btn-swap">Swap U1 &rarr; Variant B</button>
         <button type="button" id="btn-swap-a-after">Swap U1 back to A</button>
         <button type="button" id="btn-after-close">Close</button>
       </div>
     </div>
   </div>
 
-
 <script>
 (function () {
   "use strict";
 
-  var LABEL_TEXT = {
-    threat: "THREAT",
-    decoy: "DECOY",
-    unknown: "UNKNOWN",
-    friendly: "FRIENDLY"
+  /* ========================= constants ========================= */
+
+  var LABEL_TEXT = { threat: "THREAT", decoy: "DECOY", unknown: "UNKNOWN", friendly: "FRIENDLY" };
+  var HIGH_VALUE = { housing: true, generator: true, clinic: true };
+  var ACT_TEXT = {
+    launch_early: "LAUNCH EARLY",
+    engage: "ENGAGE",
+    best_effort: "BEST EFFORT",
+    "return": "RECALL"
   };
-  var tiltZeroRoll = 0;
-  var tiltZeroPitch = 0;
-  function cssVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  var ACT_CLASS = { engage: "engage", best_effort: "engage", "return": "recall" };
+  /* Live scenario pool: spawns already inside or at the edge of the view. */
+  var SCENARIO_POOL = ["hot_inbound", "two_front", "gap_rush", "clinic_raid", "comms_push", "tower22"];
+
+  /* View transform. Spreads the engine's asset cluster across the 1000x700 map
+     canvas without touching a single scenario coordinate. */
+  var K = 1.25, OX = -92, OY = -46;
+  function tx(x) { return Number(x) * K + OX; }
+  function ty(y) { return Number(y) * K + OY; }
+
+  var PERIM = { x: 186, y: 206, w: 616, h: 456 };
+  var RACK_BAY = { x: 208, y: 438, w: 188, h: 84 };
+  var OPS_BOX = { x: 420, y: 450, w: 120, h: 70 };
+  /* Font sizes in map units. The canvas renders ~0.79x, so 18 => ~14px. */
+  var MF = 20;
+
+  var SVG_NS = "http:" + "//www.w3.org/2000/svg";
+  function svgEl(n) { return document.createElementNS(SVG_NS, n); }
+  function cssVar(n) {
+    return getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   }
-  var LABEL_COLOR = {
-    threat: cssVar("--threat"),
-    decoy: cssVar("--decoy"),
-    unknown: cssVar("--unknown"),
-    friendly: cssVar("--friendly")
+  function labelColor(label) { return cssVar("--" + (LABEL_TEXT[label] ? label : "unknown")); }
+
+  /* ========================= element refs ========================= */
+
+  var el = {
+    conn: document.getElementById("conn-status"),
+    motors: document.getElementById("motors-status"),
+    scenario: document.getElementById("scenario-status"),
+    phase: document.getElementById("phase-status"),
+    simTime: document.getElementById("time-status"),
+    clock: document.getElementById("clock"),
+    alertBanner: document.getElementById("alert-banner"),
+    alertText: document.getElementById("alert-text"),
+    replayBanner: document.getElementById("replay-banner"),
+    trackList: document.getElementById("threat-list"),
+    tracksCount: document.getElementById("tracks-count"),
+    eventLog: document.getElementById("event-log"),
+    eventsCount: document.getElementById("events-count"),
+    planCard: document.getElementById("plan-card"),
+    planBody: document.getElementById("plan-body"),
+    planEta: document.getElementById("plan-eta-v"),
+    approve: document.getElementById("approve-btn"),
+    rackList: document.getElementById("rack-list"),
+    rackCount: document.getElementById("rack-count"),
+    mapFootLeft: document.getElementById("map-foot-left"),
+    scenery: document.getElementById("map-scenery"),
+    zones: document.getElementById("map-zones"),
+    zoneLabels: document.getElementById("map-zone-labels"),
+    trails: document.getElementById("map-trails"),
+    links: document.getElementById("map-links"),
+    units: document.getElementById("map-units"),
+    tracks: document.getElementById("map-tracks"),
+    chrome: document.getElementById("map-chrome"),
+    mockBtn: document.getElementById("btn-mock"),
+    afterBtn: document.getElementById("btn-after")
   };
-  // On-map spawns only — night1/night2 keep far starts for pytest, not the live pool.
-  var SCENARIO_POOL = [
-    "hot_inbound",
-    "two_front",
-    "gap_rush",
-    "clinic_raid",
-    "comms_push",
-    "tower22"
-  ];
+
+  /* ========================= state ========================= */
 
   var state = null;
   var ws = null;
   var reconnectTimer = null;
-  var intentionalClose = false;
   var mockWanted = true;
+  var booted = false;
 
-  var lastThreatKey = null;
-  var lastRackKey = null;
-  var lastPlanKey = null;
-  var lastEventsKey = null;
-  var lastAlertsKey = null;
-  var assetNodes = {};
-  var trackNodes = {};
-  var unitNodes = {};
-  var linkNodes = {};
-  var assetsBuiltFor = null;
+  var keys = { tracks: null, rack: null, plan: null, events: null, alerts: null, assets: null };
+  var trackNodes = {}, trailNodes = {}, unitNodes = {}, linkNodes = {};
+  var unitPrev = {}, tagSide = {};
+  var staticBoxes = [];
+  /* Map furniture that labels must never land on: bay, ops block and every
+     static piece of text drawn on the canvas. */
+  var staticReserved = [
+    { x: RACK_BAY.x, y: RACK_BAY.y, w: RACK_BAY.w, h: RACK_BAY.h, soft: true },
+    { x: OPS_BOX.x, y: OPS_BOX.y, w: OPS_BOX.w, h: OPS_BOX.h, soft: true },
+    { x: RACK_BAY.x - 10, y: RACK_BAY.y - 30, w: RACK_BAY.w + 20, h: 26 },  /* rack caption */
+    { x: 60, y: 468, w: 112, h: 28 },                                        /* GATE */
+    { x: 10, y: 14, w: 310, h: 30 },                                         /* FOB caption */
+    { x: 918, y: 24, w: 70, h: 110 }                                         /* compass */
+  ];
+  var lastVariant = {}, reconfig = {};
+  var approvedFlashUntil = 0;
+  /* Units the officer explicitly recalled, as opposed to ones that flew home
+     on their own after a miss or a track going away. */
+  var explicitRecall = {};
+  var tiltZeroRoll = 0, tiltZeroPitch = 0;
 
-  var el = {
-    conn: document.getElementById("conn-status"),
-    scenario: document.getElementById("scenario-status"),
-    phase: document.getElementById("phase-status"),
-    time: document.getElementById("time-status"),
-    alerts: document.getElementById("alerts"),
-    threatList: document.getElementById("threat-list"),
-    rack: document.getElementById("rack-panel"),
-    rackSummary: document.getElementById("rack-summary"),
-    rackWaiting: document.getElementById("rack-waiting-badge"),
-    planPanel: document.getElementById("plan-panel"),
-    planLines: document.getElementById("plan-lines"),
-    planBadge: document.getElementById("plan-pending-badge"),
-    approve: document.getElementById("approve-btn"),
-    eventLog: document.getElementById("event-log"),
-    mapAssets: document.getElementById("map-assets"),
-    mapTracks: document.getElementById("map-tracks"),
-    mapUnits: document.getElementById("map-units"),
-    mapLinks: document.getElementById("map-links"),
-    mapTrails: document.getElementById("map-trails"),
-    mockBtn: document.getElementById("btn-mock"),
-    replayBanner: document.getElementById("replay-banner"),
-    afterBtn: document.getElementById("btn-after"),
-    motors: document.getElementById("motors-status")
-  };
-  var VARIANT_TYPE = { A: "Standard", B: "Video" };
-  var trailNodes = {};
-  var unitPrev = {};
+  /* ========================= helpers ========================= */
 
-  function setConn(connected) {
-    if (connected) {
-      el.conn.dataset.state = "connected";
-      el.conn.textContent = "Connected";
+  function unitName(id) { return "Unit " + String(id).replace(/^U/, ""); }
+  function trackName(id) { return "Track " + id; }
+
+  function mmss(sec) {
+    if (sec == null || !isFinite(sec) || sec < 0) return null;
+    var s = Math.max(0, Math.round(Number(sec)));
+    return Math.floor(s / 60) + ":" + (s % 60 < 10 ? "0" : "") + (s % 60);
+  }
+  function findTrack(s, id) {
+    var l = (s && s.tracks) || [];
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return null;
+  }
+  function findUnit(s, id) {
+    var l = (s && s.units) || [];
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return null;
+  }
+  function approvedAction(s, unitId) {
+    var plan = (s && s.plan) || [], act = null;
+    for (var i = 0; i < plan.length; i++) {
+      if (plan[i].unit_id === unitId && plan[i].approved) act = plan[i].action;
+    }
+    return act;
+  }
+  function trackReason(tr) {
+    switch (tr.label) {
+      case "friendly": return "Registered return flight";
+      case "unknown": return "Classifying…";
+      case "decoy": return "Erratic path · no asset targeted";
+      case "threat": return "High confidence · heading for " + (tr.target_asset || "the outpost");
+      default: return "";
+    }
+  }
+  /* Engine reasons are terse internal strings; the officer sees plain English. */
+  function planReason(ln) {
+    var raw = String(ln.reason || "");
+    var m = raw.match(/^(\w+)\s+priority=(\d+)$/);
+    if (m) {
+      return m[1] === "threat"
+        ? ("Confirmed threat, priority " + m[2] + ".")
+        : ("Unknown, priority " + m[2] + ". Buy time.");
+    }
+    if (raw === "confirmed threat") return "Classification hardened to threat.";
+    if (raw === "now likely decoy") return "Score fell. Recall before it is spent.";
+    if (raw === "out of time, defaulting to threat") return "Out of time. Defaulting to threat.";
+    if (raw === "capability gap, best effort") return "No capable unit on the rack.";
+    m = raw.match(/^(U\d+) not ready, reassigned$/);
+    if (m) return unitName(m[1]) + " not ready. Reassigned.";
+    return raw;
+  }
+
+  function alertPhrase(raw) {
+    var m = String(raw).match(/Shelter:\s*(\w+)/i);
+    return m ? ("personnel near " + m[1] + " take cover") : String(raw);
+  }
+
+  /* Capability-gap reason, generated from live state. */
+  function gapDetail(s) {
+    var gaps = (s && s.gaps) || [];
+    if (!gaps.length) return null;
+    var gap = gaps[0];
+    for (var g = 0; g < gaps.length; g++) if (gaps[g].gap_type === "fast_threat") { gap = gaps[g]; break; }
+    var tr = findTrack(s, gap.track_id);
+    var units = (s && s.units) || [];
+    var margin = Number(s && s.capable_margin) || 1.2;
+    var need = tr ? tr.speed * margin : null;
+
+    var fastest = null;
+    for (var i = 0; i < units.length; i++) if (!fastest || units[i].speed > fastest.speed) fastest = units[i];
+    var enough = [];
+    for (var j = 0; j < units.length; j++) if (need != null && units[j].speed > need) enough.push(units[j]);
+
+    var parts = [];
+    if (fastest) parts.push("faster than Variant " + fastest.variant);
+    if (!enough.length) {
+      parts.push("no faster variant on the rack");
     } else {
-      el.conn.dataset.state = "disconnected";
-      el.conn.textContent = "Disconnected";
+      var spent = 0;
+      for (var k = 0; k < enough.length; k++) if (enough[k].state === "expended") spent += 1;
+      parts.push(spent === enough.length
+        ? ("only Variant " + enough[0].variant + " unit already expended")
+        : ("Variant " + enough[0].variant + " unit not available"));
     }
-  }
-
-  function send(obj) {
-    if (!ws || ws.readyState !== 1) return;
-    ws.send(JSON.stringify(obj));
-  }
-
-  function approveVisible() {
-    if (!state || state.replay) return;
-    var ids = [];
-    var lines = state.plan || [];
-    for (var i = 0; i < lines.length; i++) {
-      if (!lines[i].approved) ids.push(lines[i].id);
-    }
-    if (!ids.length) return;
-    send({ type: "approve", line_ids: ids });
-  }
-
-  function connect() {
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
-    intentionalClose = false;
-    var proto = (location.protocol === "https:") ? "wss:" : "ws:";
-    var url = proto + "//" + location.host + "/ws";
-    ws = new WebSocket(url);
-    ws.onopen = function () {
-      setConn(true);
-    };
-    ws.onclose = function () {
-      setConn(false);
-      if (!intentionalClose) {
-        reconnectTimer = setTimeout(connect, 1000);
-      }
-    };
-    ws.onerror = function () {
-      setConn(false);
-    };
-    ws.onmessage = function (ev) {
-      try {
-        state = JSON.parse(ev.data);
-      } catch (err) {
-        return;
-      }
-      onState(state);
+    return {
+      reason: parts.join(" · "),
+      math: tr ? (trackName(tr.id) + " at " + tr.speed + " · needs " +
+                  (Math.round(need * 10) / 10) + " · rack tops out at " +
+                  (fastest ? fastest.speed : "—")) : "",
+      trackId: gap.track_id
     };
   }
 
-  function onState(s) {
-    var scen = s.scenario || "—";
-    el.scenario.innerHTML = "Scenario <strong>" + String(scen).replace(/_/g, " ") + "</strong>";
-    var phase = String(s.phase || "idle").toUpperCase();
-    el.phase.innerHTML = "Phase <strong>" + phase + "</strong>";
-    el.phase.setAttribute("data-phase", String(s.phase || "idle").toLowerCase());
-    el.time.innerHTML = "t=<strong>" + (Number(s.t) || 0).toFixed(1) + "</strong>s";
+  /* ========================= event log text ========================= */
 
-    if (el.motors) {
-      if (s.motors_enabled) {
-        el.motors.dataset.state = "on";
-        el.motors.textContent = "MOTORS HOT";
-        el.motors.title = "TRIAGE_MOTORS=1 — approve on live U1 can spin motors 1/3/4";
-      } else {
-        el.motors.dataset.state = "off";
-        el.motors.textContent = "MOTORS SAFE";
-        el.motors.title = "Hardware motors off (default). Set TRIAGE_MOTORS=1 only for live motor demos.";
-      }
+  function eventText(e, s) {
+    var kind = String(e.kind || ""), msg = String(e.msg || ""), m;
+    if (kind === "contact") {
+      m = msg.match(/contact\s+(\S+)/);
+      return m ? ("Contact " + m[1] + " · classifying") : msg;
     }
-
-    var alertsKey = JSON.stringify(s.alerts || []);
-    if (alertsKey !== lastAlertsKey) {
-      lastAlertsKey = alertsKey;
-      el.alerts.textContent = (s.alerts && s.alerts.length) ? s.alerts.join(" · ") : "";
+    if (kind === "plan") {
+      m = msg.match(/^(\S+):(\S+):(\S+)\s*(.*)$/);
+      return m ? ("Plan · " + unitName(m[1]) + " → " + trackName(m[2]) + " · " +
+                  (ACT_TEXT[m[3]] || m[3]).toLowerCase()) : msg;
     }
-
-    if (s.replay) {
-      document.body.classList.add("replay-mode");
-      el.planPanel.hidden = true;
-      el.replayBanner.hidden = false;
-      if (el.afterBtn) el.afterBtn.hidden = true;
-    } else {
-      document.body.classList.remove("replay-mode");
-      el.planPanel.hidden = false;
-      el.replayBanner.hidden = true;
-      if (el.afterBtn) el.afterBtn.hidden = false;
+    if (kind === "approve") {
+      m = msg.match(/approved\s+(\S+):(\S+):(\S+)/);
+      if (!m) return msg;
+      if (m[3] === "best_effort") return "Approved · " + unitName(m[1]) + " launched (best effort)";
+      if (m[3] === "return") return "Approved · " + unitName(m[1]) + " recall";
+      return "Approved · " + unitName(m[1]) + " → " + trackName(m[2]) + " · " +
+             (ACT_TEXT[m[3]] || m[3]).toLowerCase();
     }
-
-    updateMap(s);
-    updateThreatList(s);
-    updateRack(s);
-    updatePlan(s);
-    updateEvents(s);
+    if (kind === "recall") {
+      m = msg.match(/^(U\d+)\s+recalling/);
+      return m ? (unitName(m[1]) + " recall ordered")
+               : "Assigned track gone · interceptor returning";
+    }
+    if (kind === "returned") {
+      m = msg.match(/^(U\d+)/);
+      var who = m ? m[1] : null;
+      return (who ? unitName(who) : "Interceptor") +
+        (who && explicitRecall[who] ? " recalled" : " returned") + ", not expended";
+    }
+    if (kind === "neutralized") {
+      m = msg.match(/^(U\d+)\s+neutralized\s+(\S+)/);
+      return m ? (unitName(m[1]) + " intercepted " + trackName(m[2])) : msg;
+    }
+    if (kind === "miss") return "Miss · could not match speed";
+    if (kind === "gap") {
+      m = msg.match(/on\s+(\S+)$/);
+      return "Capability gap · " + (m ? trackName(m[1]) : "track") + " too fast for the rack";
+    }
+    if (kind === "shelter") return "Alert · " + alertPhrase(msg);
+    if (kind === "impact") {
+      m = msg.match(/^(\S+)\s+impact at\s+(.+)$/);
+      var where = m ? m[2] : "the outpost", tid = m ? m[1] : null, gapped = false;
+      ((s && s.gaps) || []).forEach(function (g) { if (g.track_id === tid) gapped = true; });
+      return "IMPACT · " + where + " area." +
+             (gapped ? " No personnel. Logged as capability gap." : "");
+    }
+    if (kind === "swap") {
+      m = msg.match(/swapped\s+(\S+)\s+to variant\s+(\S+)/);
+      return m ? (unitName(m[1]) + " reconfigured · Variant " + m[2]) : msg;
+    }
+    if (kind === "hw") return "Hardware · " + msg;
+    return msg;
   }
 
-  // Namespace built without a literal http URL substring (offline UI rule).
-  var SVG_NS = "http:" + "//www.w3.org/2000/svg";
-  function svgEl(name) {
-    return document.createElementNS(SVG_NS, name);
+  /* ========================= label collision solver ========================= */
+
+  function overlaps(a, b, pad) {
+    pad = pad || 0;
+    return !(a.x + a.w + pad <= b.x || b.x + b.w + pad <= a.x ||
+             a.y + a.h + pad <= b.y || b.y + b.h + pad <= a.y);
   }
-
-  var HIGH_VALUE_KINDS = { housing: true, generator: true, clinic: true };
-
-  function assetMarker(name, kind) {
-    var g = svgEl("g");
-    g.setAttribute("class", "asset-marker");
-    var hv = !!HIGH_VALUE_KINDS[kind] || !!HIGH_VALUE_KINDS[name];
-    var w = 22, h = 18;
-    if (kind === "housing") { w = 26; h = 20; }
-    else if (kind === "generator" || kind === "clinic") { w = 24; h = 18; }
-    var pad = svgEl("rect");
-    pad.setAttribute("x", String(-w / 2));
-    pad.setAttribute("y", String(-h / 2));
-    pad.setAttribute("width", String(w));
-    pad.setAttribute("height", String(h));
-    pad.setAttribute("fill", cssVar("--panel"));
-    pad.setAttribute("stroke", hv ? cssVar("--unknown") : cssVar("--border"));
-    pad.setAttribute("stroke-width", hv ? "1.5" : "1");
-    g.appendChild(pad);
-    var label = svgEl("text");
-    label.setAttribute("x", "0");
-    label.setAttribute("y", String(h / 2 + 12));
-    label.setAttribute("text-anchor", "middle");
-    label.setAttribute("fill", cssVar("--text-dim"));
-    label.setAttribute("font-size", "13");
-    label.setAttribute("font-weight", "650");
-    label.setAttribute("class", "map-label");
-    label.textContent = name;
-    g.appendChild(label);
-    if (hv) {
-      var tag = svgEl("text");
-      tag.setAttribute("x", "0");
-      tag.setAttribute("y", String(h / 2 + 24));
-      tag.setAttribute("text-anchor", "middle");
-      tag.setAttribute("fill", cssVar("--unknown"));
-      tag.setAttribute("font-size", "13");
-      tag.setAttribute("font-weight", "700");
-      tag.setAttribute("letter-spacing", "0.08em");
-      tag.setAttribute("class", "map-label");
-      tag.textContent = "HIGH VALUE";
-      g.appendChild(tag);
-    }
-    return { g: g, t: label };
-  }
-
-  function ensureAssets(assets) {
-    var key = JSON.stringify(assets || []);
-    if (key === assetsBuiltFor) return;
-    assetsBuiltFor = key;
-    el.mapAssets.innerHTML = "";
-    assetNodes = {};
-    (assets || []).forEach(function (a) {
+  /* Exact text width, measured once per string by the renderer itself. */
+  var measureNode = null, measureCache = {};
+  function stringWidth(text, size, weight, ls) {
+    var key = size + "|" + weight + "|" + ls + "|" + text;
+    if (measureCache[key] != null) return measureCache[key];
+    if (!measureNode) {
       var g = svgEl("g");
-      g.setAttribute("data-asset", a.name);
-      g.setAttribute("transform", "translate(" + a.x + "," + a.y + ")");
-      var kind = a.kind || a.name;
-      var marker = assetMarker(a.name, kind);
-      var hit = svgEl("circle");
-      hit.setAttribute("r", "18");
-      hit.setAttribute("fill", "transparent");
-      hit.setAttribute("class", "asset-hit");
-      g.appendChild(hit);
-      g.appendChild(marker.g);
-      el.mapAssets.appendChild(g);
-      assetNodes[a.name] = { g: g, icon: marker.g, t: marker.t, hit: hit };
+      g.setAttribute("visibility", "hidden");
+      measureNode = svgEl("text");
+      measureNode.setAttribute("class", "mlab");
+      g.appendChild(measureNode);
+      document.getElementById("map-svg").appendChild(g);
+    }
+    measureNode.setAttribute("font-size", String(size));
+    measureNode.setAttribute("font-weight", String(weight));
+    measureNode.setAttribute("letter-spacing", (ls || 0) + "em");
+    measureNode.textContent = text;
+    var w = 0;
+    try { w = measureNode.getComputedTextLength(); } catch (err) { w = 0; }
+    if (!w) w = String(text).length * size * (0.56 + (ls || 0));
+    measureCache[key] = w;
+    return w;
+  }
+  function measure(lines) {
+    var w = 0, h = 0;
+    for (var i = 0; i < lines.length; i++) {
+      w = Math.max(w, stringWidth(lines[i].text, lines[i].size,
+                                  lines[i].weight || 700, lines[i].ls));
+      h += lines[i].size * 1.34;
+    }
+    return { w: w + 16, h: h + 8 };
+  }
+  function place(box, anchor, occupied, preferred) {
+    var cands = [];
+    [0, 46, 100].forEach(function (pad) {
+      cands.push({ x: anchor.x + anchor.w / 2 - box.w / 2, y: anchor.y + anchor.h + 6 + pad });
+      cands.push({ x: anchor.x + anchor.w / 2 - box.w / 2, y: anchor.y - box.h - 6 - pad });
+      cands.push({ x: anchor.x + anchor.w + 9 + pad, y: anchor.y + anchor.h / 2 - box.h / 2 });
+      cands.push({ x: anchor.x - box.w - 9 - pad, y: anchor.y + anchor.h / 2 - box.h / 2 });
+      cands.push({ x: anchor.x + anchor.w + 9 + pad, y: anchor.y + anchor.h + 6 + pad });
+      cands.push({ x: anchor.x - box.w - 9 - pad, y: anchor.y + anchor.h + 6 + pad });
+      cands.push({ x: anchor.x + anchor.w + 9 + pad, y: anchor.y - box.h - 6 - pad });
+      cands.push({ x: anchor.x - box.w - 9 - pad, y: anchor.y - box.h - 6 - pad });
+    });
+    var order = [];
+    if (preferred != null && cands[preferred]) order.push(preferred);
+    for (var i = 0; i < cands.length; i++) if (i !== preferred) order.push(i);
+
+    function clamp(c) {
+      return {
+        x: Math.min(Math.max(2, c.x), 998 - box.w),
+        y: Math.min(Math.max(2, c.y), 698 - box.h),
+        w: box.w, h: box.h
+      };
+    }
+    /* Overlapping another piece of text is a bug; an opaque callout sitting
+       over a building footprint is not, so soft boxes cost far less. */
+    function cost(r) {
+      var total = 0;
+      for (var j = 0; j < occupied.length; j++) {
+        var b = occupied[j];
+        var ox = Math.min(r.x + r.w + 5, b.x + b.w) - Math.max(r.x - 5, b.x);
+        var oy = Math.min(r.y + r.h + 5, b.y + b.h) - Math.max(r.y - 5, b.y);
+        if (ox > 0 && oy > 0) total += ox * oy * (b.soft ? 4 : 60);
+      }
+      return total;
+    }
+
+    var best = null, bestCost = Infinity, bestIdx = 0;
+    for (var o = 0; o < order.length; o++) {
+      var r = clamp(cands[order[o]]);
+      var c = cost(r);
+      if (c === 0) return { rect: r, idx: order[o] };
+      if (c < bestCost) { bestCost = c; best = r; bestIdx = order[o]; }
+    }
+    return { rect: best || clamp(cands[0]), idx: bestIdx };
+  }
+  function drawLines(parent, rect, lines, align) {
+    var y = rect.y + 5;
+    var ax = align === "start" ? rect.x + 8 : rect.x + rect.w / 2;
+    for (var i = 0; i < lines.length; i++) {
+      var ln = lines[i];
+      y += ln.size * 1.0;
+      var t = svgEl("text");
+      t.setAttribute("x", String(ax));
+      t.setAttribute("y", String(y));
+      t.setAttribute("text-anchor", align === "start" ? "start" : "middle");
+      t.setAttribute("class", "mlab");
+      t.setAttribute("font-size", String(ln.size));
+      t.setAttribute("font-weight", String(ln.weight || 700));
+      t.setAttribute("fill", ln.fill);
+      if (ln.ls) t.setAttribute("letter-spacing", ln.ls + "em");
+      t.setAttribute("paint-order", "stroke");
+      t.setAttribute("stroke", cssVar("--bg"));
+      t.setAttribute("stroke-width", "4");
+      t.setAttribute("stroke-linejoin", "round");
+      t.textContent = ln.text;
+      parent.appendChild(t);
+      y += ln.size * 0.34;
+    }
+  }
+
+  /* ========================= map: static scenery ========================= */
+
+  function sRect(g, x, y, w, h, fill, stroke, sw) {
+    var r = svgEl("rect");
+    r.setAttribute("x", String(x)); r.setAttribute("y", String(y));
+    r.setAttribute("width", String(w)); r.setAttribute("height", String(h));
+    r.setAttribute("fill", fill || "none");
+    if (stroke) { r.setAttribute("stroke", stroke); r.setAttribute("stroke-width", String(sw || 1)); }
+    g.appendChild(r);
+    return r;
+  }
+  function sPath(g, d, stroke, sw, cap) {
+    var p = svgEl("path");
+    p.setAttribute("d", d);
+    p.setAttribute("fill", "none");
+    p.setAttribute("stroke", stroke);
+    p.setAttribute("stroke-width", String(sw));
+    p.setAttribute("stroke-linecap", cap || "butt");
+    g.appendChild(p);
+    return p;
+  }
+  function sText(g, x, y, str, size, fill, anchor, ls, weight) {
+    var t = svgEl("text");
+    t.setAttribute("x", String(x)); t.setAttribute("y", String(y));
+    t.setAttribute("text-anchor", anchor || "start");
+    t.setAttribute("class", "mlab");
+    t.setAttribute("font-size", String(size));
+    t.setAttribute("font-weight", String(weight || 700));
+    t.setAttribute("fill", fill);
+    if (ls) t.setAttribute("letter-spacing", ls + "em");
+    t.setAttribute("paint-order", "stroke");
+    t.setAttribute("stroke", cssVar("--bg"));
+    t.setAttribute("stroke-width", "4");
+    t.setAttribute("stroke-linejoin", "round");
+    t.textContent = str;
+    g.appendChild(t);
+    return t;
+  }
+
+  function buildScenery() {
+    var g = el.scenery;
+    g.innerHTML = "";
+
+    /* graded ground inside the wire */
+    sRect(g, PERIM.x, PERIM.y, PERIM.w, PERIM.h, cssVar("--panel"), null, 0);
+
+    /* access roads, drawn under the zone blocks */
+    sPath(g, "M186 480 H 620", cssVar("--panel-2"), 17, "round");
+    sPath(g, "M460 480 V 300 H 700", cssVar("--panel-2"), 13, "round");
+    sPath(g, "M600 480 V 604 H 727", cssVar("--panel-2"), 13, "round");
+
+    /* perimeter wire with a vehicle gate on the west wall */
+    sPath(g,
+      "M186 455 L186 206 L802 206 L802 662 L186 662 L186 505",
+      cssVar("--border"), 3.5, "square");
+    sRect(g, 179, 446, 14, 11, cssVar("--muted"), null, 0);
+    sRect(g, 179, 503, 14, 11, cssVar("--muted"), null, 0);
+    sText(g, 170, 486, "GATE", MF, cssVar("--muted"), "end", 0.14);
+
+    /* corner guard towers */
+    [[186, 206], [802, 206], [186, 662], [802, 662]].forEach(function (c) {
+      sRect(g, c[0] - 13, c[1] - 13, 26, 26, cssVar("--panel-2"), cssVar("--muted"), 2);
+    });
+
+    /* ops / watch post — the station this console sits in */
+    sRect(g, OPS_BOX.x, OPS_BOX.y, OPS_BOX.w, OPS_BOX.h, cssVar("--panel-2"), cssVar("--border"), 1.5);
+    sText(g, OPS_BOX.x + OPS_BOX.w / 2, OPS_BOX.y + OPS_BOX.h / 2 + 6, "OPS",
+          MF + 2, cssVar("--text-dim"), "middle", 0.12, 750);
+
+    /* interceptor rack bay with four slot pads */
+    sRect(g, RACK_BAY.x, RACK_BAY.y, RACK_BAY.w, RACK_BAY.h,
+          cssVar("--panel-2"), cssVar("--muted"), 2);
+    sText(g, RACK_BAY.x + RACK_BAY.w / 2, RACK_BAY.y - 10, "INTERCEPTOR RACK",
+          MF, cssVar("--muted"), "middle", 0.08);
+    [261, 297, 333, 369].forEach(function (sx) {
+      sRect(g, tx(sx) - 19, ty(421) - 19, 38, 38, cssVar("--bg"), cssVar("--border"), 1.5);
     });
   }
+
+  function buildChrome() {
+    var g = el.chrome;
+    g.innerHTML = "";
+    sText(g, 16, 34, "FOB JUNIPER · PERIMETER", MF + 2, cssVar("--muted"), "start", 0.16);
+    /* compass */
+    sPath(g, "M952 92 L952 40 M944 50 L952 38 L960 50", cssVar("--muted"), 2.5, "round");
+    sText(g, 952, 120, "N", MF + 3, cssVar("--text-dim"), "middle", 0.04, 800);
+  }
+
+  /* ========================= map: zones ========================= */
+
+  function buildZones(assets) {
+    var key = JSON.stringify(assets || []);
+    if (key === keys.assets) return;
+    keys.assets = key;
+    el.zones.innerHTML = "";
+    el.zoneLabels.innerHTML = "";
+
+    var pts = (assets || []).map(function (a) {
+      return { name: a.name, kind: a.kind || a.name, x: tx(a.x), y: ty(a.y) };
+    });
+
+    /* Footprints are sized from the nearest-neighbour distance, so blocks are
+       substantial, varied and never collide. */
+    var items = pts.map(function (p) {
+      var d = Infinity;
+      pts.forEach(function (q) {
+        if (q === p) return;
+        d = Math.min(d, Math.hypot(q.x - p.x, q.y - p.y));
+      });
+      if (!isFinite(d)) d = 150;
+      var w = Math.max(60, Math.min(170, d * 0.80));
+      var h = Math.max(42, w * 0.66);
+      return {
+        name: p.name,
+        hv: !!(HIGH_VALUE[p.kind] || HIGH_VALUE[p.name]),
+        rect: { x: p.x - w / 2, y: p.y - h / 2, w: w, h: h },
+        area: w * h
+      };
+    });
+    items.sort(function (a, b) { return b.area - a.area; });
+
+    var occupied = staticReserved.slice();
+    items.forEach(function (it) {
+      var r = it.rect;
+      sRect(el.zones, r.x, r.y, r.w, r.h, cssVar("--border"),
+            it.hv ? cssVar("--unknown") : cssVar("--muted"), it.hv ? 2.5 : 1);
+      /* inner course line: reads as built-up ground, not a hollow outline */
+      var inner = sRect(el.zones, r.x + 6, r.y + 6, Math.max(0, r.w - 12), Math.max(0, r.h - 12),
+                        "none", cssVar("--panel"), 1);
+      inner.setAttribute("opacity", "0.85");
+      occupied.push({ x: r.x, y: r.y, w: r.w, h: r.h, soft: true });
+    });
+
+    items.forEach(function (it) {
+      var lines = [{
+        text: it.name.toUpperCase(), size: MF, weight: 750,
+        fill: cssVar("--text"), ls: 0.1
+      }];
+      if (it.hv) {
+        lines.push({ text: "HIGH VALUE", size: MF, weight: 800, fill: cssVar("--unknown"), ls: 0.12 });
+      }
+      var res = place(measure(lines), it.rect, occupied, 0);
+      drawLines(el.zoneLabels, res.rect, lines, "middle");
+      occupied.push(res.rect);
+    });
+
+    staticBoxes = occupied.slice();
+  }
+
+  /* ========================= map: tracks and units ========================= */
 
   function ensureTrackNode(id) {
     if (trackNodes[id]) return trackNodes[id];
     var g = svgEl("g");
     g.setAttribute("data-track", id);
+
+    var leader = svgEl("line");
+    leader.setAttribute("stroke-width", "1.5");
+    leader.setAttribute("opacity", "0.65");
+    g.appendChild(leader);
+
     var body = svgEl("g");
-    body.setAttribute("class", "track-body");
-    // Dot + heading tick (no flags) — bright, readable on dark radar map
     var halo = svgEl("circle");
-    halo.setAttribute("r", "11");
+    halo.setAttribute("r", "20");
     halo.setAttribute("fill", "none");
-    halo.setAttribute("stroke-width", "1.5");
-    halo.setAttribute("opacity", "0.55");
-    var diamond = svgEl("circle");
-    diamond.setAttribute("r", "5.5");
-    diamond.setAttribute("stroke", cssVar("--bg"));
-    diamond.setAttribute("stroke-width", "1.5");
-    diamond.setAttribute("filter", "url(#soft-glow)");
+    halo.setAttribute("stroke-width", "2");
+    halo.setAttribute("opacity", "0.4");
     var nose = svgEl("line");
-    nose.setAttribute("x1", "0");
-    nose.setAttribute("y1", "0");
-    nose.setAttribute("x2", "0");
-    nose.setAttribute("y2", "-16");
-    nose.setAttribute("stroke-width", "2");
+    nose.setAttribute("x1", "0"); nose.setAttribute("y1", "0");
+    nose.setAttribute("x2", "0"); nose.setAttribute("y2", "-30");
+    nose.setAttribute("stroke-width", "3");
     nose.setAttribute("stroke-linecap", "round");
-    body.appendChild(halo);
-    body.appendChild(diamond);
-    body.appendChild(nose);
-    var label = svgEl("g");
-    label.setAttribute("class", "track-label");
-    var tClass = svgEl("text");
-    tClass.setAttribute("x", "12");
-    tClass.setAttribute("y", "-2");
-    tClass.setAttribute("class", "map-label");
-    tClass.setAttribute("font-size", "11");
-    tClass.setAttribute("font-weight", "750");
-    tClass.setAttribute("letter-spacing", "0.02em");
-    var tId = svgEl("text");
-    tId.setAttribute("x", "12");
-    tId.setAttribute("y", "12");
-    tId.setAttribute("class", "map-label");
-    tId.setAttribute("font-size", "10");
-    tId.setAttribute("font-weight", "600");
-    tId.setAttribute("opacity", "0.9");
-    label.appendChild(tClass);
-    label.appendChild(tId);
+    var dot = svgEl("circle");
+    dot.setAttribute("r", "10");
+    dot.setAttribute("stroke", cssVar("--bg"));
+    dot.setAttribute("stroke-width", "2");
+    body.appendChild(halo); body.appendChild(nose); body.appendChild(dot);
     g.appendChild(body);
-    g.appendChild(label);
-    el.mapTracks.appendChild(g);
-    trackNodes[id] = { g: g, body: body, diamond: diamond, nose: nose, halo: halo, t: tClass, tId: tId };
+
+    var tagBg = svgEl("rect");
+    tagBg.setAttribute("rx", "3");
+    tagBg.setAttribute("fill", cssVar("--bg"));
+    tagBg.setAttribute("fill-opacity", "0.95");
+    tagBg.setAttribute("stroke-width", "1.5");
+    g.appendChild(tagBg);
+    var lines = [];
+    for (var i = 0; i < 3; i++) {
+      var t = svgEl("text");
+      t.setAttribute("class", "mlab");
+      t.setAttribute("text-anchor", "start");
+      g.appendChild(t);
+      lines.push(t);
+    }
+    el.tracks.appendChild(g);
+    trackNodes[id] = { g: g, body: body, dot: dot, nose: nose, halo: halo,
+                       tagBg: tagBg, lines: lines, leader: leader };
     return trackNodes[id];
+  }
+
+  function ensureTrail(id) {
+    if (trailNodes[id]) return trailNodes[id];
+    var p = svgEl("polyline");
+    p.setAttribute("fill", "none");
+    p.setAttribute("stroke-width", "3");
+    p.setAttribute("stroke-linecap", "round");
+    p.setAttribute("stroke-linejoin", "round");
+    p.setAttribute("opacity", "0.5");
+    el.trails.appendChild(p);
+    trailNodes[id] = p;
+    return p;
   }
 
   function ensureUnitNode(id) {
@@ -1005,108 +1531,117 @@
     var g = svgEl("g");
     g.setAttribute("data-unit", id);
     var craft = svgEl("g");
-    craft.setAttribute("class", "unit-craft");
-    // Chevron sized for compact rack pads
     var body = svgEl("polygon");
-    body.setAttribute("points", "0,-4 3.2,3.5 -3.2,3.5");
-    body.setAttribute("fill", cssVar("--friendly"));
+    body.setAttribute("points", "0,-13 10,11 0,5 -10,11");
     body.setAttribute("stroke", cssVar("--bg"));
-    body.setAttribute("stroke-width", "0.9");
-    var hub = body;
+    body.setAttribute("stroke-width", "1.5");
     craft.appendChild(body);
-    var t = svgEl("text");
-    t.setAttribute("y", "-8");
-    t.setAttribute("text-anchor", "middle");
-    t.setAttribute("fill", cssVar("--text-dim"));
-    t.setAttribute("font-size", "8");
-    t.setAttribute("font-weight", "700");
-    t.setAttribute("letter-spacing", "0.04em");
-    t.setAttribute("class", "map-label");
-    t.textContent = id;
     g.appendChild(craft);
+    var t = svgEl("text");
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("class", "mlab");
+    t.setAttribute("font-size", String(MF));
+    t.setAttribute("font-weight", "750");
+    t.setAttribute("letter-spacing", "0.06em");
+    t.setAttribute("paint-order", "stroke");
+    t.setAttribute("stroke", cssVar("--bg"));
+    t.setAttribute("stroke-width", "4");
+    t.setAttribute("stroke-linejoin", "round");
     g.appendChild(t);
-    el.mapUnits.appendChild(g);
-    unitNodes[id] = { g: g, craft: craft, hub: hub, t: t };
+    el.units.appendChild(g);
+    unitNodes[id] = { g: g, craft: craft, body: body, t: t };
     return unitNodes[id];
   }
 
-  function ensureTrail(id) {
-    if (trailNodes[id]) return trailNodes[id];
-    var poly = svgEl("polyline");
-    poly.setAttribute("fill", "none");
-    poly.setAttribute("stroke-width", "2.5");
-    poly.setAttribute("stroke-linecap", "round");
-    poly.setAttribute("opacity", "0.7");
-    el.mapTrails.appendChild(poly);
-    trailNodes[id] = poly;
-    return poly;
-  }
-
-  function ensureLink(uid) {
-    if (linkNodes[uid]) return linkNodes[uid];
-    var line = svgEl("line");
-    line.setAttribute("stroke", cssVar("--friendly"));
-    line.setAttribute("stroke-width", "2");
-    line.setAttribute("stroke-dasharray", "6 4");
-    line.setAttribute("opacity", "0.85");
-    el.mapLinks.appendChild(line);
-    linkNodes[uid] = line;
-    return line;
+  function ensureLink(id) {
+    if (linkNodes[id]) return linkNodes[id];
+    var l = svgEl("line");
+    l.setAttribute("stroke-width", "2");
+    l.setAttribute("stroke-dasharray", "9 7");
+    l.setAttribute("opacity", "0.8");
+    el.links.appendChild(l);
+    linkNodes[id] = l;
+    return l;
   }
 
   function updateMap(s) {
-    ensureAssets(s.assets || []);
-    var shelter = {};
-    (s.alerts || []).forEach(function (a) {
-      var m = String(a).match(/Shelter:\s*(\w+)/i);
-      if (m) shelter[m[1]] = true;
-    });
-    Object.keys(assetNodes).forEach(function (name) {
-      var node = assetNodes[name];
-      if (!node || !node.hit) return;
-      if (shelter[name]) {
-        node.hit.setAttribute("fill", "transparent");
-        node.hit.setAttribute("stroke", cssVar("--friendly"));
-        node.hit.setAttribute("stroke-width", "2");
-        node.t.setAttribute("fill", cssVar("--friendly"));
-      } else {
-        node.hit.setAttribute("fill", "transparent");
-        node.hit.setAttribute("stroke", "none");
-        node.t.setAttribute("fill", cssVar("--text"));
-      }
-    });
+    buildZones(s.assets || []);
 
-    var seenTracks = {};
-    var seenTrails = {};
-    (s.tracks || []).forEach(function (tr) {
-      if (tr.status !== "active") return;
+    var occupied = staticBoxes.slice();
+    var tracksById = {};
+    (s.tracks || []).forEach(function (tr) { tracksById[tr.id] = tr; });
+
+    var seenTracks = {}, seenTrails = {};
+    var active = (s.tracks || []).filter(function (tr) { return tr.status === "active"; });
+    active.sort(function (a, b) { return (b.priority || 0) - (a.priority || 0); });
+
+    active.forEach(function (tr) {
       seenTracks[tr.id] = true;
       var node = ensureTrackNode(tr.id);
-      var color = LABEL_COLOR[tr.label] || LABEL_COLOR.unknown;
-      var deg = ((Number(tr.heading) || 0) * 180 / Math.PI) + 90;
-      node.g.setAttribute("transform", "translate(" + tr.x + "," + tr.y + ")");
-      node.body.setAttribute("transform", "rotate(" + deg + ")");
-      node.diamond.setAttribute("fill", color);
-      node.nose.setAttribute("stroke", color);
-      if (node.halo) node.halo.setAttribute("stroke", color);
-      node.t.setAttribute("fill", color);
-      node.t.textContent = LABEL_TEXT[tr.label] || String(tr.label);
-      if (node.tId) {
-        node.tId.setAttribute("fill", color);
-        node.tId.textContent = tr.id;
-      }
+      var color = labelColor(tr.label);
+      var X = tx(tr.x), Y = ty(tr.y);
+
       node.g.style.display = "";
-      node.g.setAttribute("opacity", "1");
+      node.body.setAttribute("transform",
+        "translate(" + X + "," + Y + ") rotate(" +
+        (((Number(tr.heading) || 0) * 180 / Math.PI) + 90) + ")");
+      node.dot.setAttribute("fill", color);
+      node.nose.setAttribute("stroke", color);
+      node.halo.setAttribute("stroke", color);
+
+      var lines = [
+        { text: tr.id + "  ·  " + (LABEL_TEXT[tr.label] || "UNKNOWN"),
+          size: MF, weight: 800, fill: color, ls: 0.08 },
+        { text: trackReason(tr), size: MF, weight: 650, fill: cssVar("--text-dim"), ls: 0 }
+      ];
+      var eta = (tr.label === "threat" || tr.label === "unknown") ? mmss(tr.eta) : null;
+      if (eta) lines.push({ text: "ETA " + eta, size: MF, weight: 800, fill: cssVar("--unknown"), ls: 0.08 });
+
+      var anchor = { x: X - 22, y: Y - 22, w: 44, h: 44 };
+      var res = place(measure(lines), anchor, occupied, tagSide[tr.id] != null ? tagSide[tr.id] : 2);
+      tagSide[tr.id] = res.idx;
+      occupied.push(res.rect);
+
+      node.tagBg.setAttribute("x", String(res.rect.x));
+      node.tagBg.setAttribute("y", String(res.rect.y));
+      node.tagBg.setAttribute("width", String(res.rect.w));
+      node.tagBg.setAttribute("height", String(res.rect.h));
+      node.tagBg.setAttribute("stroke", color);
+
+      var yy = res.rect.y + 5;
+      for (var i = 0; i < node.lines.length; i++) {
+        var tEl = node.lines[i];
+        if (i >= lines.length) { tEl.style.display = "none"; continue; }
+        var ln = lines[i];
+        tEl.style.display = "";
+        yy += ln.size * 1.0;
+        tEl.setAttribute("x", String(res.rect.x + 8));
+        tEl.setAttribute("y", String(yy));
+        tEl.setAttribute("font-size", String(ln.size));
+        tEl.setAttribute("font-weight", String(ln.weight));
+        tEl.setAttribute("fill", ln.fill);
+        tEl.setAttribute("letter-spacing", ln.ls + "em");
+        tEl.textContent = ln.text;
+        yy += ln.size * 0.34;
+      }
+
+      node.leader.setAttribute("x1", String(X));
+      node.leader.setAttribute("y1", String(Y));
+      node.leader.setAttribute("x2", String(res.rect.x + res.rect.w / 2));
+      node.leader.setAttribute("y2", String(res.rect.y + res.rect.h / 2));
+      node.leader.setAttribute("stroke", color);
 
       if (tr.history && tr.history.length > 1) {
         seenTrails[tr.id] = true;
         var trail = ensureTrail(tr.id);
-        var pts = tr.history.map(function (p) { return p[0] + "," + p[1]; }).join(" ");
-        trail.setAttribute("points", pts);
+        trail.setAttribute("points", tr.history.map(function (p) {
+          return tx(p[0]) + "," + ty(p[1]);
+        }).join(" "));
         trail.setAttribute("stroke", color);
         trail.style.display = "";
       }
     });
+
     Object.keys(trackNodes).forEach(function (id) {
       if (!seenTracks[id]) trackNodes[id].g.style.display = "none";
     });
@@ -1114,46 +1649,47 @@
       if (!seenTrails[id]) trailNodes[id].style.display = "none";
     });
 
-    var tracksById = {};
-    (s.tracks || []).forEach(function (tr) { tracksById[tr.id] = tr; });
     var seenUnits = {};
     (s.units || []).forEach(function (u) {
       seenUnits[u.id] = true;
       var node = ensureUnitNode(u.id);
-      var expended = u.state === "expended";
-      var onRack = !expended && (!u.state || u.state === "rack");
-      var away = u.state && u.state !== "rack" && !expended;
-      var yaw = 0;
-      var prev = unitPrev[u.id];
-      if (away && prev && (Math.abs(u.x - prev.x) > 0.5 || Math.abs(u.y - prev.y) > 0.5)) {
-        yaw = Math.atan2(u.y - prev.y, u.x - prev.x) * 180 / Math.PI + 90;
-      } else if (away && u.assigned_track && tracksById[u.assigned_track]) {
-        var tgt = tracksById[u.assigned_track];
-        yaw = Math.atan2(tgt.y - u.y, tgt.x - u.x) * 180 / Math.PI + 90;
+      var X = tx(u.x), Y = ty(u.y);
+      var spent = u.state === "expended";
+      var onRack = !spent && (!u.state || u.state === "rack");
+      var away = !spent && !onRack;
+      /* An expended unit no longer exists — the rack panel reports it. */
+      if (spent) {
+        node.g.style.display = "none";
+        ensureLink(u.id).style.display = "none";
+        return;
       }
-      unitPrev[u.id] = { x: u.x, y: u.y };
-      node.g.setAttribute("transform", "translate(" + u.x + "," + u.y + ")");
-      var scale = onRack ? 0.85 : 1.15;
-      node.craft.setAttribute("transform", "rotate(" + yaw + ") scale(" + scale + ")");
-      node.hub.setAttribute(
-        "fill",
-        expended ? cssVar("--muted") : (away ? cssVar("--threat") : cssVar("--friendly"))
-      );
-      node.g.setAttribute("opacity", expended ? "0.35" : "1");
-      // On rack: label under the chevron so the craft sits inside the pad.
-      node.t.setAttribute("x", "0");
-      node.t.setAttribute("y", onRack ? "12" : "-12");
-      node.t.setAttribute("font-size", onRack ? "7" : "10");
+
+      var yaw = 0, prev = unitPrev[u.id];
+      if (away && prev && (Math.abs(X - prev.x) > 0.4 || Math.abs(Y - prev.y) > 0.4)) {
+        yaw = Math.atan2(Y - prev.y, X - prev.x) * 180 / Math.PI + 90;
+      } else if (away && u.assigned_track && tracksById[u.assigned_track]) {
+        var g2 = tracksById[u.assigned_track];
+        yaw = Math.atan2(ty(g2.y) - Y, tx(g2.x) - X) * 180 / Math.PI + 90;
+      }
+      unitPrev[u.id] = { x: X, y: Y };
+
       node.g.style.display = "";
+      node.g.setAttribute("opacity", spent ? "0.35" : "1");
+      node.craft.setAttribute("transform",
+        "translate(" + X + "," + Y + ") rotate(" + yaw + ") scale(" + (onRack ? 0.9 : 1.3) + ")");
+      node.body.setAttribute("fill", spent ? cssVar("--muted")
+        : (away ? cssVar("--unknown") : cssVar("--friendly")));
+      node.t.setAttribute("x", String(X));
+      node.t.setAttribute("y", String(away ? Y - 26 : Y + 33));
+      node.t.setAttribute("fill", away ? cssVar("--unknown") : cssVar("--text-dim"));
+      node.t.textContent = u.id;
 
       var link = ensureLink(u.id);
-      if (away && u.assigned_track && tracksById[u.assigned_track] &&
-          tracksById[u.assigned_track].status === "active") {
-        var tr = tracksById[u.assigned_track];
-        link.setAttribute("x1", u.x);
-        link.setAttribute("y1", u.y);
-        link.setAttribute("x2", tr.x);
-        link.setAttribute("y2", tr.y);
+      var at = u.assigned_track && tracksById[u.assigned_track];
+      if (away && at && at.status === "active") {
+        link.setAttribute("x1", String(X)); link.setAttribute("y1", String(Y));
+        link.setAttribute("x2", String(tx(at.x))); link.setAttribute("y2", String(ty(at.y)));
+        link.setAttribute("stroke", cssVar("--unknown"));
         link.style.display = "";
       } else {
         link.style.display = "none";
@@ -1164,449 +1700,562 @@
     });
   }
 
-  function updateThreatList(s) {
+  /* ========================= track list ========================= */
+
+  function updateTrackList(s) {
     var tracks = (s.tracks || []).slice().sort(function (a, b) {
-      var aActive = a.status === "active" ? 0 : 1;
-      var bActive = b.status === "active" ? 0 : 1;
-      if (aActive !== bActive) return aActive - bActive;
-      if (aActive === 0) {
-        return (b.priority || 0) - (a.priority || 0) || String(a.id).localeCompare(String(b.id));
-      }
+      var aa = a.status === "active" ? 0 : 1, bb = b.status === "active" ? 0 : 1;
+      if (aa !== bb) return aa - bb;
+      if (aa === 0) return (b.priority || 0) - (a.priority || 0) ||
+                            String(a.id).localeCompare(String(b.id));
       return String(a.id).localeCompare(String(b.id));
     });
-    var key = JSON.stringify(tracks.map(function (tr) {
-      return [tr.id, tr.label, tr.threat_score, tr.target_asset, tr.eta, tr.priority, tr.factors, tr.status];
+    var key = JSON.stringify(tracks.map(function (t) {
+      return [t.id, t.label, t.threat_score, t.target_asset, t.status, t.priority,
+              t.eta == null ? null : Math.round(t.eta)];
     }));
-    if (key === lastThreatKey) return;
-    lastThreatKey = key;
-    el.threatList.innerHTML = "";
+    if (key === keys.tracks) return;
+    keys.tracks = key;
+
+    var activeN = 0, threats = 0;
+    tracks.forEach(function (t) {
+      if (t.status === "active") activeN += 1;
+      if (t.status === "active" && t.label === "threat") threats += 1;
+    });
+    el.tracksCount.textContent = activeN + " active";
+    el.tracksCount.className = "tag-count" + (threats ? " hot" : "");
+    el.mapFootLeft.textContent = threats
+      ? (threats + (threats === 1 ? " threat inbound" : " threats inbound"))
+      : (activeN ? activeN + " contact" + (activeN === 1 ? "" : "s") + " tracked" : "Perimeter secure");
+
+    el.trackList.innerHTML = "";
     if (!tracks.length) {
-      el.threatList.textContent = "No contacts.";
+      var e = document.createElement("p");
+      e.className = "empty";
+      e.textContent = "No contacts. Airspace clear.";
+      el.trackList.appendChild(e);
       return;
     }
+
     tracks.forEach(function (tr) {
-      var active = tr.status === "active";
+      var act = tr.status === "active";
       var card = document.createElement("article");
-      card.className = "track-card " + (tr.label || "unknown") + (active ? "" : " ended");
-      card.setAttribute("aria-label", "Track " + tr.id);
-      var row = document.createElement("div");
-      row.className = "label-row";
-      var sw = document.createElement("span");
-      sw.className = "swatch " + (tr.label || "unknown");
-      sw.setAttribute("aria-hidden", "true");
-      var title = document.createElement("span");
-      title.className = "track-title";
-      title.textContent = tr.id + " · " + (LABEL_TEXT[tr.label] || String(tr.label).toUpperCase());
-      var score = document.createElement("span");
-      score.className = "track-score";
-      score.textContent = String(tr.threat_score | 0);
-      row.appendChild(sw);
-      row.appendChild(title);
-      row.appendChild(score);
-      var meta = document.createElement("div");
-      meta.className = "meta";
-      var tgt = tr.target_asset || "—";
-      var hvTarget = !!(tr.target_asset && HIGH_VALUE_KINDS[String(tr.target_asset)]);
-      // Confidence mirrors threat score; high-value targets raise priority weight in the engine.
-      var parts = [
-        String(tr.status || "").toUpperCase(),
-        "Target " + tgt + (hvTarget ? " (high value)" : ""),
-        "Priority " + (tr.priority | 0)
-      ];
-      if (active) {
-        parts.splice(2, 0, "ETA " + ((tr.eta == null) ? "—" : (Number(tr.eta).toFixed(1) + " s")));
-      }
-      meta.textContent = parts.join(" · ");
-      card.appendChild(row);
+      card.className = "trk " + (tr.label || "unknown") + (act ? "" : " gone");
+      card.setAttribute("aria-label", trackName(tr.id));
+
+      var top = document.createElement("div");
+      top.className = "trk-top";
+      var id = document.createElement("span");
+      id.className = "trk-id";
+      id.textContent = tr.id;
+      var chip = document.createElement("span");
+      chip.className = "chip " + (tr.label || "unknown");
+      chip.textContent = LABEL_TEXT[tr.label] || "UNKNOWN";
+      var sc = document.createElement("span");
+      sc.className = "trk-score";
+      sc.textContent = String(tr.threat_score | 0);
+      top.appendChild(id); top.appendChild(chip); top.appendChild(sc);
+      card.appendChild(top);
+
+      var why = document.createElement("p");
+      why.className = "trk-why";
+      why.textContent = act ? trackReason(tr)
+        : (String(tr.status).toUpperCase() + " · track closed");
+      card.appendChild(why);
+
+      var bits = [];
+      var eta = mmss(tr.eta);
+      if (act && eta) bits.push("ETA " + eta);
+      if (tr.target_asset) bits.push("Target " + tr.target_asset);
+      bits.push("Priority " + (tr.priority | 0));
+      var hv = !!(tr.target_asset && HIGH_VALUE[tr.target_asset]);
+      if (hv) bits.push("High value");
+      var meta = document.createElement("p");
+      meta.className = "trk-meta" + (hv ? " hv" : "");
+      meta.textContent = bits.join(" · ");
       card.appendChild(meta);
-      if (hvTarget && active) {
-        var hvNote = document.createElement("div");
-        hvNote.className = "meta";
-        hvNote.style.color = cssVar("--unknown");
-        hvNote.textContent = "High-value site — protect first";
-        card.appendChild(hvNote);
-      }
-      if (active && tr.factors && tr.factors.length) {
-        var ul = document.createElement("ul");
-        ul.className = "factors";
-        tr.factors.forEach(function (f) {
-          var li = document.createElement("li");
-          li.textContent = f;
-          ul.appendChild(li);
-        });
-        card.appendChild(ul);
-      }
-      el.threatList.appendChild(card);
+
+      el.trackList.appendChild(card);
     });
   }
 
-  function updateU1Tilt(u) {
-    var disc = document.getElementById("u1-horizon-disc");
-    var txt = document.getElementById("u1-tilt-text");
-    if (!disc || !txt || !u) return;
-    var roll = (Number(u.roll) || 0) - tiltZeroRoll;
-    var pitch = (Number(u.pitch) || 0) - tiltZeroPitch;
-    // Pitch shifts horizon vertically; roll rotates the disc.
-    var py = Math.max(-28, Math.min(28, -pitch * 0.9));
-    disc.style.transform = "rotate(" + roll + "deg) translateY(" + py + "px)";
-    txt.textContent = "R " + roll.toFixed(0) + "° · P " + pitch.toFixed(0) + "°";
-  }
-
-  function unitStatusPhrase(u) {
-    var st = String(u.state || "rack").toLowerCase();
-    if (st === "expended") return { text: "Expended", cls: "bad" };
-    if (st === "rack") {
-      return { text: (u.ready ? "Healthy · waiting" : "Not ready · rack"), cls: u.ready ? "" : "muted" };
-    }
-    if (st === "shadowing") return { text: "In service", cls: "svc" };
-    if (st === "en_route" || st === "outbound") return { text: "In service", cls: "svc" };
-    if (st === "returning") return { text: "Returning", cls: "svc" };
-    if (st === "engaging") return { text: "Engaging", cls: "svc" };
-    return { text: st.replace(/_/g, " "), cls: "muted" };
-  }
-
-  function formatEta(sec) {
-    if (sec == null || !isFinite(sec) || sec < 0) return "—:—";
-    var s = Math.max(0, Math.round(Number(sec)));
-    var m = Math.floor(s / 60);
-    var r = s % 60;
-    return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
-  }
-
-  function actionHeadline(action) {
-    var a = String(action || "");
-    if (a === "launch_early") return "Early launch. Hold commitment.";
-    if (a === "engage") return "Engage. Commit interceptor.";
-    if (a === "return") return "Recall. Return unused.";
-    if (a === "best_effort") return "Best effort. Gap response.";
-    return a.replace(/_/g, " ");
-  }
-
-  function approveLabel(action) {
-    var a = String(action || "");
-    if (a === "launch_early") return "APPROVE early launch";
-    if (a === "engage") return "APPROVE engage";
-    if (a === "return") return "APPROVE return";
-    if (a === "best_effort") return "APPROVE best effort";
-    return "APPROVE";
-  }
-
-  function updateDecisionWindow(s) {
-    var node = document.getElementById("decision-eta");
-    if (!node) return;
-    var pending = (s.plan || []).filter(function (ln) { return !ln.approved; });
-    if (!pending.length) return;
-    var tr = null;
-    var tracks = s.tracks || [];
-    for (var i = 0; i < tracks.length; i++) {
-      if (tracks[i].id === pending[0].track_id) { tr = tracks[i]; break; }
-    }
-    node.textContent = formatEta(tr && tr.eta);
-  }
-
-  function updateRack(s) {
-    var units = s.units || [];
-    // Exclude continuous attitude from rebuild key — update tilt in place instead.
-    var key = JSON.stringify(units.map(function (u) {
-      return [
-        u.id, u.source,
-        Math.round((u.battery_v || 0) * 10) / 10,
-        Math.round((u.battery_pct || 0) * 100),
-        u.ready, u.variant, u.state, u.assigned_track || ""
-      ];
-    })) + "|tz=" + tiltZeroRoll + "," + tiltZeroPitch;
-    if (key === lastRackKey) {
-      var u1live = null;
-      for (var i = 0; i < units.length; i++) {
-        if (units[i].id === "U1") { u1live = units[i]; break; }
-      }
-      updateU1Tilt(u1live);
-      return;
-    }
-    lastRackKey = key;
-    el.rack.innerHTML = "";
-
-    var waiting = 0;
-    var returning = [];
-    var service = [];
-    units.forEach(function (u) {
-      var st = String(u.state || "rack").toLowerCase();
-      if (st === "rack" && u.ready) waiting += 1;
-      if (st === "returning") returning.push(u.id);
-      if (st === "en_route" || st === "outbound" || st === "shadowing" || st === "engaging") {
-        service.push(u.id);
-      }
-    });
-    if (el.rackWaiting) {
-      el.rackWaiting.textContent = waiting + "/" + units.length + " available";
-    }
-    if (el.rackSummary) {
-      var bits = [waiting + " of " + units.length + " units ready"];
-      returning.forEach(function (id) { bits.push(id + " returning"); });
-      service.forEach(function (id) { bits.push(id + " in service"); });
-      el.rackSummary.textContent = bits.join(" · ");
-    }
-
-    units.forEach(function (u) {
-      var row = document.createElement("div");
-      row.className = "unit-row";
-      row.setAttribute("data-unit", u.id);
-
-      var chev = document.createElement("span");
-      chev.className = "unit-chevron" + (u.state === "expended" || !u.ready ? " dim" : "");
-      chev.setAttribute("aria-hidden", "true");
-      row.appendChild(chev);
-
-      var idCol = document.createElement("div");
-      var idLine = document.createElement("div");
-      idLine.className = "unit-id";
-      idLine.appendChild(document.createTextNode(u.id));
-      var src = u.source || "sim";
-      if (src === "live" || src === "mock") {
-        var badge = document.createElement("span");
-        badge.className = "badge " + src;
-        badge.textContent = src.toUpperCase();
-        idLine.appendChild(badge);
-      }
-      var type = document.createElement("div");
-      type.className = "unit-type";
-      type.textContent = VARIANT_TYPE[u.variant] || ("Var " + (u.variant || "?"));
-      idCol.appendChild(idLine);
-      idCol.appendChild(type);
-      row.appendChild(idCol);
-
-      var pct = document.createElement("div");
-      pct.className = "unit-pct";
-      if (u.id === "U1") {
-        pct.textContent = "";
-        pct.setAttribute("aria-hidden", "true");
-      } else {
-        pct.textContent = "—";
-      }
-      row.appendChild(pct);
-
-      var st = unitStatusPhrase(u);
-      var status = document.createElement("div");
-      status.className = "unit-status" + (st.cls ? (" " + st.cls) : "");
-      status.textContent = st.text;
-      row.appendChild(status);
-
-      if (u.id === "U1") {
-        row.className = "unit-row unit-row-u1";
-        var extra = document.createElement("div");
-        extra.className = "u1-extra";
-        var vitals = document.createElement("div");
-        vitals.className = "u1-vitals";
-        var volt = document.createElement("div");
-        volt.className = "u1-volt";
-        volt.textContent = (Number(u.battery_v) || 0).toFixed(1) + " V";
-        var bigPct = document.createElement("div");
-        bigPct.className = "u1-pct-lg";
-        bigPct.textContent = Math.round((u.battery_pct || 0) * 100) + "%";
-        vitals.appendChild(volt);
-        vitals.appendChild(bigPct);
-        extra.appendChild(vitals);
-        var ah = document.createElement("div");
-        ah.className = "art-horizon";
-        ah.id = "u1-tilt";
-        ah.setAttribute("aria-hidden", "true");
-        ah.title = "U1 attitude";
-        var disc = document.createElement("div");
-        disc.className = "ah-disc";
-        disc.id = "u1-horizon-disc";
-        var sky = document.createElement("div");
-        sky.className = "ah-sky";
-        var ground = document.createElement("div");
-        ground.className = "ah-ground";
-        var hline = document.createElement("div");
-        hline.className = "ah-horizon-line";
-        disc.appendChild(sky);
-        disc.appendChild(ground);
-        disc.appendChild(hline);
-        ah.appendChild(disc);
-        var wing = document.createElement("div");
-        wing.className = "ah-wing";
-        ah.appendChild(wing);
-        extra.appendChild(ah);
-        var tiltTxt = document.createElement("div");
-        tiltTxt.className = "u1-tilt-deg";
-        tiltTxt.id = "u1-tilt-text";
-        extra.appendChild(tiltTxt);
-        row.appendChild(extra);
-        updateU1Tilt(u);
-      }
-      el.rack.appendChild(row);
-    });
-  }
+  /* ========================= plan panel ========================= */
 
   function updatePlan(s) {
     var plan = s.plan || [];
-    var tracks = s.tracks || [];
-    var units = s.units || [];
-    var pendingLines = plan.filter(function (ln) { return !ln.approved; });
-    var focusTrackId = pendingLines.length ? pendingLines[0].track_id : null;
-    var focusTrack = null;
-    for (var ti = 0; ti < tracks.length; ti++) {
-      if (tracks[ti].id === focusTrackId) { focusTrack = tracks[ti]; break; }
-    }
-    var key = JSON.stringify(plan) + "|" + !!s.replay + "|" +
-      (focusTrack ? [focusTrack.label, Math.round(Number(focusTrack.eta) || 0)].join(":") : "");
-    if (key === lastPlanKey) {
-      updateDecisionWindow(s);
-      return;
-    }
-    lastPlanKey = key;
-    el.planLines.innerHTML = "";
+    var pending = plan.filter(function (ln) { return !ln.approved; });
+    var focus = pending.length ? findTrack(s, pending[0].track_id) : null;
+    var gap = gapDetail(s);
+    /* Text-only readout: updated in place so the APPROVE button is never rebuilt. */
+    var etaNow = focus ? mmss(focus.eta) : null;
+    el.planEta.textContent = (!s.replay && pending.length && etaNow)
+      ? ("ETA " + etaNow) : "—";
+    var key = JSON.stringify(plan) + "|" + !!s.replay + "|" + (gap ? gap.reason + gap.math : "") +
+      "|" + (focus ? focus.label + ":" + (focus.eta == null ? "" : Math.round(focus.eta)) : "") +
+      "|" + (Date.now() < approvedFlashUntil ? "flash" : "");
+    if (key === keys.plan) return;
+    keys.plan = key;
 
-    if (el.planBadge) {
-      if (pendingLines.length && !s.replay) {
-        el.planBadge.hidden = false;
-        el.planBadge.textContent = pendingLines.length + " PENDING";
-      } else {
-        el.planBadge.hidden = true;
-      }
+    var flashing = Date.now() < approvedFlashUntil;
+    el.planBody.innerHTML = "";
+
+    if (gap) {
+      var gb = document.createElement("div");
+      gb.className = "gap-block";
+      var gt = document.createElement("div");
+      gt.className = "gap-title";
+      gt.textContent = "NO CAPABLE UNIT ON RACK";
+      var gr = document.createElement("p");
+      gr.className = "gap-reason";
+      gr.textContent = gap.reason;
+      var gm = document.createElement("p");
+      gm.className = "gap-math";
+      gm.textContent = gap.math;
+      gb.appendChild(gt); gb.appendChild(gr); gb.appendChild(gm);
+      el.planBody.appendChild(gb);
     }
 
-    if (!pendingLines.length || s.replay) {
-      var empty = document.createElement("div");
-      empty.className = "officer-empty";
-      empty.textContent = s.replay ? "Replay — scoring only, no plan approvals" : "No pending plan";
-      el.planLines.appendChild(empty);
-      el.planPanel.classList.remove("has-pending");
-      el.approve.disabled = true;
+    if (s.replay) {
+      var rp = document.createElement("p");
+      rp.className = "plan-empty";
+      rp.textContent = "Replay — scoring only, no plan to approve.";
+      el.planBody.appendChild(rp);
+      el.planCard.classList.remove("pending");
       el.approve.setAttribute("aria-disabled", "true");
       el.approve.textContent = "APPROVE";
       return;
     }
 
-    var ln = pendingLines[0];
-    var unit = null;
-    for (var ui = 0; ui < units.length; ui++) {
-      if (units[ui].id === ln.unit_id) { unit = units[ui]; break; }
+    if (!pending.length) {
+      var pe = document.createElement("p");
+      pe.className = "plan-empty";
+      pe.textContent = "No pending plan";
+      el.planBody.appendChild(pe);
+      el.planCard.classList.remove("pending");
+      el.approve.setAttribute("aria-disabled", "true");
+      el.approve.textContent = flashing ? "APPROVED ✓" : "APPROVE";
+      return;
     }
 
-    var focus = document.createElement("div");
-    focus.className = "officer-focus";
-    var left = document.createElement("div");
-    var idEl = document.createElement("div");
-    idEl.className = "officer-id";
-    idEl.textContent = ln.track_id;
-    var chip = document.createElement("span");
-    var label = (focusTrack && focusTrack.label) || "unknown";
-    chip.className = "label-chip " + label;
-    chip.textContent = LABEL_TEXT[label] || String(label);
-    idEl.appendChild(chip);
-    left.appendChild(idEl);
-    focus.appendChild(left);
-
-    var dw = document.createElement("div");
-    dw.className = "decision-window";
-    var dwLab = document.createElement("div");
-    dwLab.className = "dw-label";
-    dwLab.textContent = "Decision window";
-    var dwTime = document.createElement("div");
-    dwTime.className = "dw-time";
-    dwTime.id = "decision-eta";
-    dwTime.textContent = formatEta(focusTrack && focusTrack.eta);
-    dw.appendChild(dwLab);
-    dw.appendChild(dwTime);
-    focus.appendChild(dw);
-    el.planLines.appendChild(focus);
-
-    var head = document.createElement("p");
-    head.className = "officer-headline";
-    head.textContent = actionHeadline(ln.action);
-    el.planLines.appendChild(head);
-    var sub = document.createElement("p");
-    sub.className = "officer-sub";
-    sub.textContent = ln.reason || "Resolve classification before the final decision.";
-    el.planLines.appendChild(sub);
-
-    if (pendingLines.length > 1) {
-      var more = document.createElement("p");
-      more.className = "officer-sub";
-      more.textContent = (pendingLines.length - 1) + " more pending line" +
-        (pendingLines.length > 2 ? "s" : "") + " will approve with this action.";
-      el.planLines.appendChild(more);
+    function lineLabel(ln) {
+      var unit = findUnit(s, ln.unit_id);
+      return unitName(ln.unit_id) + (unit ? " (Variant " + unit.variant + ")" : "") +
+        " → " + trackName(ln.track_id);
     }
 
-    var fit = document.createElement("div");
-    fit.className = "fit-card";
-    var fitLeft = document.createElement("div");
-    var fitTitle = document.createElement("div");
-    fitTitle.className = "fit-title";
-    var vType = unit ? (VARIANT_TYPE[unit.variant] || ("Var " + unit.variant)) : "—";
-    fitTitle.textContent = ln.unit_id + " / " + vType + " core";
-    var fitMeta = document.createElement("div");
-    fitMeta.className = "fit-meta";
-    if (unit && unit.id === "U1") {
-      fitMeta.textContent = Math.round((unit.battery_pct || 0) * 100) + "% battery · " +
-        (unit.ready ? "healthy" : "not ready");
-    } else if (unit) {
-      fitMeta.textContent = String(unit.state || "rack") +
-        (unit.ready ? " · ready" : " · not ready");
-    } else {
-      fitMeta.textContent = "Unit unavailable";
-    }
-    fitLeft.appendChild(fitTitle);
-    fitLeft.appendChild(fitMeta);
-    fit.appendChild(fitLeft);
-    var fitTag = document.createElement("div");
-    fitTag.className = "fit-tag";
-    fitTag.textContent = "Lowest-cost fit";
-    fit.appendChild(fitTag);
-    el.planLines.appendChild(fit);
+    var first = pending[0];
+    var row = document.createElement("div");
+    row.className = "plan-row";
+    var main = document.createElement("div");
+    main.className = "pl-main";
+    main.textContent = lineLabel(first);
+    var tag = document.createElement("span");
+    tag.className = "act" + (ACT_CLASS[first.action] ? " " + ACT_CLASS[first.action] : "");
+    tag.textContent = ACT_TEXT[first.action] || String(first.action).replace(/_/g, " ");
+    row.appendChild(main); row.appendChild(tag);
+    el.planBody.appendChild(row);
 
-    el.planPanel.classList.add("has-pending");
-    el.approve.disabled = false;
+    var reason = document.createElement("p");
+    reason.className = "plan-reason";
+    reason.textContent = first.action === "best_effort"
+      ? (unitName(first.unit_id) + " launched (best effort) — it cannot match this track's " +
+         "speed, but it is the fastest unit on the rack.")
+      : planReason(first);
+    el.planBody.appendChild(reason);
+
+    if (pending.length > 1) {
+      var also = document.createElement("ul");
+      also.className = "plan-also";
+      pending.slice(1).forEach(function (ln) {
+        var li = document.createElement("li");
+        li.textContent = "Also approves " + unitName(ln.unit_id) + " → " +
+          trackName(ln.track_id) + " · " +
+          (ACT_TEXT[ln.action] || ln.action).toLowerCase();
+        also.appendChild(li);
+      });
+      el.planBody.appendChild(also);
+    }
+
+    el.planCard.classList.add("pending");
     el.approve.setAttribute("aria-disabled", "false");
-    el.approve.textContent = approveLabel(ln.action);
-    updateDecisionWindow(s);
+    el.approve.textContent = flashing ? "APPROVED ✓"
+      : ("APPROVE · " + (ACT_TEXT[first.action] || ""));
   }
+
+  /* ========================= rack panel ========================= */
+
+  function stateLabel(s, u, compact) {
+    var rc = reconfig[u.id];
+    if (rc && Date.now() < rc.until) {
+      return {
+        label: compact ? "RECONFIG" : ("RECONFIG (" + rc.from + " → " + rc.to + ")"),
+        tone: "warn",
+        sub: rc.from + " → " + rc.to
+      };
+    }
+    var st = String(u.state || "rack");
+    if (st === "expended") return { label: "EXPENDED", tone: "dim" };
+    if (st === "returning") return { label: "RETURNING", tone: "warn" };
+    if (st === "rack") return u.ready ? { label: "READY", tone: "ok" } : { label: "NOT READY", tone: "bad" };
+    var act = approvedAction(s, u.id);
+    if (act === "engage" || act === "best_effort") return { label: "ENGAGED", tone: "warn" };
+    return { label: "LAUNCHED", tone: "warn" };
+  }
+
+  function buildAttitude() {
+    var svg = svgEl("svg");
+    svg.setAttribute("viewBox", "0 0 104 104");
+    svg.setAttribute("width", "104");
+    svg.setAttribute("height", "104");
+    svg.setAttribute("aria-hidden", "true");
+
+    var defs = svgEl("defs");
+    var clip = svgEl("clipPath");
+    clip.setAttribute("id", "ai-clip");
+    var cc = svgEl("circle");
+    cc.setAttribute("cx", "52"); cc.setAttribute("cy", "52"); cc.setAttribute("r", "46.5");
+    clip.appendChild(cc); defs.appendChild(clip); svg.appendChild(defs);
+
+    var wrap = svgEl("g");
+    wrap.setAttribute("clip-path", "url(#ai-clip)");
+    var disc = svgEl("g");
+    disc.setAttribute("id", "u1-ai-disc");
+    function r(x, y, w, h, fill) {
+      var e = svgEl("rect");
+      e.setAttribute("x", String(x)); e.setAttribute("y", String(y));
+      e.setAttribute("width", String(w)); e.setAttribute("height", String(h));
+      e.setAttribute("fill", fill);
+      disc.appendChild(e);
+    }
+    function ln(x1, y1, x2, y2, stroke, w) {
+      var e = svgEl("line");
+      e.setAttribute("x1", String(x1)); e.setAttribute("y1", String(y1));
+      e.setAttribute("x2", String(x2)); e.setAttribute("y2", String(y2));
+      e.setAttribute("stroke", stroke); e.setAttribute("stroke-width", String(w));
+      disc.appendChild(e);
+    }
+    r(-70, -130, 244, 182, cssVar("--border"));
+    r(-70, 52, 244, 182, cssVar("--threat-fill"));
+    ln(-70, 52, 174, 52, cssVar("--text"), 2);
+    [[-20, 15], [-10, 9], [10, 9], [20, 15]].forEach(function (p) {
+      ln(52 - p[1], 52 + p[0], 52 + p[1], 52 + p[0], cssVar("--text-dim"), 1.2);
+    });
+    wrap.appendChild(disc);
+    svg.appendChild(wrap);
+
+    var ring = svgEl("circle");
+    ring.setAttribute("cx", "52"); ring.setAttribute("cy", "52"); ring.setAttribute("r", "46.5");
+    ring.setAttribute("fill", "none");
+    ring.setAttribute("stroke", cssVar("--border"));
+    ring.setAttribute("stroke-width", "3");
+    svg.appendChild(ring);
+
+    var ref = svgEl("path");
+    ref.setAttribute("d", "M24 52 H42 M62 52 H80");
+    ref.setAttribute("stroke", cssVar("--unknown"));
+    ref.setAttribute("stroke-width", "2.6");
+    svg.appendChild(ref);
+    var hub = svgEl("circle");
+    hub.setAttribute("cx", "52"); hub.setAttribute("cy", "52"); hub.setAttribute("r", "2.6");
+    hub.setAttribute("fill", cssVar("--unknown"));
+    svg.appendChild(hub);
+    var mark = svgEl("path");
+    mark.setAttribute("d", "M52 9 l-5 8 h10 z");
+    mark.setAttribute("fill", cssVar("--unknown"));
+    svg.appendChild(mark);
+    return svg;
+  }
+
+  function updateTilt(u) {
+    var disc = document.getElementById("u1-ai-disc");
+    var cap = document.getElementById("u1-ai-cap");
+    if (!disc || !u) return;
+    var roll = (Number(u.roll) || 0) - tiltZeroRoll;
+    var pitch = (Number(u.pitch) || 0) - tiltZeroPitch;
+    var shift = Math.max(-34, Math.min(34, pitch * 0.85));
+    disc.setAttribute("transform",
+      "rotate(" + (-roll).toFixed(2) + " 52 52) translate(0 " + shift.toFixed(2) + ")");
+    if (cap) cap.textContent = "R " + roll.toFixed(0) + "°  P " + pitch.toFixed(0) + "°";
+  }
+
+  function updateRack(s) {
+    var units = s.units || [];
+
+    units.forEach(function (u) {
+      var prev = lastVariant[u.id];
+      if (prev && prev !== u.variant) {
+        reconfig[u.id] = { from: prev, to: u.variant, until: Date.now() + 3500 };
+        window.setTimeout(function () {
+          keys.rack = null;
+          if (state) updateRack(state);
+        }, 3600);
+      }
+      lastVariant[u.id] = u.variant;
+    });
+
+    var recalled = {};
+    (s.events || []).forEach(function (e) {
+      if (e.kind !== "returned") return;
+      var m = String(e.msg).match(/^(U\d+)/);
+      if (m) recalled[m[1]] = true;
+    });
+
+    var key = JSON.stringify(units.map(function (u) {
+      return [u.id, u.source, u.variant, u.state, u.ready,
+              Math.round((u.battery_v || 0) * 10) / 10,
+              Math.round((u.battery_pct || 0) * 100),
+              approvedAction(s, u.id),
+              !!recalled[u.id],
+              (reconfig[u.id] && Date.now() < reconfig[u.id].until) ? reconfig[u.id].to : ""];
+    }));
+    if (key === keys.rack) { updateTilt(findUnit(s, "U1")); return; }
+    keys.rack = key;
+
+    var ready = 0;
+    units.forEach(function (u) { if (u.state === "rack" && u.ready) ready += 1; });
+    el.rackCount.textContent = ready + " of " + units.length + " ready";
+    el.rackCount.className = "tag-count" + (ready ? "" : " hot");
+
+    el.rackList.innerHTML = "";
+    var slots = document.createElement("div");
+    slots.className = "slots";
+
+    units.forEach(function (u) {
+      var hero = u.id === "U1";
+      var st = stateLabel(s, u, !hero);
+      var spent = u.state === "expended";
+      var away = u.state && u.state !== "rack" && !spent;
+      var card = document.createElement("article");
+      card.className = "unit" + (hero ? " u1" : " slot") +
+        (away ? " out" : "") + (spent ? " spent" : "");
+
+      var name = document.createElement("span");
+      name.className = "unit-name";
+      name.appendChild(document.createTextNode(unitName(u.id)));
+      var stEl = document.createElement("span");
+      stEl.className = "ustate " + st.tone;
+      stEl.textContent = st.label;
+      var sub = document.createElement("div");
+      sub.className = "unit-sub";
+
+      if (hero) {
+        var src = u.source || "sim";
+        var badge = document.createElement("span");
+        badge.className = "badge " + src;
+        badge.textContent = src.toUpperCase();
+        name.appendChild(badge);
+
+        var main = document.createElement("div");
+        main.className = "u1-main";
+        main.appendChild(name);
+        main.appendChild(stEl);
+        sub.textContent = spent ? "Slot empty" : ("Variant " + u.variant);
+        main.appendChild(sub);
+        var v = document.createElement("div");
+        v.className = "u1-big";
+        v.textContent = (Number(u.battery_v) || 0).toFixed(1) + " V";
+        var p = document.createElement("div");
+        p.className = "u1-big";
+        p.textContent = Math.round((u.battery_pct || 0) * 100) + "%";
+        var cap = document.createElement("div");
+        cap.className = "u1-cap";
+        cap.textContent = u.ready ? "Pack OK" : "Below minimum";
+        main.appendChild(v); main.appendChild(p); main.appendChild(cap);
+        card.appendChild(main);
+
+        var aiWrap = document.createElement("div");
+        aiWrap.className = "ai-wrap";
+        aiWrap.appendChild(buildAttitude());
+        var aiCap = document.createElement("div");
+        aiCap.className = "ai-cap";
+        aiCap.id = "u1-ai-cap";
+        aiCap.textContent = "R 0°  P 0°";
+        aiWrap.appendChild(aiCap);
+        card.appendChild(aiWrap);
+      } else {
+        var slotRow = document.createElement("div");
+        slotRow.className = "slot-row";
+        sub.textContent = spent
+          ? "Slot empty"
+          : ((st.sub || ("Var " + u.variant)) + " · " +
+             Math.round((u.battery_pct || 0) * 100) + "%");
+        slotRow.appendChild(name);
+        slotRow.appendChild(sub);
+        slotRow.appendChild(stEl);
+        card.appendChild(slotRow);
+      }
+
+      var note = null;
+      if (approvedAction(s, u.id) === "best_effort" && away) {
+        note = hero ? (unitName(u.id) + " launched (best effort)") : "Best effort";
+      } else if (recalled[u.id] && (u.state === "rack" || u.state === "returning")) {
+        var verb = explicitRecall[u.id] ? " recalled" : " returned";
+        note = hero
+          ? (unitName(u.id) + verb + ", not expended")
+          : (explicitRecall[u.id] ? "Recalled, not spent" : "Returned, not spent");
+      }
+      if (note) {
+        var n = document.createElement("div");
+        n.className = "unit-note";
+        n.textContent = note;
+        card.appendChild(n);
+      }
+
+      if (hero) el.rackList.appendChild(card);
+      else slots.appendChild(card);
+    });
+
+    if (slots.childNodes.length) el.rackList.appendChild(slots);
+    updateTilt(findUnit(s, "U1"));
+  }
+
+  /* ========================= event log ========================= */
 
   function updateEvents(s) {
     var events = s.events || [];
     var key = JSON.stringify(events);
-    if (key === lastEventsKey) return;
-    lastEventsKey = key;
+    if (key === keys.events) return;
+    keys.events = key;
+
+    el.eventsCount.textContent = events.length + (events.length === 1 ? " entry" : " entries");
     el.eventLog.innerHTML = "";
-    var slice = events.slice(-40).reverse();
-    if (!slice.length) {
-      var empty = document.createElement("li");
-      empty.className = "event-empty";
-      empty.textContent = "No events yet — hit Start.";
-      el.eventLog.appendChild(empty);
+    if (!events.length) {
+      var e0 = document.createElement("li");
+      e0.className = "empty";
+      e0.textContent = "No events yet. Press Start.";
+      el.eventLog.appendChild(e0);
       return;
     }
-    slice.forEach(function (e) {
+    events.slice().reverse().forEach(function (e) {
       var li = document.createElement("li");
-      li.className = "event-row";
+      li.className = "ev k-" + String(e.kind || "").replace(/[^a-z0-9_-]/gi, "");
       var t = document.createElement("span");
-      t.className = "et";
-      t.textContent = Number(e.t).toFixed(1) + "s";
-      var k = document.createElement("span");
-      var kind = String(e.kind || "event");
-      k.className = "ek " + kind.replace(/[^a-z0-9_-]/gi, "");
-      k.textContent = kind;
+      t.className = "evt";
+      t.textContent = "T+" + (Number(e.t) || 0).toFixed(1);
       var m = document.createElement("span");
-      m.className = "em";
-      m.textContent = e.msg || "";
-      li.appendChild(t);
-      li.appendChild(k);
-      li.appendChild(m);
+      m.className = "evm";
+      m.textContent = eventText(e, s);
+      li.appendChild(t); li.appendChild(m);
       el.eventLog.appendChild(li);
     });
   }
 
-  document.getElementById("approve-btn").addEventListener("click", approveVisible);
-  function pickRandomScenario() {
+  /* ========================= alerts ========================= */
+
+  function updateAlerts(s) {
+    var raw = s.alerts || [];
+    var key = JSON.stringify(raw);
+    if (key === keys.alerts) return;
+    keys.alerts = key;
+    if (!raw.length) {
+      el.alertBanner.hidden = true;
+      el.alertText.textContent = "";
+      return;
+    }
+    el.alertText.textContent = raw.map(alertPhrase).join(" · ");
+    el.alertBanner.hidden = false;
+  }
+
+  /* ========================= render ========================= */
+
+  function render(s) {
+    el.scenario.querySelector(".v").textContent = String(s.scenario || "—").replace(/_/g, " ");
+    var ph = String(s.phase || "idle");
+    el.phase.querySelector(".v").textContent = ph.charAt(0).toUpperCase() + ph.slice(1);
+    el.simTime.querySelector(".v").textContent = (Number(s.t) || 0).toFixed(1) + " s";
+
+    if (s.motors_enabled) {
+      el.motors.dataset.state = "on";
+      el.motors.querySelector(".v").textContent = "Hot";
+      el.motors.title = "TRIAGE_MOTORS=1 — approve can spin live Unit 1 motors";
+    } else {
+      el.motors.dataset.state = "off";
+      el.motors.querySelector(".v").textContent = "Safe";
+      el.motors.title = "Hardware motors off (default)";
+    }
+
+    if (s.replay) {
+      el.replayBanner.hidden = false;
+      el.afterBtn.disabled = true;
+    } else {
+      el.replayBanner.hidden = true;
+      el.afterBtn.disabled = false;
+    }
+
+    explicitRecall = {};
+    (s.events || []).forEach(function (e) {
+      if (e.kind !== "recall") return;
+      var m = String(e.msg).match(/^(U\d+)\s+recalling/);
+      if (m) explicitRecall[m[1]] = true;
+    });
+
+    updateAlerts(s);
+    updateMap(s);
+    updateTrackList(s);
+    updatePlan(s);
+    updateRack(s);
+    updateEvents(s);
+  }
+
+  /* ========================= socket ========================= */
+
+  function setConn(up) {
+    el.conn.dataset.state = up ? "connected" : "disconnected";
+    el.conn.querySelector(".v").textContent = up ? "Online" : "Offline";
+  }
+  function send(obj) {
+    if (!ws || ws.readyState !== 1) return;
+    ws.send(JSON.stringify(obj));
+  }
+  function connect() {
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+    var proto = (location.protocol === "https:") ? "wss:" : "ws:";
+    ws = new WebSocket(proto + "//" + location.host + "/ws");
+    ws.onopen = function () { setConn(true); };
+    ws.onclose = function () { setConn(false); reconnectTimer = setTimeout(connect, 1000); };
+    ws.onerror = function () { setConn(false); };
+    ws.onmessage = function (ev) {
+      var next;
+      try { next = JSON.parse(ev.data); } catch (err) { return; }
+      state = next;
+      // Fresh server: show the outpost straight away instead of a blank map.
+      if (!booted && !next.scenario) {
+        booted = true;
+        send({ type: "load_scenario", name: "hot_inbound" });
+      } else if (next.scenario) {
+        booted = true;
+      }
+      render(state);
+    };
+  }
+
+  /* ========================= controls ========================= */
+
+  function approveVisible() {
+    if (!state || state.replay) return;
+    var ids = [];
+    (state.plan || []).forEach(function (ln) { if (!ln.approved) ids.push(ln.id); });
+    if (!ids.length) return;
+    send({ type: "approve", line_ids: ids });
+    approvedFlashUntil = Date.now() + 1600;
+    el.approve.textContent = "APPROVED ✓";
+    window.setTimeout(function () {
+      keys.plan = null;
+      if (state) updatePlan(state);
+    }, 1700);
+  }
+  el.approve.addEventListener("click", function () {
+    if (el.approve.getAttribute("aria-disabled") === "true") return;
+    approveVisible();
+  });
+
+  function pickScenario() {
     return SCENARIO_POOL[Math.floor(Math.random() * SCENARIO_POOL.length)];
   }
   document.getElementById("btn-start").addEventListener("click", function () {
     var phase = state && state.phase;
-    // Idle/ended: load a random scenario then start. Live: ignore (already running).
     if (phase === "idle" || phase === "ended" || !phase) {
-      send({ type: "load_scenario", name: pickRandomScenario() });
+      send({ type: "load_scenario", name: pickScenario() });
     }
     send({ type: "start" });
   });
@@ -1616,25 +2265,17 @@
   document.getElementById("btn-reset").addEventListener("click", function () {
     if (afterOpen) closeAfter();
     send({ type: "reset" });
-    send({ type: "load_scenario", name: pickRandomScenario() });
+    send({ type: "load_scenario", name: pickScenario() });
   });
   document.getElementById("btn-zero-tilt").addEventListener("click", function () {
-    var u1 = null;
-    if (state && state.units) {
-      for (var i = 0; i < state.units.length; i++) {
-        if (state.units[i].id === "U1") { u1 = state.units[i]; break; }
-      }
-    }
+    var u1 = findUnit(state, "U1");
     if (!u1) return;
     tiltZeroRoll = Number(u1.roll) || 0;
     tiltZeroPitch = Number(u1.pitch) || 0;
-    updateU1Tilt(u1);
-    lastRackKey = null;
-    if (state) onState(state);
+    updateTilt(u1);
   });
   function swapU1ToA() {
-    if (!state) return;
-    if (state.phase !== "idle" && state.phase !== "ended") return;
+    if (!state || (state.phase !== "idle" && state.phase !== "ended")) return;
     send({ type: "swap_variant", unit_id: "U1", variant: "A" });
   }
   document.getElementById("btn-swap-a").addEventListener("click", swapU1ToA);
@@ -1643,240 +2284,228 @@
     el.mockBtn.setAttribute("aria-pressed", mockWanted ? "true" : "false");
     send({ type: "set_mock", value: mockWanted });
   });
-  document.addEventListener("keydown", function (ev) {
-    if (ev.key === "Escape" && afterOpen) {
-      ev.preventDefault();
-      closeAfter();
-      return;
-    }
-    if (ev.key === "a" || ev.key === "A") {
-      if (ev.target && (ev.target.tagName === "INPUT" || ev.target.tagName === "TEXTAREA")) return;
-      if (afterOpen) return;
-      ev.preventDefault();
-      approveVisible();
-    }
-  });
 
-  var afterOverlay = document.getElementById("after-overlay");
-  var afterDialog = document.getElementById("after-dialog");
-  var afterOpen = false;
-  var afterOpener = null;
-  var afterFocusables = [];
-  var cardsCache = null;
+  /* station clock — text only, never rebuilds a list */
+  function tickClock() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    el.clock.textContent = p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+  }
+  tickClock();
+  window.setInterval(tickClock, 1000);
 
-  function getFocusable(root) {
+  /* ========================= after-action overlay ========================= */
+
+  var overlay = document.getElementById("after-overlay");
+  var dialog = document.getElementById("after-dialog");
+  var afterOpen = false, afterOpener = null, cardsCache = null;
+
+  function focusables() {
     return Array.prototype.slice.call(
-      root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+      dialog.querySelectorAll("button, [href], input, select, textarea")
     ).filter(function (n) { return !n.disabled && n.offsetParent !== null; });
   }
-
   function openAfter() {
-    afterOpener = document.activeElement;
+    afterOpener = (document.activeElement && document.activeElement !== document.body)
+      ? document.activeElement : el.afterBtn;
     afterOpen = true;
-    afterOverlay.hidden = false;
+    overlay.hidden = false;
     populateAfter().then(function () {
-      afterFocusables = getFocusable(afterDialog);
-      var first = afterFocusables[0] || afterDialog;
-      first.focus();
+      var f = focusables();
+      (f[0] || dialog).focus();
     });
   }
-
   function closeAfter() {
     afterOpen = false;
-    afterOverlay.hidden = true;
+    overlay.hidden = true;
     if (afterOpener && afterOpener.focus) afterOpener.focus();
   }
 
-  function buildRunSummary() {
-    var events = (state && state.events) || [];
-    var tracks = (state && state.tracks) || [];
-    var units = (state && state.units) || [];
-    var lines = [];
-    lines.push("Scenario: " + ((state && state.scenario) || "—") +
-      " · phase " + ((state && state.phase) || "idle") +
-      " · t=" + ((state && Number(state.t)) || 0).toFixed(1) + "s");
-    var counts = { contact: 0, neutralized: 0, impact: 0, miss: 0, gap: 0, returned: 0 };
-    events.forEach(function (e) {
-      if (counts[e.kind] != null) counts[e.kind] += 1;
+  function stat(parent, n, label, hot) {
+    var d = document.createElement("div");
+    d.className = "stat" + (hot ? " hot" : "");
+    var nn = document.createElement("div");
+    nn.className = "n";
+    nn.textContent = String(n);
+    var ll = document.createElement("div");
+    ll.className = "l";
+    ll.textContent = label;
+    d.appendChild(nn); d.appendChild(ll);
+    parent.appendChild(d);
+  }
+
+  function runSummaryText() {
+    var s = state || {};
+    var out = ["TRIAGE RUN SUMMARY",
+      "Scenario: " + (s.scenario || "—") + " · phase " + (s.phase || "idle") +
+      " · t=" + (Number(s.t) || 0).toFixed(1) + "s"];
+    (s.tracks || []).forEach(function (tr) {
+      out.push("Track " + tr.id + ": " + (LABEL_TEXT[tr.label] || tr.label) + " → " +
+        String(tr.status || "").toUpperCase() + (tr.target_asset ? (" @ " + tr.target_asset) : ""));
     });
-    lines.push(
-      "Contacts " + counts.contact +
-      " · neutralized " + counts.neutralized +
-      " · impacts " + counts.impact +
-      " · misses " + counts.miss +
-      " · gaps " + counts.gap
-    );
-    tracks.forEach(function (tr) {
-      lines.push(
-        "Track " + tr.id + ": " + (LABEL_TEXT[tr.label] || tr.label) +
-        " → " + String(tr.status || "").toUpperCase() +
-        (tr.target_asset ? (" @ " + tr.target_asset) : "")
-      );
+    (s.units || []).forEach(function (u) {
+      out.push(u.id + ": variant " + u.variant + " · " + String(u.state || "").toUpperCase() +
+        " · " + String(u.source || "sim").toUpperCase());
     });
-    units.forEach(function (u) {
-      lines.push(
-        u.id + " var " + (u.variant || "?") + " · " + String(u.state || "").toUpperCase() +
-        " · " + String(u.source || "sim").toUpperCase()
-      );
-    });
-    if (!tracks.length && !events.length) {
-      lines.push("No engagements yet — run a scenario, then reopen after-action.");
-    }
-    return lines.join("\n");
+    return out.join("\n");
   }
 
   function populateAfter() {
-    var gaps = (state && state.gaps) || [];
-    document.getElementById("after-gaps").textContent =
-      "Gaps logged: " + gaps.length +
-      (gaps.length ? (" (" + gaps.map(function (g) {
-        return (g.gap_type || "?") + " on " + (g.track_id || "?");
-      }).join(", ") + ")") : "");
-    document.getElementById("after-summary").textContent = buildRunSummary();
+    var s = state || {};
+    var events = s.events || [], tracks = s.tracks || [], gaps = s.gaps || [];
+
+    document.getElementById("after-sub").textContent =
+      String(s.scenario || "—").replace(/_/g, " ") + " · " +
+      (Number(s.t) || 0).toFixed(1) + " s elapsed · " + String(s.phase || "idle");
+
+    var detected = 0, intercepted = 0, decoys = 0;
+    events.forEach(function (e) {
+      if (e.kind === "contact") detected += 1;
+      if (e.kind === "neutralized") intercepted += 1;
+    });
+    if (!detected) detected = tracks.length;
+    tracks.forEach(function (tr) { if (tr.label === "decoy") decoys += 1; });
+
+    var statRoot = document.getElementById("after-stats");
+    statRoot.innerHTML = "";
+    stat(statRoot, detected, "Tracks detected");
+    stat(statRoot, decoys, "Decoys identified");
+    stat(statRoot, intercepted, "Threats intercepted");
+    stat(statRoot, gaps.length, "Threats beyond rack capability", gaps.length > 0);
 
     var evRoot = document.getElementById("after-events");
     evRoot.innerHTML = "";
-    ((state && state.events) || []).slice().reverse().forEach(function (e) {
-      var li = document.createElement("li");
-      li.textContent = "t=" + Number(e.t).toFixed(1) + " [" + e.kind + "] " + e.msg;
-      evRoot.appendChild(li);
-    });
-    if (!((state && state.events) || []).length) {
-      var empty = document.createElement("li");
-      empty.textContent = "No events in this run yet.";
-      evRoot.appendChild(empty);
+    if (!events.length) {
+      var li0 = document.createElement("li");
+      li0.textContent = "No events in this run yet.";
+      evRoot.appendChild(li0);
+    } else {
+      events.slice().reverse().forEach(function (e) {
+        var li = document.createElement("li");
+        var t = document.createElement("span");
+        t.className = "evt";
+        t.textContent = "T+" + (Number(e.t) || 0).toFixed(1);
+        var m = document.createElement("span");
+        m.textContent = eventText(e, s);
+        li.appendChild(t); li.appendChild(m);
+        evRoot.appendChild(li);
+      });
     }
 
     var swapBtn = document.getElementById("btn-swap");
     var swapABtn = document.getElementById("btn-swap-a-after");
-    var phase = state ? state.phase : "idle";
-    var canSwap = phase === "idle" || phase === "ended";
+    var canSwap = s.phase === "idle" || s.phase === "ended";
     swapBtn.disabled = !canSwap;
-    if (swapABtn) swapABtn.disabled = !canSwap;
-    var swapACtrl = document.getElementById("btn-swap-a");
-    if (swapACtrl) swapACtrl.disabled = !canSwap;
-    swapBtn.dataset.toVariant = "B";
+    swapABtn.disabled = !canSwap;
+    document.getElementById("btn-swap-a").disabled = !canSwap;
     swapBtn.dataset.unitId = "U1";
+    swapBtn.dataset.toVariant = "B";
 
-    var briefP = fetch("/gap_brief").then(function (r) { return r.text(); }).then(function (txt) {
-      var elBrief = document.getElementById("after-brief");
-      if (txt && txt.trim()) {
-        elBrief.textContent = txt;
-      } else {
-        elBrief.textContent =
-          "RUN BRIEF (live)\n" + buildRunSummary() +
-          "\n\nNo capability gap this run — Velocity reconfigure card appears only after a fast-threat gap.";
-      }
+    var briefP = fetch("/gap_brief").then(function (r) { return r.text(); }).then(function (out) {
+      document.getElementById("after-brief").textContent = (out && out.trim())
+        ? out
+        : (runSummaryText() +
+           "\n\nNo capability gap this run — the Velocity reconfigure brief is generated only " +
+           "after a gap is logged.");
     }).catch(function () {
-      document.getElementById("after-brief").textContent = buildRunSummary();
+      document.getElementById("after-brief").textContent = runSummaryText();
     });
 
-    var cardP = (cardsCache
-      ? Promise.resolve(cardsCache)
+    var cardP = (cardsCache ? Promise.resolve(cardsCache)
       : fetch("/cards.json").then(function (r) { return r.json(); }).then(function (d) {
-          cardsCache = d;
-          return d;
+          cardsCache = d; return d;
         })
     ).then(function (cards) {
-      var cardRoot = document.getElementById("after-card");
-      cardRoot.innerHTML = "";
-      if (!gaps.length) {
-        var none = document.createElement("p");
-        none.className = "meta";
-        none.textContent = "No Velocity reconfigure recommendation — rack matched this attack.";
-        cardRoot.appendChild(none);
-        return;
-      }
       var card = null;
-      var gapType = gaps[0].gap_type || "fast_threat";
-      for (var i = 0; i < (cards || []).length; i++) {
-        if (cards[i].gap_type === gapType) { card = cards[i]; break; }
-      }
+      var want = gaps.length ? (gaps[0].gap_type || "fast_threat") : "fast_threat";
+      (cards || []).forEach(function (c) { if (!card && c.gap_type === want) card = c; });
       if (!card && cards && cards[0]) card = cards[0];
+
+      document.getElementById("after-placeholder").hidden = !(card && card.placeholder);
+
+      var head = document.getElementById("vel-head");
+      var meta = document.getElementById("vel-meta");
+      var reuseLabel = document.getElementById("reuse-label");
+      var bar = document.getElementById("reuse-bar");
+      bar.innerHTML = "";
+
       if (!card) {
-        cardRoot.textContent = "No matching Velocity card for " + gapType + ".";
+        head.textContent = "No Velocity card available.";
+        meta.textContent = "";
+        reuseLabel.textContent = "Core · reuse breakdown unavailable";
         return;
       }
-      var title = document.createElement("div");
-      var strong = document.createElement("strong");
-      strong.textContent = "Velocity · Reconfigure " + (card.unit_id || "U1") +
-        " → Variant " + (card.to_variant || "?");
-      title.appendChild(strong);
-      if (card.placeholder) {
-        var tag = document.createElement("span");
-        tag.className = "placeholder-tag";
-        tag.textContent = "PLACEHOLDER";
-        title.appendChild(tag);
-      }
-      var meta = document.createElement("div");
-      meta.className = "meta";
-      meta.textContent = "Swap: " + (card.swap || []).join(", ") +
-        " · Keep: " + (card.keep || []).join(", ") +
-        " · Reuse " + (card.reuse_pct != null ? card.reuse_pct + "%" : "—") +
-        " · Δ$" + (card.cost_delta != null ? card.cost_delta : "—") +
-        " · " + (card.swap_minutes != null ? card.swap_minutes + " min" : "") +
-        " · " + (card.source || "");
-      var why = document.createElement("div");
-      why.className = "meta";
-      why.textContent = "Triggered by gap on track " + (gaps[0].track_id || "?") +
-        " (" + gapType + ") this run.";
-      cardRoot.appendChild(title);
-      cardRoot.appendChild(why);
-      cardRoot.appendChild(meta);
-      if (card.summary) {
-        var sum = document.createElement("div");
-        sum.className = "meta";
-        sum.textContent = card.summary;
-        cardRoot.appendChild(sum);
-      }
+
+      head.textContent = "Reconfigure 1 unit: swap the rotor kit. Core and software unchanged.";
+      meta.textContent =
+        unitName(card.unit_id || "U1") + " → Variant " + (card.to_variant || "B") +
+        " · swap " + (card.swap || []).join(", ") +
+        " · keep " + (card.keep || []).join(", ") +
+        (card.swap_minutes != null ? (" · " + card.swap_minutes + " min on the bench") : "") +
+        (card.cost_delta != null ? (" · +$" + Number(card.cost_delta).toLocaleString() + " per unit") : "") +
+        (gaps.length ? (" · triggered by the gap on " + trackName(gaps[0].track_id)) : "");
+
+      var keep = (card.reuse_pct != null) ? Number(card.reuse_pct) : 80;
+      var swapped = Math.max(0, 100 - keep);
+      reuseLabel.textContent = "CORE · REUSED " + keep + "% / SWAPPED " + swapped + "%";
+      var a = document.createElement("span");
+      a.className = "keep";
+      a.style.width = keep + "%";
+      a.textContent = "Reused " + keep + "%";
+      var b = document.createElement("span");
+      b.className = "swapped";
+      b.style.width = swapped + "%";
+      b.textContent = "Swapped " + swapped + "%";
+      bar.appendChild(a); bar.appendChild(b);
+
       swapBtn.dataset.toVariant = card.to_variant || "B";
       swapBtn.dataset.unitId = card.unit_id || "U1";
     }).catch(function () {
-      document.getElementById("after-card").textContent = "Card unavailable.";
+      document.getElementById("vel-head").textContent = "Velocity card unavailable.";
     });
 
     return Promise.all([briefP, cardP]);
   }
 
-  document.getElementById("btn-after").addEventListener("click", openAfter);
+  el.afterBtn.addEventListener("click", openAfter);
   document.getElementById("btn-after-close").addEventListener("click", closeAfter);
   document.getElementById("btn-copy-brief").addEventListener("click", function () {
-    var txt = document.getElementById("after-brief").textContent || "";
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt);
-    }
+    var t = document.getElementById("after-brief").textContent || "";
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t);
+    var b = document.getElementById("btn-copy-brief");
+    b.textContent = "Copied";
+    window.setTimeout(function () { b.textContent = "Copy brief"; }, 1400);
   });
   document.getElementById("btn-swap-a-after").addEventListener("click", swapU1ToA);
   document.getElementById("btn-swap").addEventListener("click", function () {
-    var btn = document.getElementById("btn-swap");
-    send({
-      type: "swap_variant",
-      unit_id: btn.dataset.unitId || "U1",
-      variant: btn.dataset.toVariant || "B"
-    });
+    var b = document.getElementById("btn-swap");
+    send({ type: "swap_variant", unit_id: b.dataset.unitId || "U1", variant: b.dataset.toVariant || "B" });
     closeAfter();
   });
-  afterDialog.addEventListener("keydown", function (ev) {
+  dialog.addEventListener("keydown", function (ev) {
     if (!afterOpen || ev.key !== "Tab") return;
-    afterFocusables = getFocusable(afterDialog);
-    if (!afterFocusables.length) return;
-    var first = afterFocusables[0];
-    var last = afterFocusables[afterFocusables.length - 1];
-    if (ev.shiftKey && document.activeElement === first) {
+    var f = focusables();
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+    else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && afterOpen) { ev.preventDefault(); closeAfter(); return; }
+    if (ev.key === "a" || ev.key === "A") {
+      var tag = ev.target && ev.target.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || afterOpen) return;
       ev.preventDefault();
-      last.focus();
-    } else if (!ev.shiftKey && document.activeElement === last) {
-      ev.preventDefault();
-      first.focus();
+      approveVisible();
     }
   });
 
-  
+  /* ========================= boot ========================= */
 
+  buildScenery();
+  buildChrome();
   connect();
 })();
-  </script>
+</script>
 </body>
-</html>
-
 </html>
