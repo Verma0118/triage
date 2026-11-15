@@ -32,25 +32,27 @@ def _unit(uid: str, x: float, y: float, source: str) -> Unit:
 
 
 def _juniper_assets() -> list[Asset]:
-    # Spread enough that map labels do not collide (housing/comms were stacking).
+    # Around the cross: housing at hub, others on separate bearings so pads
+    # read as a compound without stacking. Positions are scenario-locked.
     return [
-        Asset("housing", 720.0, 360.0, "housing"),
-        Asset("generator", 780.0, 280.0, "generator"),
-        Asset("comms", 640.0, 260.0, "comms"),
-        Asset("fuel", 800.0, 400.0, "fuel"),
-        Asset("parking", 880.0, 540.0, "parking"),
+        Asset("housing", 500.0, 350.0, "housing"),      # hub
+        Asset("generator", 585.0, 270.0, "generator"),  # NE
+        Asset("comms", 400.0, 255.0, "comms"),          # NW
+        Asset("fuel", 605.0, 425.0, "fuel"),            # SE
+        Asset("parking", 655.0, 520.0, "parking"),      # further SE apron
     ]
 
 
 def _juniper_units() -> list[Unit]:
-    # Docked in the interceptor rack bay (map pad ~488–620 x, pads at y≈405).
+    # Docked in interceptor rack bay (pads ~290–420 x, y≈416).
     # Keep unit-to-track proposal distances under 600 for Variant A at 50% battery.
     return [
-        _unit("U1", 500.0, 405.0, "mock"),
-        _unit("U2", 536.0, 405.0, "sim"),
-        _unit("U3", 572.0, 405.0, "sim"),
-        _unit("U4", 608.0, 405.0, "sim"),
+        _unit("U1", 261.0, 421.0, "mock"),
+        _unit("U2", 297.0, 421.0, "sim"),
+        _unit("U3", 333.0, 421.0, "sim"),
+        _unit("U4", 369.0, 421.0, "sim"),
     ]
+
 
 
 def _decoy_waypoints() -> list[tuple[float, float]]:
@@ -109,15 +111,15 @@ def _friendly_waypoints() -> list[tuple[float, float]]:
     """Registered friendly returning to rack/base inside the map; gone on arrival."""
     # From north of the outpost, approach the rack/base and end there (not off-map).
     return [
-        (500.0, 80.0),
-        (560.0, 300.0),
-        (600.0, 400.0),  # rack/base — inside map
+        (500.0, 60.0),
+        (420.0, 280.0),
+        (310.0, 421.0),  # rack/base — inside map
     ]
 
 
 def juniper_night1() -> dict:
-    housing = (720.0, 360.0)
-    parking = (880.0, 540.0)
+    housing = (500.0, 350.0)
+    parking = (655.0, 520.0)
     # B: straight at housing from ~620 west.
     b_start = (housing[0] - 620.0, housing[1])
     # C: straight at parking from the west.
@@ -170,15 +172,15 @@ def juniper_night1() -> dict:
 
 
 def juniper_night2() -> dict:
-    comms = (640.0, 260.0)
+    comms = (400.0, 255.0)
     # Fast threat at comms. ETA >= 20 s (dist >= 800 at speed 40).
     # Approach along rack latitude so unit-to-track at proposal stays under 600.
-    c_start = (comms[0] - 800.0, 413.0)  # (-160, 413); ETA = 20.0 s
+    c_start = (comms[0] - 800.0, 421.0)  # west approach; ETA = 20.0 s
     units = [
-        _unit("U1", 500.0, 405.0, "mock"),
-        _unit("U2", 536.0, 405.0, "sim"),
-        _unit("U3", 572.0, 405.0, "sim"),
-        _unit("U4", 608.0, 405.0, "sim"),
+        _unit("U1", 261.0, 421.0, "mock"),
+        _unit("U2", 297.0, 421.0, "sim"),
+        _unit("U3", 333.0, 421.0, "sim"),
+        _unit("U4", 369.0, 421.0, "sim"),
     ]
     return {
         "name": "juniper_night2",
@@ -200,7 +202,7 @@ def juniper_night2() -> dict:
 
 
 def tower22() -> dict:
-    housing = (720.0, 360.0)
+    housing = (500.0, 350.0)
     return {
         "name": "tower22",
         "replay": True,
@@ -215,11 +217,11 @@ def tower22() -> dict:
                 "registered_friendly": True,
                 "target_asset": None,
                 "waypoints": [
-                    (720.0, 40.0),
-                    (720.0, 200.0),
-                    (660.0, 360.0),
-                    (500.0, 360.0),
-                    (-20.0, 360.0),
+                    (500.0, 40.0),
+                    (500.0, 200.0),
+                    (440.0, 350.0),
+                    (300.0, 350.0),
+                    (-20.0, 350.0),
                 ],
             },
             {
@@ -230,7 +232,7 @@ def tower22() -> dict:
                 "registered_friendly": False,
                 "target_asset": "housing",
                 "waypoints": [
-                    (720.0, 680.0),
+                    (500.0, 680.0),
                     housing,
                 ],
             },
