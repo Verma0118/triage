@@ -114,12 +114,11 @@ def read_attitude(board: MSPy) -> tuple[float, float, float]:
 
 
 def read_battery_v(board: MSPy) -> float:
-    # Prefer BATTERY_STATE (centivolts); fall back to ANALOG.
-    if msp_transact(board, "MSP_BATTERY_STATE"):
-        v = float(board.BATTERY_STATE.get("voltage") or 0.0)
-        if v > 0.0:
-            return v
-    msp_transact(board, "MSP_ANALOG")
+    # Use MSP_ANALOG only. YAMSPy 0.3.3 mis-parses MSP_BATTERY_STATE on current
+    # Betaflight (it skips the legacy u8 voltage byte, so every later field is
+    # shifted by one and voltage reads like 606.72). Verified on hardware at H1.
+    if not msp_transact(board, "MSP_ANALOG"):
+        return 0.0
     return float(board.ANALOG.get("voltage") or 0.0)
 
 

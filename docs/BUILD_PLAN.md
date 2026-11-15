@@ -247,7 +247,9 @@ class UnitSource:
 **LiveUnit**
 - One background thread owns the serial port. Nothing else reads or writes it. Polling (about 5 Hz), motor tests, and name writes all go through that thread's command queue. `read()` returns the cached snapshot and never blocks.
 - Port: `TRIAGE_PORT` or autodetect. On macOS use `/dev/cu.usbmodem*`.
-- MSP: `MSP_NAME`, `MSP_SET_NAME`, `MSP_ATTITUDE`, `MSP_ANALOG` or `MSP_BATTERY_STATE`, `MSP_STATUS_EX`, `MSP_SET_MOTOR`. Check method names against the installed YAMSPy.
+- MSP: `MSP_NAME`, `MSP_SET_NAME`, `MSP_ATTITUDE`, `MSP_ANALOG`, `MSP_STATUS_EX`, `MSP_SET_MOTOR`. Check method names against the installed YAMSPy.
+- **Voltage comes from `MSP_ANALOG` only.** YAMSPy 0.3.3 mis-parses `MSP_BATTERY_STATE` on this firmware (fields shifted one byte, voltage reads like 606.72). Found at H1.
+- **H1 facts (verified on the real drone):** Betaflight 26.6.2, MSP API 1.48, port `/dev/cu.usbmodem0x80000001`, 4S pack, accelerometer on, `MSP_SET_NAME` write + re-read works, bench arming flags are `RXLOSS` and `ANGLE`. Copy the working calls from `tools/bridge_test.py` when writing LiveUnit.
 - **ready** = snapshot age < 1 s and battery_v > BATTERY_V_MIN and gyro present. Ignore arming-disable flags that are always set on a USB bench (RX loss, MSP, throttle, and similar). Do not require "no arming flags" or Unit 1 will never be ready.
 - **Motor test, all of these or refuse:** `MOTORS_ENABLED` is true, FC reports disarmed, battery_v > BATTERY_V_MIN, no motor test already running (single-flight: a second request while one runs is dropped). Value = `min(MOTOR_TEST_VALUE, MOTOR_HARD_CAP)`. Re-send the value every 100 ms for MOTOR_TEST_SECONDS, then send all-1000 three times in a `finally` block.
 - **Motors off on every exit path:** `atexit`, SIGINT / SIGTERM handler, serial exception handler, `reset`, `close()`.
