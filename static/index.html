@@ -172,6 +172,16 @@
     .toolbar button:hover:not(:disabled) { border-color: var(--muted); background: var(--panel-2); }
     .toolbar button.primary { border-color: var(--unknown); color: var(--unknown); }
     .toolbar button[aria-pressed="true"] { border-color: var(--unknown); color: var(--unknown); }
+    .toolbar .toolbar-label {
+      font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--muted); margin-right: 2px;
+    }
+    .toolbar .divider {
+      width: 1px; align-self: stretch; margin: 0 10px; background: var(--border);
+    }
+    .toolbar button.scn.on {
+      border-color: var(--text); color: var(--bg); background: var(--text);
+    }
     .toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
     .toolbar .spacer { flex: 1 1 auto; }
 
@@ -810,6 +820,11 @@
     </header>
 
     <div class="toolbar" id="toolbar" role="toolbar" aria-label="Scenario controls">
+      <span class="toolbar-label" id="scenario-label">Scenario</span>
+      <button type="button" class="scn" data-scenario="juniper_night1" aria-describedby="scenario-label">Night 1</button>
+      <button type="button" class="scn" data-scenario="juniper_night2" aria-describedby="scenario-label">Night 2</button>
+      <button type="button" class="scn" data-scenario="tower22" aria-describedby="scenario-label">Tower 22</button>
+      <span class="divider" aria-hidden="true"></span>
       <button type="button" id="btn-start" class="primary">Start</button>
       <button type="button" id="btn-pause">Pause</button>
       <button type="button" id="btn-reset">Reset</button>
@@ -2218,12 +2233,17 @@
       var next;
       try { next = JSON.parse(ev.data); } catch (err) { return; }
       state = next;
-      // Fresh server: show the outpost straight away instead of a blank map.
+      // Fresh server: load the main demo scenario, never a random one.
       if (!booted && !next.scenario) {
         booted = true;
-        send({ type: "load_scenario", name: "hot_inbound" });
+        send({ type: "load_scenario", name: selectedScenario });
       } else if (next.scenario) {
         booted = true;
+        // Keep the picker honest about what the server actually has loaded.
+        if (next.scenario !== selectedScenario) {
+          selectedScenario = next.scenario;
+          markSelected();
+        }
       }
       render(state);
     };
@@ -2249,13 +2269,39 @@
     approveVisible();
   });
 
+  /* The demo is scripted, so the operator always picks the scenario explicitly.
+     Start never chooses one: it starts whatever is loaded. */
+  var selectedScenario = "juniper_night1";
+
+  function markSelected() {
+    var btns = document.querySelectorAll("button.scn");
+    for (var i = 0; i < btns.length; i++) {
+      var on = btns[i].getAttribute("data-scenario") === selectedScenario;
+      btns[i].setAttribute("aria-pressed", on ? "true" : "false");
+      btns[i].classList.toggle("on", on);
+    }
+  }
+
+  (function wireScenarioButtons() {
+    var btns = document.querySelectorAll("button.scn");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function (ev) {
+        selectedScenario = ev.currentTarget.getAttribute("data-scenario");
+        markSelected();
+        send({ type: "load_scenario", name: selectedScenario });
+      });
+    }
+    markSelected();
+  })();
+
   function pickScenario() {
-    return SCENARIO_POOL[Math.floor(Math.random() * SCENARIO_POOL.length)];
+    return selectedScenario;
   }
   document.getElementById("btn-start").addEventListener("click", function () {
     var phase = state && state.phase;
-    if (phase === "idle" || phase === "ended" || !phase) {
-      send({ type: "load_scenario", name: pickScenario() });
+    if (phase === "ended") {
+      /* Re-running the same scenario: reload it so the rack is restocked. */
+      send({ type: "load_scenario", name: selectedScenario });
     }
     send({ type: "start" });
   });
