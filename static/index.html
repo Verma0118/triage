@@ -114,6 +114,18 @@
       color: var(--warn);
       font-weight: 600;
     }
+    #replay-banner {
+      margin: 0;
+      padding: 0.4rem 0.65rem;
+      background: #1a2330;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    #replay-banner[hidden] { display: none !important; }
+    body.replay-mode #plan-panel { display: none !important; }
+    body.replay-mode #btn-after { display: none !important; }
     .main-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.7fr) minmax(260px, 0.85fr);
@@ -363,6 +375,9 @@
   </header>
 
   <div id="alerts" class="alerts" aria-live="polite" aria-atomic="true"></div>
+  <p id="replay-banner" hidden role="status">
+    Replay: simplified schematic based on public reporting
+  </p>
 
   <div class="main-grid">
     <section id="map-panel" class="panel" aria-labelledby="map-heading">
@@ -499,7 +514,9 @@
     mapTracks: document.getElementById("map-tracks"),
     mapUnits: document.getElementById("map-units"),
     mapLinks: document.getElementById("map-links"),
-    mockBtn: document.getElementById("btn-mock")
+    mockBtn: document.getElementById("btn-mock"),
+    replayBanner: document.getElementById("replay-banner"),
+    afterBtn: document.getElementById("btn-after")
   };
 
   function setConn(connected) {
@@ -571,9 +588,15 @@
     }
 
     if (s.replay) {
+      document.body.classList.add("replay-mode");
       el.planPanel.hidden = true;
+      el.replayBanner.hidden = false;
+      if (el.afterBtn) el.afterBtn.hidden = true;
     } else {
+      document.body.classList.remove("replay-mode");
       el.planPanel.hidden = false;
+      el.replayBanner.hidden = true;
+      if (el.afterBtn) el.afterBtn.hidden = false;
     }
 
     updateMap(s);
