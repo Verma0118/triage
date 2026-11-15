@@ -2359,7 +2359,7 @@
       demoLater(1800, function () {
         openAfter();
         // Let the stats, Velocity card and reuse bar sit on screen, then swap.
-        demoLater(9000, function () {
+        demoLater(6000, function () {
           var b = document.getElementById("btn-swap");
           send({
             type: "swap_variant",
@@ -2368,8 +2368,8 @@
           });
           closeAfter();
           demo.stage = "reconfig";
-          // RECONFIG shows for ~3.5 s, then night 2.
-          demoLater(4500, function () {
+          // RECONFIG shows briefly, then night 2.
+          demoLater(3000, function () {
             selectedScenario = "juniper_night2";
             markSelected();
             send({ type: "load_scenario", name: selectedScenario });

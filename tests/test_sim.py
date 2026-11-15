@@ -89,10 +89,10 @@ def test_tracks_spawn_at_scenario_times():
     timeline = _run_night1_until_ended()
     spawns = _spawn_times(timeline)
     # Spawns happen on the tick that crosses scenario time (t after step).
-    assert spawns["F1"] == pytest_approx_tick(2.0)
-    assert spawns["A"] == pytest_approx_tick(5.0)
-    assert spawns["B"] == pytest_approx_tick(8.0)
-    assert spawns["C"] == pytest_approx_tick(50.0)
+    assert spawns["A"] == pytest_approx_tick(1.0)
+    assert spawns["B"] == pytest_approx_tick(2.0)
+    assert spawns["C"] == pytest_approx_tick(22.0)
+    assert "F1" not in spawns, "night 1 carries no friendly: it muddies the demo"
 
 
 def pytest_approx_tick(spawn_t: float) -> float:
@@ -128,10 +128,9 @@ def test_no_approvals_b_impacts_housing_c_impacts_parking():
     assert math.hypot(c_pos[0] - parking.x, c_pos[1] - parking.y) < config.INTERCEPT_RADIUS
 
 
-def test_friendly_and_decoy_end_gone():
+def test_decoy_ends_gone():
     timeline = _run_night1_until_ended()
     statuses = _final_status_by_id(timeline)
-    assert statuses["F1"] == "gone"
     assert statuses["A"] == "gone"
 
 
@@ -187,7 +186,7 @@ def test_engine_imports_no_fastapi_serial_bridge():
 
 
 def test_night1_scenario_speeds_and_geometry():
-    """Section 9 constraints: speeds, B distance ~620, decoy first-leg cone, unit range."""
+    """Section 9 constraints: speeds, B distance ~400, decoy first-leg cone, unit range."""
     scenario = SCENARIOS["juniper_night1"]
     assets = {a.name: a for a in scenario["assets"]}
     spawns = {s["id"]: s for s in scenario["spawns"]}
@@ -195,18 +194,16 @@ def test_night1_scenario_speeds_and_geometry():
     assert spawns["A"]["speed"] == 9
     assert spawns["B"]["speed"] == 28
     assert spawns["C"]["speed"] == 40
-    assert spawns["F1"]["speed"] == 15
     assert spawns["A"]["truth"] == "decoy"
     assert spawns["B"]["truth"] == "real"
     assert spawns["C"]["truth"] == "real"
-    assert spawns["F1"]["truth"] == "friendly"
-    assert spawns["F1"]["registered_friendly"] is True
+    assert "F1" not in spawns
 
     housing = assets["housing"]
     parking = assets["parking"]
     b0 = spawns["B"]["waypoints"][0]
     b_dist = math.hypot(b0[0] - housing.x, b0[1] - housing.y)
-    assert 600 <= b_dist <= 640, f"B should start ~620 from housing, got {b_dist}"
+    assert 380 <= b_dist <= 420, f"B should start ~400 from housing, got {b_dist}"
 
     # C aims at parking (last waypoint near parking).
     c_last = spawns["C"]["waypoints"][-1]
@@ -216,7 +213,8 @@ def test_night1_scenario_speeds_and_geometry():
     a_wps = spawns["A"]["waypoints"]
     assert len(a_wps) >= 2
     leg_len = math.hypot(a_wps[1][0] - a_wps[0][0], a_wps[1][1] - a_wps[0][1])
-    assert 9 * 11.5 <= leg_len <= 9 * 12.5
+    # First leg is 5 s now: the decoy has to resolve inside a 60 s demo.
+    assert 9 * 4.5 <= leg_len <= 9 * 5.5
     heading = math.atan2(a_wps[1][1] - a_wps[0][1], a_wps[1][0] - a_wps[0][0])
     hva = ("housing", "generator", "clinic", "comms", "fuel", "radar")
     for name in hva:

@@ -60,22 +60,25 @@ def _juniper_units() -> list[Unit]:
 
 
 def _decoy_waypoints() -> list[tuple[float, float]]:
-    """Straight first leg ~12 s at speed 9, then 2–3 s loiter legs with ≥90° turns.
+    """Straight first leg ~5 s at speed 9, then 2–3 s loiter legs with ≥90° turns.
 
-    First leg is not aimed inside 20° of high-value or primary sites.
-    Keeps loitering until at least t=58 (spawn t=5 + 12 s straight + loiter),
-    then ends gone on a short final leg (≤3 s). No long straight exit.
+    First leg is not aimed inside 20° of high-value or primary sites, so the
+    track reads UNKNOWN while it is flying straight. Once it starts loitering
+    the heading variance climbs and it resolves to DECOY.
+
+    Timings are tight on purpose: the whole demo has to fit a 60 second film.
     """
     speed = 9.0
-    spawn_t = 5.0
-    straight_s = 12.0
-    # Close enough to the rack that every unit-to-track distance is < 600.
-    start = (210.0, 50.0)
-    # Fly due east (~12 s).
-    leg1_end = (start[0] + speed * straight_s, start[1])  # (308, 50)
+    spawn_t = 1.0
+    straight_s = 5.0
+    # ~230 from the rack, so the interceptor reaches standoff before the track
+    # resolves to DECOY: the operator sees it arrive, hold, then be recalled.
+    start = (120.0, 240.0)
+    # Fly due west (~5 s) — clears every asset by >150 degrees.
+    leg1_end = (start[0] - speed * straight_s, start[1])  # (75, 240)
 
     # Verify cone constraint at definition time (guards against accidental edits).
-    heading = 0.0  # east
+    heading = math.pi  # west
     assets = {a.name: a for a in _juniper_assets()}
     for name in ("housing", "generator", "clinic", "comms", "fuel", "radar"):
         a = assets[name]
@@ -83,18 +86,30 @@ def _decoy_waypoints() -> list[tuple[float, float]]:
         diff = abs((to_a - heading + math.pi) % (2 * math.pi) - math.pi)
         assert math.degrees(diff) > 20.0, f"decoy first leg aims at {name}"
 
+
     # Loiter box: N/W/S/E legs of 2–3 s with 90° turns until past t=58, then short end.
     wps: list[tuple[float, float]] = [start, leg1_end]
     x, y = leg1_end
+    # Every loiter leg must point away from the outpost. An eastward leg aims
+    # back at the site and scores heading points, which would flip the track out
+    # of DECOY mid-loiter. N / W / S / W drifts the decoy off the west edge and
+    # still turns >=90 degrees between legs.
     loiter_dirs = [
-        (0.0, 1.0),
-        (-1.0, 0.0),
-        (0.0, -1.0),
-        (1.0, 0.0),
+        (0.0, 1.0),    # north
+        (-1.0, 0.0),   # west
+        (0.0, -1.0),   # south
+        (-1.0, 0.0),   # west
     ]
-    t_end = spawn_t + straight_s  # ~17
+    for dx, dy in loiter_dirs:
+        h = math.atan2(dy, dx)
+        for name in ("housing", "generator", "clinic", "comms", "fuel", "radar", "parking"):
+            a = assets[name]
+            to_a = math.atan2(a.y - leg1_end[1], a.x - leg1_end[0])
+            d = abs((to_a - h + math.pi) % (2 * math.pi) - math.pi)
+            assert math.degrees(d) > 20.0, f"decoy loiter leg aims at {name}"
+    t_end = spawn_t + straight_s  # ~6
     i = 0
-    while t_end < 58.0:
+    while t_end < 20.0:
         dx, dy = loiter_dirs[i % 4]
         secs = 2.5 if (i % 5) != 4 else 3.0
         x = x + dx * speed * secs
@@ -124,10 +139,11 @@ def _friendly_waypoints() -> list[tuple[float, float]]:
 def juniper_night1() -> dict:
     housing = (500.0, 350.0)
     parking = (655.0, 520.0)
-    # B: straight at housing from ~620 west.
-    b_start = (housing[0] - 620.0, housing[1])
-    # C: straight at parking from the west.
-    c_start = (parking[0] - 600.0, parking[1])
+    # B: straight at housing from 400 west (14.3 s at speed 28).
+    b_start = (housing[0] - 400.0, housing[1])
+    # C: straight at parking from 560 west (14 s at speed 40) — long enough for
+    # the best-effort interceptor to visibly chase and fall behind.
+    c_start = (parking[0] - 560.0, parking[1])
 
     return {
         "name": "juniper_night1",
@@ -136,16 +152,7 @@ def juniper_night1() -> dict:
         "units": _juniper_units(),
         "spawns": [
             {
-                "t": 2.0,
-                "id": "F1",
-                "speed": 15.0,
-                "truth": "friendly",
-                "registered_friendly": True,
-                "target_asset": None,
-                "waypoints": _friendly_waypoints(),
-            },
-            {
-                "t": 5.0,
+                "t": 1.0,
                 "id": "A",
                 "speed": 9.0,
                 "truth": "decoy",
@@ -154,7 +161,7 @@ def juniper_night1() -> dict:
                 "waypoints": _decoy_waypoints(),
             },
             {
-                "t": 8.0,
+                "t": 2.0,
                 "id": "B",
                 # 28 needs a unit above 33.6: Variant A (30) cannot take this,
                 # only the rack's single Variant B (60) can.
@@ -165,7 +172,7 @@ def juniper_night1() -> dict:
                 "waypoints": [b_start, housing],
             },
             {
-                "t": 50.0,
+                "t": 22.0,
                 "id": "C",
                 "speed": 40.0,
                 "truth": "real",
@@ -179,9 +186,10 @@ def juniper_night1() -> dict:
 
 def juniper_night2() -> dict:
     comms = (400.0, 255.0)
-    # Fast threat at comms. ETA >= 20 s (dist >= 800 at speed 40).
+    # Fast threat at comms, 480 west at speed 40: ETA 12 s, which still leaves
+    # a comfortable margin between the proposal and impact.
     # Approach along rack latitude so unit-to-track at proposal stays under 600.
-    c_start = (comms[0] - 800.0, 421.0)  # west approach along rack lat; ETA = 20.0 s
+    c_start = (comms[0] - 480.0, 421.0)  # west approach along rack lat; ETA = 12.0 s
     units = [
         _unit("U1", 261.0, 421.0, "mock"),
         _unit("U2", 297.0, 421.0, "sim"),
@@ -195,7 +203,7 @@ def juniper_night2() -> dict:
         "units": units,
         "spawns": [
             {
-                "t": 3.0,
+                "t": 1.0,
                 "id": "T1",
                 "speed": 40.0,
                 "truth": "real",

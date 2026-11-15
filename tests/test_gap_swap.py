@@ -111,7 +111,9 @@ def test_night2_single_engage_never_launch_early_time_to_impact():
     world.apply_u1_snapshot(mock.read())
     world.step(config.DT)
     t1 = next(t for t in world.tracks if t.id == "T1")
-    assert t1.eta is not None and t1.eta + 1e-9 >= 20.0, f"spawn ETA={t1.eta}"
+    # 12 s at spawn: short enough for a 60 s film, long enough that the single
+    # engage approval is never a last-instant scramble (margin checked below).
+    assert t1.eta is not None and t1.eta + 1e-9 >= 10.0, f"spawn ETA={t1.eta}"
 
     propose_t = None
     seen_ids: set[str] = set()
